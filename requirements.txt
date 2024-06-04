@@ -1,0 +1,9 @@
+streamlit
+langchain_openai
+requests
+langchain
+langchain_community
+datasets
+sentence_transformers
+ragas
+weaviate-client
