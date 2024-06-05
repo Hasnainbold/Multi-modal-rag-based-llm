@@ -38,13 +38,22 @@ class VectorDatabase:
     def upsert(self, data, splitter):
         chunks = self.data_prep(data, splitter)
         if self.v_type == 'Pinecone':
-            docsearch = PineconeVectorStore.from_documents(chunks, self.embedding_model, index_name=self.extra['index'])
-            self.retriever = docsearch.as_retriever(search_type="mmr")
+            self.retriever = PineconeVectorStore.from_documents(chunks, self.embedding_model,
+                                                                index_name=self.extra['index'])
         else:
             db = WeaviateVectorStore.from_documents(chunks, self.embedding_model, client=self.vector_inst)
             self.retriever = db.as_retriever(search_type="mmr")
 
     def query(self, question):
-        matched_docs = self.retriever.invoke(question)
-        context = [d.page_content for d in matched_docs]
+        if self.v_type == 'Pinecone':
+            docsearch = self.retriever.similarity_search(question)
+            context = [doc.page_content for doc in docsearch]
+        else:
+            matched_docs = self.retriever.invoke(question)
+            context = [d.page_content for d in matched_docs]
         return context
+
+# vb = VectorDatabase(embedding_model, 'Pinecone', pinecone_api_key, index='INDEX_NAME', dimension=DIMENSION_VALUE, metric='METRIC',url=None)
+# vb = VectorDatabase(embedding_model, 'Weaviate', WEAVIATE_API_KEY, index=None, dimension=None, metric=None, url=WEAVIATE_URL)
+# vb.upsert(data,text_splitter1)
+# context = vb.query(query1)
