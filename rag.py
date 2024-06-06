@@ -1,17 +1,17 @@
 import os
 import streamlit as st
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory, StreamlitChatMessageHistory, ConversationBufferMemory
+from langchain_community.chat_message_histories import StreamlitChatMessageHistory
+from langchain_community.document_loaders import TextLoader
+from langchain_community.vectorstores import Weaviate
+from langchain.memory import ConversationBufferMemory, ConversationBufferMemory
 from streamlit_feedback import streamlit_feedback
 from langchain.callbacks.tracers.run_collector import RunCollectorCallbackHandler
 from langchain.schema.runnable import RunnableConfig
 from langchain.callbacks.tracers.langchain import wait_for_all_tracers
 import requests
-from langchain.document_loaders import TextLoader
 from langchain.docstore.document import Document
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Weaviate
 import weaviate
 from weaviate.embedded import EmbeddedOptions
 from langchain.prompts import ChatPromptTemplate
@@ -22,14 +22,8 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 from datasets import Dataset
 from sentence_transformers import CrossEncoder
-from ragas.metrics import (
-    faithfulness,
-    answer_relevancy,
-    context_recall,
-    context_precision,
-)
+from ragas.metrics import faithfulness, answer_relevancy, context_recall, context_precision, answer_correctness, answer_similarity
 from sentence_transformers import SentenceTransformer
-from ragas.metrics import faithfulness, answer_correctness, answer_similarity
 from ragas import evaluate
 from typing import Sequence
 import pandas as pd
@@ -167,7 +161,6 @@ for message in st.session_state.messages:
 
 if prompt := st.chat_input("What's up?"):
     feedback_option = "faces" if st.toggle(label="`Thumbs` ⇄ `Faces`", value=False) else "thumbs"
-
     st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -175,13 +168,17 @@ if prompt := st.chat_input("What's up?"):
     with st.chat_message("assistant"):
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
+    feedback = streamlit_feedback(
+        feedback_type=feedback_option,  # Apply the selected feedback style
+        optional_text_label="[Optional] Please provide an explanation",  # Allow for additional comments
+    )  # key=f"feedback_{st.session_state.run_id}",
 
-    if st.session_state.get("run_id"):
-        feedback = streamlit_feedback(
-            feedback_type=feedback_option,  # Apply the selected feedback style
-            optional_text_label="[Optional] Please provide an explanation",  # Allow for additional comments
-            key=f"feedback_{st.session_state.run_id}",
-        )
+    # if st.session_state.get("run_id"):
+    #     feedback = streamlit_feedback(
+    #         feedback_type=feedback_option,  # Apply the selected feedback style
+    #         optional_text_label="[Optional] Please provide an explanation",  # Allow for additional comments
+    #         key=f"feedback_{st.session_state.run_id}",
+    #         )
 
 def reset_conversation():
   st.session_state.messages = []

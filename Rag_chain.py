@@ -1,5 +1,7 @@
 from langchain_openai import ChatOpenAI
 import requests
+from langchain_community.document_loaders import TextLoader
+from langchain_community.vectorstores import Weaviate
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import *

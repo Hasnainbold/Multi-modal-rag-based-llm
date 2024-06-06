@@ -1,6 +1,8 @@
 from langchain.docstore.document import Document
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
+from langchain_community.document_loaders import TextLoader
+from langchain_community.vectorstores import Weaviate
 from langchain_weaviate.vectorstores import WeaviateVectorStore
 import weaviate
 
