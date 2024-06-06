@@ -1,15 +1,12 @@
 import os
 import streamlit as st
 from langchain.embeddings.openai import OpenAIEmbeddings
-# from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
-# from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory, StreamlitChatMessageHistory, ConversationBufferMemory
 from streamlit_feedback import streamlit_feedback
 from langchain.callbacks.tracers.run_collector import RunCollectorCallbackHandler
 from langchain.schema.runnable import RunnableConfig
 from langchain.callbacks.tracers.langchain import wait_for_all_tracers
-# from langchain_openai import ChatOpenAI
 import requests
 from langchain.document_loaders import TextLoader
 from langchain.docstore.document import Document
@@ -39,7 +36,6 @@ import pandas as pd
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables import RunnableLambda
-# from pinecone_notebooks.colab import Authenticate
 from langchain_weaviate.vectorstores import WeaviateVectorStore
 from langchain.text_splitter import *
 from langchain.smith import RunEvalConfig

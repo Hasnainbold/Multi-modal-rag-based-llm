@@ -1,35 +1,19 @@
 from langchain_openai import ChatOpenAI
 import requests
-from langchain.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.docstore.document import Document
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Weaviate
-import weaviate
-from weaviate.embedded import EmbeddedOptions
-import os
 from langchain.prompts import ChatPromptTemplate
-from langchain_community.llms import HuggingFaceHub
-from langchain.llms import HuggingFaceHub
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.chat_models import ChatHuggingFace
 from langchain.schema.runnable import RunnablePassthrough
-from langchain.schema.output_parser import StrOutputParser
+from langchain.schema.output_parser import *
 from datasets import Dataset
-from sentence_transformers import CrossEncoder
 from ragas.metrics import (
     faithfulness,
     answer_relevancy,
     context_recall,
     context_precision,
+    answer_correctness,
+    answer_similarity
 )
-import streamlit as st
-from sentence_transformers import SentenceTransformer
-from ragas.metrics import faithfulness, answer_correctness, answer_similarity
 from ragas import evaluate
 from langchain_core.runnables import RunnableLambda
-from typing import Sequence
-import pandas as pd
 from Vector_database import VectorDatabase
 
 
@@ -89,7 +73,8 @@ class RAGEval:
                 documents=cont,
                 return_documents=True
             )[:len(prior_context) - self.best + 1]
-            return [i['text'] for i in c]
+            self.context = [i['text'] for i in c]
+            return self.context
 
         prompt = ChatPromptTemplate.from_template(self.template)
         self.retriever = RunnableLambda(retrieve)
@@ -105,8 +90,7 @@ class RAGEval:
         self.answers = self.ragchain.invoke(question)
         return self.answers
 
-    def raga(
-            self):  # metric: 1 for Context_Precision / 2 for Context_Recall / 3 for Faithfulness / 4 for Answer_Relevancy
+    def raga(self):
         data = {
             "question": self.questions,
             "answer": self.answers,
