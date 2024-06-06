@@ -7,3 +7,7 @@ datasets
 sentence_transformers
 ragas
 weaviate-client
+streamlit_feedback
+pinecone-client
+langchain_pinecone
+langchain_weaviate
