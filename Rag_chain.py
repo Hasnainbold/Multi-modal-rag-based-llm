@@ -20,14 +20,15 @@ from Vector_database import VectorDatabase
 
 
 class RAGEval:
-    '''
+    """
     WorkFlow:
     1. Call RAGEval()
     2. Call ground_truth_prep()
     3. Call model_prep()
     4. Call query()
     5. Call raga()
-    '''
+    """
+
     best = 2
     parse = StrOutputParser()
 
