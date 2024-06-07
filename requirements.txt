@@ -5,6 +5,7 @@ langchain
 langchain_community
 datasets
 sentence_transformers
+langchain_huggingface
 ragas
 weaviate-client
 streamlit_feedback
