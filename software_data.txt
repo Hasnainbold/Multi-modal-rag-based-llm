@@ -167,9 +167,6 @@ and gives you the opportunity to configure the procedure adequately for nearly e
 alignment task occurring. Please do not mix up the Alignment process described here
 with the sample adjustment, which is used to determine the position and the
 orientation of the sample system according to the stage system.
-1 Glossary
-12 Software Manual SmartFIB | en1.2 | 346000-8083-000
-Term Description
 Area dose The area dose is defined as electric charge per area in micro-Coulomb per square-
 centimeter: Beside its general meaning as a dose value for exposure (see: Exposure
 tab) the area dose is also relevant for the image capture during an Alignment process
@@ -201,9 +198,6 @@ Prevention of redeposition (deposits of etch/mill waste) during milling or layer
 layer deposition.
 Dose The dose determines the cumulative intensity (depth or deposition height) within a
 patterning element.
-1 Glossary
-Software Manual SmartFIB | en1.2 | 346000-8083-000 13
-Term Description
 Dose value The term dose is of crucial meaning for the lithography-process. It is defined as
 charge per dimension unit and describes in principle the ammount of electrons (or
 ions) that are hitting the surface of the sample in normalized values. For example
@@ -241,9 +235,6 @@ the current from the Faraday cup to the electrical ground reflects the actual be
 current which would expose the specimen under similar conditions. The exact
 knowledge of the specimen beam current is necessary to precisely determine the
 dwell time for the beam in order to achieve a given dose value.
-1 Glossary
-14 Software Manual SmartFIB | en1.2 | 346000-8083-000
-Term Description
 Focus plane This plane matches the unintentional tilt of the sample. It is calculated from several
 positions where the focus is adjusted correctly (see: Setup of a focus plane). A least
 mean square fit is used to do this. So, whenever eLitho moves the stage and a focus
@@ -286,9 +277,6 @@ and scanning methods.
 Line dose Line elements are exposed as a chain of single pixels along the direction of a line.
 Therefore this "one dimensional" elements are also called "single pixel line". The line
 dose specifies the electric charge per length unit in pico-Coulomb per centimeter:.
-1 Glossary
-Software Manual SmartFIB | en1.2 | 346000-8083-000 15
-Term Description
 Mask layer For alignment processes it is necessary to capture images from the region of interest
 in order to find characteristic orientation features. Capturing a "normal" image will
 expose the complete image area to the electron beam. eLitho offers a versatile way
@@ -330,9 +318,6 @@ While setting any exposure parameters, the Preview window can remain open. This
 provides immediate feedback for the selected parameters. This function is especially
 useful when creating new recipes (one can see immediately, why something is not
 working).
-1 Glossary
-16 Software Manual SmartFIB | en1.2 | 346000-8083-000
-Term Description
 Proximity effect Mainly the secondary electrons are resposnible for the exposure i.e. the cracking of
 the polymere chains of the resist in an lithography process. Those secondary
 electrons do not only leave the sample surface exactly at the spot where the incident
@@ -375,19 +360,7 @@ magnification which is chosen at the microscope. The exact value of the chosen
 magnification depends on the microscope and if so of the settings of the alignment
 process.
 Scanning mode The scanning mode determines the fill pattern during the exposure process.
-1 Glossary
-Software Manual SmartFIB | en1.2 | 346000-8083-000 17
-Term Description
 Spacing Spacing determines the step size along the scanning path.
-1 Glossary
-18 Software Manual SmartFIB | en1.2 | 346000-8083-000
-2 About this Document
-2. About this Document
-20 Software Manual SmartFIB | en1.2 | 346000-8083-000
-2 About this Document | 2.1 Introduction
-Software Manual SmartFIB | en1.2 | 346000-8083-000 21
-2 About this Document
-About this Document |
 2.1 Introduction
 Welcome to the Software Manual of SmartFIB.
 Content This Software Manual contains descriptions of control elements and instructions
