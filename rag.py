@@ -39,6 +39,7 @@ from langsmith import Client
 from langsmith.schemas import Run, Example
 from Vector_database import VectorDatabase
 from Rag_chain import RAGEval
+from Query_agent import QueryAgent
 
 
 # Embedding Model
@@ -113,6 +114,14 @@ def load_chat_model():
     )
 
 
+@st.cache_resource(show_spinner=False)
+def load_q_model():
+    return HuggingFaceHub(
+        repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+        model_kwargs={"temperature": 0.5, "max_length": 64, "max_new_tokens": 512}
+    )
+
+
 bi_encoder = load_bi_encoder()
 chat_model = load_chat_model()
 cross_model = load_cross()
@@ -140,9 +149,14 @@ vb_list = [
 
 mistral_parser = RunnableLambda(MistralParser().invoke)
 
+q_model = load_q_model()
+q_parser = RunnableLambda(lambda ans: ans.split('\n')[-1].strip()[len('Output: '):])
+query_agent = RunnableLambda(QueryAgent(vb_list, q_model, cross_model, q_parser).query)
+
 # file_path, vb_list, cross_model
-re = RAGEval(file_path, vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
-re.model_prep(chat_model, mistral_parser)  # model details
+req = RAGEval(file_path, vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
+req.model_prep(chat_model, mistral_parser)  # model details
+req.query_agent_prep(q_model, q_parser)
 
 if "run_id" not in st.session_state:
     st.session_state.run_id = uuid4()
@@ -156,7 +170,7 @@ print(f"Run_ID -> {st.session_state.run_id}, {mes}")
 # memory = ConversationBufferMemory(
 #     chat_memory=StreamlitChatMessageHistory(key="langchain_messages"),
 #     return_messages=True,
-#     memory_key="chat_history",
+#     memory_key="chat_history"
 # )
 
 st.title('RAG Bot')
@@ -193,7 +207,7 @@ def fbcb():
         f.write(fb)
         f.write(st.session_state.fb_k['text']+'\n')
     f.close()
-    with open('feedback.txt','r') as f:
+    with open('feedback.txt', 'r') as f:
         feed = f.read()
     client.create_feedback(
         run_id=st.session_state.run_id,
@@ -209,7 +223,7 @@ if prompt := st.chat_input("What's up?"):
     st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    response = re.query(prompt)
+    response = req.query(prompt)
     with st.chat_message("assistant"):
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
@@ -217,11 +231,11 @@ if prompt := st.chat_input("What's up?"):
     with st.form('form'):
         streamlit_feedback(feedback_type="thumbs", align="flex-start", key='fb_k', optional_text_label="[Optional] Please provide an explanation")
         submit_button = st.form_submit_button('Save feedback', on_click=fbcb)
-        if(not submit_button):
+        if not submit_button:
             print('Click the Submit button')
 
-with open('feedback.txt', 'r') as f:
-    rt.end(outputs={'outputs': f.read()})
+with open('feedback.txt', 'r') as fd:
+    rt.end(outputs={'outputs': fd.read()})
 rt.post()
 
 

@@ -12,3 +12,5 @@ streamlit_feedback
 pinecone-client
 langchain_pinecone
 langchain_weaviate
+langsmith
+pandas
