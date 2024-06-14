@@ -1,29 +1,34 @@
-import os
-import streamlit as st
-from uuid import uuid4
-from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain.chains import ConversationalRetrievalChain
-from langchain_community.document_loaders import TextLoader
-from langchain_community.vectorstores import Weaviate
-from streamlit_feedback import streamlit_feedback
-from langchain.callbacks.tracers.run_collector import RunCollectorCallbackHandler
-from langchain.schema.runnable import RunnableConfig
-from langchain.callbacks.tracers.langchain import wait_for_all_tracers
+from langchain_openai import ChatOpenAI
 import requests
+import openai
+from streamlit_feedback import streamlit_feedback
+from langchain.document_loaders import TextLoader
 from langchain.docstore.document import Document
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Weaviate
 import weaviate
+from langchain.prompts import PromptTemplate
 from weaviate.embedded import EmbeddedOptions
+import os
 from langchain.prompts import ChatPromptTemplate
 from langchain_community.llms import HuggingFaceHub
-from langsmith import traceable
-from langsmith.run_trees import RunTree
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.chat_models import ChatHuggingFace
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 from datasets import Dataset
 from sentence_transformers import CrossEncoder
-from ragas.metrics import faithfulness, answer_relevancy, context_recall, context_precision, answer_correctness, answer_similarity
+from ragas.metrics import (
+    faithfulness,
+    answer_relevancy,
+    context_recall,
+    context_precision,
+    ContextRelevancy,
+    answer_correctness,
+    answer_similarity
+)
+from uuid import uuid4
+import streamlit as st
 from sentence_transformers import SentenceTransformer
 from ragas import evaluate
 from typing import Sequence
@@ -36,10 +41,16 @@ from langchain.text_splitter import *
 from langchain.smith import RunEvalConfig
 from langchain_core.runnables import chain
 from langsmith import Client
-from langsmith.schemas import Run, Example
+import re
+from langchain_core.messages import HumanMessage
+from langchain_core.tools import tool
+from openai import OpenAI
+from transformers import pipeline
+import torch
 from Vector_database import VectorDatabase
 from Rag_chain import RAGEval
-from Query_agent import QueryAgent
+from Query_agent import *
+from langsmith.run_trees import RunTree
 
 
 # Embedding Model
@@ -138,7 +149,7 @@ pine_embed = pine_embedding_model()
 weaviate_embed = weaviate_embedding_model()
 pine_cross = pine_cross_encoder()
 weaviate_cross = weaviate_cross_encoder()
-pine_vb = VectorDatabase(pine_embed, pine_cross, 'Pinecone', st.secrets["PINECONE_API_KEY"], index='rag2', dimension=768, metric='euclidean', url=None)
+pine_vb = VectorDatabase(pine_embed, pine_cross, 'Pinecone', st.secrets["PINECONE_API_KEY"], index='rag3', dimension=768, metric='euclidean', url=None)
 weaviate_vb = VectorDatabase(weaviate_embed, weaviate_cross, 'Weaviate', st.secrets["WEAVIATE_V_KEY"], index=None, dimension=None, metric=None, url=url)
 pine_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
 weaviate_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
@@ -150,13 +161,15 @@ vb_list = [
 mistral_parser = RunnableLambda(MistralParser().invoke)
 
 q_model = load_q_model()
-q_parser = RunnableLambda(lambda ans: ans.split('\n')[-1].strip()[len('Output: '):])
-query_agent = RunnableLambda(QueryAgent(vb_list, q_model, cross_model, q_parser).query)
+# q_parser = RunnableLambda(lambda ans: ans.split('\n')[-1].strip()[len('Output: '):])
+alt_parser = RunnableLambda(lambda x: x[x.find('1. '):])
+query_agent = RunnableLambda(QueryAgent(vb_list, q_model, cross_model, alt_parser).query)
+
 
 # file_path, vb_list, cross_model
 req = RAGEval(file_path, vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
 req.model_prep(chat_model, mistral_parser)  # model details
-req.query_agent_prep(q_model, q_parser)
+req.query_agent_prep(q_model, alt_parser)
 
 if "run_id" not in st.session_state:
     st.session_state.run_id = uuid4()

@@ -17,7 +17,7 @@ from ragas.metrics import (
 from ragas import evaluate
 from langchain_core.runnables import RunnableLambda
 from Vector_database import VectorDatabase
-from Query_agent import QueryAgent
+from Query_agent import *
 
 
 class RAGEval:
@@ -62,7 +62,8 @@ class RAGEval:
         self.parser = parser_choice
 
     def query_agent_prep(self,model,parser):
-        self.query_agent = RunnableLambda(QueryAgent(self.vb_list, model,self.cross_model, parser).query)
+        # self.query_agent = RunnableLambda(QueryAgent(self.vb_list, model,self.cross_model, parser).query)
+        self.query_agent = RunnableLambda(AlternateQuestionAgent(self.vb_list, model, self.cross_model, parser).query)
 
     def rag_chain(self):
         prompt = ChatPromptTemplate.from_template(self.template)

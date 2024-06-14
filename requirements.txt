@@ -4,6 +4,9 @@ requests
 langchain
 langchain_community
 datasets
+openai
+transformers
+torch
 sentence_transformers
 langchain_huggingface
 ragas

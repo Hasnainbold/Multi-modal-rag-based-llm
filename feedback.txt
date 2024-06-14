@@ -2,8 +2,7 @@ FEEDBACK FOR :
 How to create a recipe with exclusive function?
 How to create a recipe with exclusive function?
 NEGATIVE -> 1. Open the Control Panel and select the Attributes tab > Recipe Tab. 2. From the Material drop- down list, select Exclusive. 3. Set the parameter values as required and press Enter. 4. The new recipe will be available from the Materials: drop-down list.
-1. Click on OK.
+1. To create a new recipe with exclusive function, click on OK.
         2. The new/edited recipe should be available from the Materials: drop-down list.
 NEGATIVE -> 1. Open the Control Panel and select the Attributes tab > Recipe Tab. 2. From the Material drop- down list, select Exclusive. 3. Set the parameter values as required and press Enter. 4. The new recipe will be available from the Materials: drop-down list.
-om the Materials: drop-down list.
- drop-down list.
+t.
