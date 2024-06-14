@@ -1,8 +1,15 @@
 FEEDBACK FOR : 
-How to create a recipe with exclusive function?
-How to create a recipe with exclusive function?
-NEGATIVE -> 1. Open the Control Panel and select the Attributes tab > Recipe Tab. 2. From the Material drop- down list, select Exclusive. 3. Set the parameter values as required and press Enter. 4. The new recipe will be available from the Materials: drop-down list.
-1. To create a new recipe with exclusive function, click on OK.
-        2. The new/edited recipe should be available from the Materials: drop-down list.
-NEGATIVE -> 1. Open the Control Panel and select the Attributes tab > Recipe Tab. 2. From the Material drop- down list, select Exclusive. 3. Set the parameter values as required and press Enter. 4. The new recipe will be available from the Materials: drop-down list.
-t.
+What is the active layer in Smart FlB?
+What is Image mode?
+NEGATIVE -> The active layer in Smart FlB is the editable and insertable layer.
+Image mode is a setting in the software used for scanning electron microscopy (SEM) that allows the user to select between displaying the image in image or sample mode. In image mode, the entire image is displayed, while in sample mode, only the virtual sample is displayed, and some menu entries and tools are adapted for structure-assembly and layout administration. The image mode can be set to bi-directional or uni-directional, and allows the user to subdivide the image area into regions where the beam is switched on and off during image capture.
+NEGATIVE -> The active layer in Smart FlB is the editable and insertable layer.
+What is the active layer in Smart FlB?
+NEGATIVE -> The active layer in Smart FlB is the editable and insertable layer.
+The active layer is the editable and insertable layer in Smart FlB.
+NEGATIVE -> The active layer in Smart FlB is the editable and insertable layer.
+do, cut, copy, paste, and select.
+Which kind of buttons are present in the standard toolbar?
+NEGATIVE -> The standard toolbar contains various buttons for quickly accessing a subset of the commands contained in the menu bar. It also oﬀers some additional functionality such as zoom control and grid activation. The appearance of the standard toolbar is diﬀerent for sample mode and live mode, and you can change the mode with the buttons on the rightmost side of the standard toolbar. The icons available in sample mode include undo, redo, cut, copy, paste, and select.
+In the standard toolbar, there are buttons for loading, saving, and deleting default cross-section parameter sets. There are also import and export buttons for ASP parameters.
+NEGATIVE -> The standard toolbar contains various buttons for quickly accessing a subset of the commands contained in the menu bar. It also oﬀers some additional functionality such as zoom control and grid activation. The appearance of the standard toolbar is diﬀerent for sample mode and live mode, and you can change the mode with the buttons on the rightmost side of the standard toolbar. The icons available in sample mode include undo, redo, cut, copy, paste, and select.

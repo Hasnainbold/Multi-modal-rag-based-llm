@@ -114,7 +114,6 @@ def load_chat_model():
     template = '''
     You are an assistant for question-answering tasks.
     Use the following pieces of retrieved context to answer the question accurately.
-    If you don't know the answer, just say that you don't know.
     Question: {question}
     Context: {context}
     Answer:
@@ -206,7 +205,6 @@ rt = RunTree(
 )
 
 
-@st.cache_data
 def fbcb():
     message_id = len(st.session_state.messages) - 1
     if message_id >= 0:
@@ -214,10 +212,14 @@ def fbcb():
     f = open('feedback.txt', 'r+')
     f.write("FEEDBACK FOR : \n")
     f.write(prompt+'\n')
+    print(st.session_state.fb_k)
+    print(st.session_state.fb_k["score"])
     fb = "NEGATIVE -> " if st.session_state.fb_k["score"] == '👎' else "POSITIVE -> "
     for message in st.session_state.messages:
         f.write(message["content"]+'\n')
         f.write(fb)
+        if st.session_state.fb_k['text'] is None:
+            st.session_state.fb_k['text'] = ""
         f.write(st.session_state.fb_k['text']+'\n')
     f.close()
     with open('feedback.txt', 'r') as f:
