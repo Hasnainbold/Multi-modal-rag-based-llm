@@ -143,8 +143,8 @@ def vector_database_prep():
     weaviate_cross = weaviate_cross_encoder()
     pine_vb = VectorDatabase(pine_embed, pine_cross, 'Pinecone', st.secrets["PINECONE_API_KEY"], index='rag3', dimension=768, metric='euclidean', url=None)
     weaviate_vb = VectorDatabase(weaviate_embed, weaviate_cross, 'Weaviate', st.secrets["WEAVIATE_V_KEY"], index=None, dimension=None, metric=None, url=url)
-    pine_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
-    weaviate_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
+    pine_text_splitter = RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35)
+    weaviate_text_splitter = RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35)
     vb_list = [
         (pine_vb, pine_text_splitter),
         (weaviate_vb, weaviate_text_splitter)
