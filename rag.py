@@ -7,6 +7,8 @@ from langchain.docstore.document import Document
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Weaviate
 import weaviate
+from scipy.spatial.distance import euclidean
+import numpy as np
 from langchain.prompts import PromptTemplate
 from weaviate.embedded import EmbeddedOptions
 import os
@@ -132,6 +134,28 @@ def load_q_model():
     )
 
 
+@st.cache_resource(show_spinner=False)
+def vector_database_prep():
+    # Vector Database objects
+    pine_embed = pine_embedding_model()
+    weaviate_embed = weaviate_embedding_model()
+    pine_cross = pine_cross_encoder()
+    weaviate_cross = weaviate_cross_encoder()
+    pine_vb = VectorDatabase(pine_embed, pine_cross, 'Pinecone', st.secrets["PINECONE_API_KEY"], index='rag3', dimension=768, metric='euclidean', url=None)
+    weaviate_vb = VectorDatabase(weaviate_embed, weaviate_cross, 'Weaviate', st.secrets["WEAVIATE_V_KEY"], index=None, dimension=None, metric=None, url=url)
+    pine_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
+    weaviate_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
+    vb_list = [
+        (pine_vb, pine_text_splitter),
+        (weaviate_vb, weaviate_text_splitter)
+    ]
+    # RUN THIS ONCE
+    data = open(file_path, 'r').read()
+    for vb, sp in vb_list:
+        vb.upsert(data, sp)
+    return vb_list
+
+
 bi_encoder = load_bi_encoder()
 chat_model = load_chat_model()
 cross_model = load_cross()
@@ -143,30 +167,15 @@ gpt_key = st.secrets["GPT_KEY"]
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
 
-# Vector Database objects
-pine_embed = pine_embedding_model()
-weaviate_embed = weaviate_embedding_model()
-pine_cross = pine_cross_encoder()
-weaviate_cross = weaviate_cross_encoder()
-pine_vb = VectorDatabase(pine_embed, pine_cross, 'Pinecone', st.secrets["PINECONE_API_KEY"], index='rag3', dimension=768, metric='euclidean', url=None)
-weaviate_vb = VectorDatabase(weaviate_embed, weaviate_cross, 'Weaviate', st.secrets["WEAVIATE_V_KEY"], index=None, dimension=None, metric=None, url=url)
-pine_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
-weaviate_text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=30)
-vb_list = [
-    (pine_vb, pine_text_splitter),
-    (weaviate_vb, weaviate_text_splitter)
-]
-
 mistral_parser = RunnableLambda(MistralParser().invoke)
-
+vb_list = vector_database_prep()
 q_model = load_q_model()
 # q_parser = RunnableLambda(lambda ans: ans.split('\n')[-1].strip()[len('Output: '):])
 alt_parser = RunnableLambda(lambda x: x[x.find('1. '):])
 query_agent = RunnableLambda(QueryAgent(vb_list, q_model, cross_model, alt_parser).query)
 
-
 # file_path, vb_list, cross_model
-req = RAGEval(file_path, vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
+req = RAGEval(vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
 req.model_prep(chat_model, mistral_parser)  # model details
 req.query_agent_prep(q_model, alt_parser)
 
@@ -206,14 +215,21 @@ rt = RunTree(
 
 
 def fbcb():
+    print('FEEDBACK KEY')
+    print('-'*20)
+    print(st.session_state.fb_k)
+    if st.session_state.fb_k is None:
+        st.session_state.fb_k = {'type': 'thumbs', 'score': '👎', 'text': ''}
+
     message_id = len(st.session_state.messages) - 1
     if message_id >= 0:
         st.session_state.messages[message_id]["feedback"] = st.session_state.fb_k
+    open('feedback.txt', 'w').close()
+
     f = open('feedback.txt', 'r+')
     f.write("FEEDBACK FOR : \n")
     f.write(prompt+'\n')
-    print(st.session_state.fb_k)
-    print(st.session_state.fb_k["score"])
+
     fb = "NEGATIVE -> " if st.session_state.fb_k["score"] == '👎' else "POSITIVE -> "
     for message in st.session_state.messages:
         f.write(message["content"]+'\n')

@@ -33,7 +33,7 @@ class RAGEval:
     best = 2
     parse = StrOutputParser()
 
-    def __init__(self,file_path, vb_list, cross_model):  # vb_list = [(vb,splitter)]
+    def __init__(self, vb_list, cross_model):  # vb_list = [(vb,splitter)]
         self.cross_model = cross_model
 
         self.template = """You are an assistant for question-answering tasks.
@@ -44,30 +44,29 @@ class RAGEval:
         Context: {context}
         Answer:
         """
-        self.file_path = file_path
         self.vb_list = vb_list
-        self.vector_dbs()
 
     def ground_truths_prep(self, ground_truth):  # questions is a file with questions
         self.ground_truth = ground_truth
-
-    def vector_dbs(self):
-      with open(self.file_path, 'r') as file:
-        data = file.read()
-      for vb, sp in self.vb_list:
-        vb.upsert(data, sp)
 
     def model_prep(self, model, parser_choice=parse):  # model_link is the link to the model
         self.chat_model = model
         self.parser = parser_choice
 
     def query_agent_prep(self,model,parser):
-        # self.query_agent = RunnableLambda(QueryAgent(self.vb_list, model,self.cross_model, parser).query)
         self.query_agent = RunnableLambda(AlternateQuestionAgent(self.vb_list, model, self.cross_model, parser).query)
+
+    def context_prep(self):
+        con = self.query_agent.invoke(self.question).split('@@')
+        uni_con = []
+        for i in con:
+            if i not in uni_con:
+                uni_con.append(i)
+        self.context = str("\n".join(uni_con))
 
     def rag_chain(self):
         prompt = ChatPromptTemplate.from_template(self.template)
-        self.context = self.query_agent.invoke(self.question)
+        self.context_prep()
         context_agent = RunnableLambda(lambda x: str(self.context))
         self.ragchain = (
             {"context": context_agent, "question": RunnablePassthrough()}
