@@ -16,4 +16,6 @@ pinecone-client
 langchain_pinecone
 langchain_weaviate
 langsmith
+langgraph
 pandas
+scipy

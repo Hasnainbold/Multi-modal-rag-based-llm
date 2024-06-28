@@ -53,6 +53,7 @@ from Vector_database import VectorDatabase
 from Rag_chain import RAGEval
 from Query_agent import *
 from langsmith.run_trees import RunTree
+from Feedback_system import FeedbackSystem
 
 
 # Embedding Model
@@ -166,7 +167,15 @@ v_key = st.secrets["WEAVIATE_V_KEY"]
 gpt_key = st.secrets["GPT_KEY"]
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
+os.environ["OPENAI_API_KEY"] = gpt_key
+f_url = st.secrets['FEEDBACK_URL']
+f_api = st.secrets['FEEDBACK_API']
+feedback_file = "feedback_smith1.csv"
 
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
+
+feedback_sys = FeedbackSystem(feedback_file, embeddings, f_url, f_api)
 mistral_parser = RunnableLambda(MistralParser().invoke)
 vb_list = vector_database_prep()
 q_model = load_q_model()
@@ -178,6 +187,7 @@ query_agent = RunnableLambda(QueryAgent(vb_list, q_model, cross_model, alt_parse
 req = RAGEval(vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
 req.model_prep(chat_model, mistral_parser)  # model details
 req.query_agent_prep(q_model, alt_parser)
+req.feedback_prep(feedback_file, embeddings, f_url, f_api)
 
 if "run_id" not in st.session_state:
     st.session_state.run_id = uuid4()
@@ -188,12 +198,6 @@ client = Client(api_url=st.secrets["LANGSMITH_URL"], api_key=st.secrets["LANGSMI
 mes = [message["role"]+": "+message["content"] for message in st.session_state.messages]
 print(f"Run_ID -> {st.session_state.run_id}, {mes}")
 
-# memory = ConversationBufferMemory(
-#     chat_memory=StreamlitChatMessageHistory(key="langchain_messages"),
-#     return_messages=True,
-#     memory_key="chat_history"
-# )
-
 st.title('RAG Bot')
 st.subheader('Converse with our Chatbot')
 st.text("Some sample questions to ask:")
@@ -202,7 +206,7 @@ st.markdown("- What does alignment accuracy refer to, and how is it achieved in 
 st.markdown("- What are alignment marks, and how are they used in the alignment process?")
 st.markdown("- What is the alignment process in lithography, and how does eLitho facilitate this procedure?")
 st.markdown("- What can you do with the insertable layer in Smart FIB?")
-
+open('feedback.txt', 'w').close()
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -220,26 +224,28 @@ def fbcb():
     print(st.session_state.fb_k)
     if st.session_state.fb_k is None:
         st.session_state.fb_k = {'type': 'thumbs', 'score': '👎', 'text': ''}
-
     message_id = len(st.session_state.messages) - 1
     if message_id >= 0:
         st.session_state.messages[message_id]["feedback"] = st.session_state.fb_k
-    open('feedback.txt', 'w').close()
 
-    f = open('feedback.txt', 'r+')
-    f.write("FEEDBACK FOR : \n")
-    f.write(prompt+'\n')
-
-    fb = "NEGATIVE -> " if st.session_state.fb_k["score"] == '👎' else "POSITIVE -> "
-    for message in st.session_state.messages:
-        f.write(message["content"]+'\n')
-        f.write(fb)
+    s = f"The feedback for {prompt} "
+    fb = "NEGATIVE " if st.session_state.fb_k["score"] == '👎' else "POSITIVE "
+    for _ in st.session_state.messages:
         if st.session_state.fb_k['text'] is None:
             st.session_state.fb_k['text'] = ""
-        f.write(st.session_state.fb_k['text']+'\n')
-    f.close()
-    with open('feedback.txt', 'r') as f:
-        feed = f.read()
+        s += f'is {fb} and the response is '
+        if fb == "NEGATIVE ":
+            s += st.session_state.fb_k['text']
+        else:
+            s += [d["content"] for d in st.session_state.messages if d["role"] == "assistant"][-1]
+        s += '\n'
+    with open('feedback.txt', 'r+') as fd:  # feedback records all feedback for this run
+        fd.write(s)
+    with open('feedback_loop.txt', 'r+') as fd:  # feedback loop records feedback for all runs
+        fd.write(s)
+    feedback_sys.write(s)
+    with open('feedback.txt', 'r') as fd:
+        feed = fd.read()
     client.create_feedback(
         run_id=st.session_state.run_id,
         key="fb_k",
@@ -265,8 +271,8 @@ if prompt := st.chat_input("What's up?"):
         if not submit_button:
             print('Click the Submit button')
 
-with open('feedback.txt', 'r') as fd:
-    rt.end(outputs={'outputs': fd.read()})
+with open('feedback.txt', 'r')as f:
+    rt.end(outputs={'outputs': f.read()})
 rt.post()
 
 
