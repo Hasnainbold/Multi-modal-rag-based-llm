@@ -219,9 +219,6 @@ rt = RunTree(
 
 
 def fbcb():
-    print('FEEDBACK KEY')
-    print('-'*20)
-    print(st.session_state.fb_k)
     if st.session_state.fb_k is None:
         st.session_state.fb_k = {'type': 'thumbs', 'score': '👎', 'text': ''}
     message_id = len(st.session_state.messages) - 1
@@ -256,7 +253,6 @@ def fbcb():
 
 
 if prompt := st.chat_input("What's up?"):
-    # feedback_option = "thumbs" if st.toggle(label="`Thumbs` ⇄ `Faces`", value=False) else "faces"
     st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 

@@ -95,9 +95,11 @@ class AlternateQuestionAgent:
       return [i['text'] for i in c]  # list of text
 
   def query(self, question):
-      questions = [question]+[i[3:] for i in (self.chain.invoke(question)).split('\n')]  # assuming the questions are labelled as 1. q1 \n 2. q2
-
+      qs = [i[3:] for i in (self.chain.invoke(question)).split('\n')]
+      if '' in qs:
+          qs.remove('')
+      questions = [question] + qs  # assuming the questions are labelled as 1. q1 \n 2. q2
       context = ""
       for q in questions:
-        context += "".join(self.retrieve(q)) + "\n"
+          context += "".join(self.retrieve(q)) + "@@"
       return context

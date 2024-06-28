@@ -45,17 +45,16 @@ class VectorDatabase:
       self.retriever = WeaviateVectorStore.from_documents(chunks, self.embedding_model, client=self.vector_inst).as_retriever(search_type="mmr")
 
   def query(self,question):
+    context = [doc.page_content for doc in self.retriever.invoke(question)]
     if self.v_type=='Pinecone':
-      context = [doc.page_content for doc in self.retriever.invoke(question)]
-      print(f"Pinecone retrieved : {len(context)}")
+        print(f"Pinecone retrieved : {len(context)}")
     else:
-      context = [doc.page_content for doc in self.retriever.invoke(question)]
-      print(f"Weaviate retrieved : {len(context)}")
+        print(f"Weaviate retrieved : {len(context)}")
 
     c = self.cross_encoder.rank(
              query=question,
-              documents=context,
-              return_documents=True
+             documents=context,
+             return_documents=True
             )[:len(context)-2]
     return [i['text'] for i in c]
 
