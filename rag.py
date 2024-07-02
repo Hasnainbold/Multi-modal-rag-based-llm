@@ -37,11 +37,10 @@ from typing import Sequence
 import pandas as pd
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
-from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables import RunnableLambda, chain
 from langchain_weaviate.vectorstores import WeaviateVectorStore
 from langchain.text_splitter import *
 from langchain.smith import RunEvalConfig
-from langchain_core.runnables import chain
 from langsmith import Client
 import re
 from langchain_core.messages import HumanMessage
@@ -79,6 +78,17 @@ class MistralParser:
     def invoke(self, query):
         ans = self.parser.invoke(query)
         return ans[ans.find(self.stopword)+len(self.stopword):].strip()
+
+
+class chatGPT:
+  def __init__(self, model, api_key, template):
+    self.model = model
+    self.client = OpenAI(api_key=api_key)
+    self.template = template
+
+  def chat(self, prompt):
+    message = [{"role":"user", "content":prompt.messages[0].content}]
+    return self.client.chat.completions.create(messages=message, model=self.model).choices[0].message.content
 
 
 # Caching models
@@ -170,23 +180,29 @@ os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
 os.environ["OPENAI_API_KEY"] = gpt_key
 f_url = st.secrets['FEEDBACK_URL']
 f_api = st.secrets['FEEDBACK_API']
-feedback_file = "feedback_smith1.csv"
+feedback_file = "feedback_loop.txt"
 
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
-
 feedback_sys = FeedbackSystem(feedback_file, embeddings, f_url, f_api)
 mistral_parser = RunnableLambda(MistralParser().invoke)
 vb_list = vector_database_prep()
 q_model = load_q_model()
-# q_parser = RunnableLambda(lambda ans: ans.split('\n')[-1].strip()[len('Output: '):])
 alt_parser = RunnableLambda(lambda x: x[x.find('1. '):])
-query_agent = RunnableLambda(QueryAgent(vb_list, q_model, cross_model, alt_parser).query)
+gpt_model = RunnableLambda(chatGPT("gpt-4o", api_key=gpt_key, template="""You are an assistant for question-answering tasks.
+    Use the following pieces of retrieved context to answer the question accurately.
+    Question: {question}
+    Context: {context}
+    Answer:""").chat)
+gq_model = RunnableLambda(chatGPT('gpt-3.5-turbo', api_key=gpt_key, template="""You are an assistant for question-answering tasks.
+    Use the following pieces of retrieved context to answer the question accurately.
+    Question: {question}
+    Context: {context}
+    Answer:""").chat)
 
-# file_path, vb_list, cross_model
-req = RAGEval(vb_list, cross_model)  # file_path,url,vb_key,gpt_key):
-req.model_prep(chat_model, mistral_parser)  # model details
-req.query_agent_prep(q_model, alt_parser)
+req = RAGEval(vb_list, cross_model)
+req.model_prep(gpt_model)  # model details
+req.query_agent_prep(gq_model)
 req.feedback_prep(feedback_file, embeddings, f_url, f_api)
 
 if "run_id" not in st.session_state:
