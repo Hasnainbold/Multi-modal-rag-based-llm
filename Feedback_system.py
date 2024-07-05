@@ -13,7 +13,7 @@ class FeedbackSystem:
     feedback_url = url
     feedback_weaviate_api_key = api
     feedback_vb = weaviate.connect_to_wcs(cluster_url=feedback_url,auth_credentials=weaviate.classes.init.Auth.api_key(feedback_weaviate_api_key))
-    self.db = WeaviateVectorStore.from_documents([Document(i) for i in data],embeddings,client=feedback_vb)
+    self.db = WeaviateVectorStore.from_documents([Document(i) for i in data],embeddings, client=feedback_vb)
 
   def feedback_retriever(self,top_k=1):
     self.top_k = top_k

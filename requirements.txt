@@ -19,3 +19,5 @@ langsmith
 langgraph
 pandas
 scipy
+pillow
+torchvision

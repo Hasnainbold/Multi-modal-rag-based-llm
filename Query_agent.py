@@ -74,23 +74,7 @@ class AlternateQuestionAgent:
     self.cross_model = cross_model
     self.chain = {"question":RunnablePassthrough()} | self.prompt | self.model | self.parser
 
-  def retrieve(self,question):
-    prior_context = [vb.query(question) for vb,_ in self.vb_list]
-    cont = []
-    for i in prior_context:
-      context = ""
-      for j in i: # list to str
-        context += j
-      cont.append(context)
-
-    c = self.cross_model.rank(
-          query=question,
-          documents=cont,
-          return_documents=True
-        )[:len(prior_context)-self.best+1]
-    return [i['text'] for i in c] # list of text
-
-  def query(self,question):
+  def mul_qs(self,question):
     qs = [i[3:] for i in (self.chain.invoke(question)).split('\n')] + [question]
     if '' in qs:
       qs.remove('')
@@ -98,7 +82,28 @@ class AlternateQuestionAgent:
     for q in qs:
       if q not in uni_q:
         uni_q.append(q)
-    questions = [question]+uni_q # assuming the questions are labelled as 1. q1 \n 2. q2
+    return uni_q # assuming the questions are labelled as 1. q1 \n 2. q2
+
+  def query(self, question):
+    questions = self.mul_qs(question)
+    return self.fetch(questions)
+
+  def fetch(self,questions):
+    def retrieve(question):
+      prior_context = [vb.query(question) for vb,_ in self.vb_list]
+      cont = []
+      for i in prior_context:
+        context = ""
+        for j in i: # list to str
+          context += j
+        cont.append(context)
+
+      c = self.cross_model.rank(
+            query=question,
+            documents=cont,
+            return_documents=True
+          )[:len(prior_context)-self.best+1]
+      return [i['text'] for i in c] # list of text
 
     contexts = [self.retrieve(q) for q in questions]
     uni_contexts = []
@@ -117,7 +122,7 @@ class AlternateQuestionAgent:
     uni_contexts = []
     for i in range(len(u)):
       for j in range(len(u)):
-        if j != i and u[i] in u[j]:
+        if j!=i and u[i] in u[j]:
             break
       else:
         uni_contexts.append(u[i])
