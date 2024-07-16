@@ -1,7 +1,6 @@
 from streamlit_feedback import streamlit_feedback
 import streamlit as st
 from uuid import uuid4
-import unstructured
 import pdfminer
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
@@ -10,7 +9,6 @@ from llama_index.core import SimpleDirectoryReader, StorageContext, Settings
 from llama_index.vector_stores.lancedb import LanceDBVectorStore
 from llama_index.core.schema import ImageNode
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from unstructured.partition.pdf import partition_pdf
 from langchain_openai import ChatOpenAI
 import requests
 from PIL import Image
@@ -284,87 +282,87 @@ def vector_database_prep():
     return vb_list
 
 
-@st.cache_resource(show_spinner=False)
-def image_dataset_creation(file_path):
-  def image_to_bytes(image):
-    if image.mode == 'CMYK':
-        image = image.convert('RGB')
-    with io.BytesIO() as output:
-        image.save(output, format="PNG")
-        return output.getvalue()
-
-  content = []
-  headers = [{
-      'page_index': 0,
-      'block_index': 0,
-      'line_index': 0,
-      'span_index': 0,
-      'text': 'Software Manual SmartFIB Application Software for Crossbeam Workstations',
-      'content': []}]
-
-  page_cont = dict()
-  with fitz.open('Software Manual SmartFIB v1.2.pdf') as pdf_file:
-    for page_index in range(len(pdf_file)):
-      page_cont[page_index] = pdf_file[page_index].get_text('dict')
-
-  for page_index in page_cont:
-    page_dict = page_cont[page_index]
-    blocks = page_dict['blocks']
-    text_blocks = [block for block in blocks if block['type'] == 0]
-    for text_block in text_blocks:
-      lines = text_block['lines']
-      for line in range(len(lines)):
-        spans = lines[line]['spans']
-        for span in spans:
-          if span['size'] >= 10.4 and 'bol' in span['font'].lower():
-            new_header = {
-                'page_index': page_index,
-                'block_index': text_block['number'],
-                'line_index': line,
-                'span_index': spans.index(span),
-                'text': span['text'],
-                'content': []
-            }
-            headers[-1]['content'] = content
-            headers.append(new_header)
-            content = []
-          else:
-            content.append(span['text'])
-  # header_df = pd.DataFrame(headers)
-
-  with fitz.open(file_path) as pdf_file:
-    per_page_text = [pdf_file[page_index].get_text() for page_index in range(len(pdf_file))]
-    # iterate over pdf pages
-    images = []
-    for page_index in range(len(pdf_file)):  # which page in the doc
-        # get the page itself
-        page = pdf_file[page_index]
-        image_list = page.get_images()
-        # printing number of images found in this page
-        if image_list:
-            for image_index, img in enumerate(image_list, start=1):  # which image in the current page
-              xref = img[0]  # get the XREF of the image
-              base_image = pdf_file.extract_image(xref)
-              image_bytes = base_image["image"]  # extract the image bytes
-              image_ext = base_image["ext"]  # get the image extension
-              image = Image.open(io.BytesIO(image_bytes))  # load it to PIL
-              image_content = per_page_text[0] + "\n" + pytesseract.image_to_string(image)
-              header_names = [i['text'].replace('/','\\') for i in headers if i['page_index'] == page_index and not i['text'].isnumeric()]
-              if len(header_names) == 0:
-                header_names = [pytesseract.image_to_string(image) + ' ' + image_content[:image_content.find(' ')] + '_' + str(page_index)]
-              image_dict = {
-                  "page_index": page_index,
-                  "image_index": image_index,
-                  "image_ext": image_ext,
-                  "image": image,
-                  "image_file_name": ",".join(header_names) + '_' + str(image_index),
-                  "image_content": image_content
-              }
-              images.append(image_dict)
-  im_df = pd.DataFrame(images)
-  im_df['image'] = im_df['image'].apply(image_to_bytes)
-  dataset = Dataset(pa.Table.from_pandas(im_df))
-  return dataset
+# @st.cache_resource()
+# def image_dataset_creation(file_path):
+#   def image_to_bytes(image):
+#     if image.mode == 'CMYK':
+#         image = image.convert('RGB')
+#     with io.BytesIO() as output:
+#         image.save(output, format="PNG")
+#         return output.getvalue()
+#
+#   content = []
+#   headers = [{
+#       'page_index': 0,
+#       'block_index': 0,
+#       'line_index': 0,
+#       'span_index': 0,
+#       'text': 'Software Manual SmartFIB Application Software for Crossbeam Workstations',
+#       'content': []}]
+#
+#   page_cont = dict()
+#   with fitz.open('Software Manual SmartFIB v1.2.pdf') as pdf_file:
+#     for page_index in range(len(pdf_file)):
+#       page_cont[page_index] = pdf_file[page_index].get_text('dict')
+#
+#   for page_index in page_cont:
+#     page_dict = page_cont[page_index]
+#     blocks = page_dict['blocks']
+#     text_blocks = [block for block in blocks if block['type'] == 0]
+#     for text_block in text_blocks:
+#       lines = text_block['lines']
+#       for line in range(len(lines)):
+#         spans = lines[line]['spans']
+#         for span in spans:
+#           if span['size'] >= 10.4 and 'bol' in span['font'].lower():
+#             new_header = {
+#                 'page_index': page_index,
+#                 'block_index': text_block['number'],
+#                 'line_index': line,
+#                 'span_index': spans.index(span),
+#                 'text': span['text'],
+#                 'content': []
+#             }
+#             headers[-1]['content'] = content
+#             headers.append(new_header)
+#             content = []
+#           else:
+#             content.append(span['text'])
+#   # header_df = pd.DataFrame(headers)
+#
+#   with fitz.open(file_path) as pdf_file:
+#     per_page_text = [pdf_file[page_index].get_text() for page_index in range(len(pdf_file))]
+#     # iterate over pdf pages
+#     images = []
+#     for page_index in range(len(pdf_file)):  # which page in the doc
+#         # get the page itself
+#         page = pdf_file[page_index]
+#         image_list = page.get_images()
+#         # printing number of images found in this page
+#         if image_list:
+#             for image_index, img in enumerate(image_list, start=1):  # which image in the current page
+#               xref = img[0]  # get the XREF of the image
+#               base_image = pdf_file.extract_image(xref)
+#               image_bytes = base_image["image"]  # extract the image bytes
+#               image_ext = base_image["ext"]  # get the image extension
+#               image = Image.open(io.BytesIO(image_bytes))  # load it to PIL
+#               image_content = per_page_text[0] + "\n" + pytesseract.image_to_string(image)
+#               header_names = [i['text'].replace('/','\\') for i in headers if i['page_index'] == page_index and not i['text'].isnumeric()]
+#               if len(header_names) == 0:
+#                 header_names = [pytesseract.image_to_string(image) + ' ' + image_content[:image_content.find(' ')] + '_' + str(page_index)]
+#               image_dict = {
+#                   "page_index": page_index,
+#                   "image_index": image_index,
+#                   "image_ext": image_ext,
+#                   "image": image,
+#                   "image_file_name": ",".join(header_names) + '_' + str(image_index),
+#                   "image_content": image_content
+#               }
+#               images.append(image_dict)
+#   im_df = pd.DataFrame(images)
+#   im_df['image'] = im_df['image'].apply(image_to_bytes)
+#   dataset = Dataset(pa.Table.from_pandas(im_df))
+#   return dataset
 
 
 @st.cache_resource(show_spinner=False)
@@ -372,6 +370,7 @@ def load_image_model(model):
     extractor = AutoFeatureExtractor.from_pretrained(model)
     im_model = AutoModel.from_pretrained(model)
     return extractor, im_model
+
 
 @st.cache_resource(show_spinner=False)
 def load_nomic_model():
@@ -420,7 +419,7 @@ gq_model = RunnableLambda(ChatGPT('gpt-3.5-turbo', api_key=gpt_key, template="""
     Question: {question}
     Context: {context}
     Answer:""").chat)
-dataset = image_dataset_creation(image_file)
+# dataset = image_dataset_creation(image_file)
 weaviate_embed = weaviate_embedding_model()
 pine_embed = pine_embedding_model()
 feedback_db = TextDatabase('feedback', 'lancedb/rag')
@@ -569,24 +568,11 @@ for conv_id in st.session_state['conv_id']:
     user_messages, ai_messages, images = dic['user_messages'], dic['ai_messages'], dic['images']
     if len(user_messages) > 0:
         with st.chat_message(user_messages["role"]):
-            st.text(user_messages["content"])
+            st.markdown(user_messages["content"])
     with st.chat_message(ai_messages["role"]):
-        # if type(ai_messages['content']) is dict:
-        #     st.text(ai_messages['content']['text'])
-        #     if len(ai_messages['content']['image']) > 0:
-        #         for image in ai_messages['content']['image']:
-        #             if os.path.isfile(image):
-        #                 st.text(image)
-        #                 st.image(Image.open(Image.open(os.path.join('./figures', image)), use_column_width=True))
-        #         # image_name = './rag_result_' + str(uuid.uuid4()) + '.jpg'
-        #         # output_path = './output_images'
-        #         # saved_image_path = plot_images(ai_messages['content']['image'], output_path, image_name)
-        #         # st.image(Image.open(saved_image_path), use_column_width=True)
-        # else:
-        st.text(ai_messages["content"])
+        st.markdown(ai_messages["content"])
     if len(images) > 0:
         for image in images:
-            st.text(image)
             st.image(Image.open(os.path.join('./figures', image)), use_column_width=True)
 
 if fd:
@@ -609,4 +595,3 @@ def reset_conversation():
 
 
 st.button('Reset Chat', on_click=reset_conversation)
-

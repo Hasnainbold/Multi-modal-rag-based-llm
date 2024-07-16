@@ -1,0 +1,9 @@
+[logger]
+level = "error"
+
+[theme]
+primaryColor="#FBB13C"
+backgroundColor="#ADD8E6"
+secondaryBackgroundColor="#F0F2F6"
+textColor="#000000"
+font="serif"

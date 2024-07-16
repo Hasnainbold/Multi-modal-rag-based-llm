@@ -21,7 +21,6 @@ class Database(ABC):
     self.table_name = table_name
 
   def upsert(self, data):
-    print(self.table_name)
     try:
       self.tbl = self.db.create_table(self.table_name, data=data)
     except:
@@ -71,7 +70,6 @@ class ImageDatabase(Database):
     return self.embedder.embed_query(text)
 
   def upsert(self, data):  # image_file, image_context, PIL Object
-    print(type(data))
     if isinstance(data, list) and all(isinstance(i, tuple) and len(i) == 3 for i in data):
       image_embeddings = [{"image_file": i[0], "image_context": i[1], "vector": self._get_image_embedding(i[2])} for i
                           in data]
