@@ -2,8 +2,8 @@
 level = "error"
 
 [theme]
-primaryColor="#FBB13C"
-backgroundColor="#ADD8E6"
-secondaryBackgroundColor="#F0F2F6"
+primaryColor="#632B30"
+backgroundColor="#E7EB90"
+secondaryBackgroundColor="#FADF63"
 textColor="#000000"
 font="serif"

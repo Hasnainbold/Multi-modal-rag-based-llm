@@ -549,7 +549,7 @@ if uploaded_file is not None:
         "images": images  # list
     }
 
-if prompt := st.chat_input("What's up?"):
+if prompt := st.chat_input("What's Up?"):
     fd = True
     st.session_state.messages.append({"role": "user", "content": prompt})
     response = req.query(prompt, 5)  # prompt is a str
