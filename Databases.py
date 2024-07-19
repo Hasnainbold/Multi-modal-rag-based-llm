@@ -5,6 +5,7 @@ import torchvision.transforms as T
 from datasets import Dataset
 import io
 import weaviate
+import pytesseract
 from pinecone import Pinecone, ServerlessSpec
 import uuid
 import time
@@ -19,13 +20,13 @@ class Database(ABC):
   def __init__(self, table_name, uri='lancedb/rag'):
     self.db = lancedb.connect(uri)
     self.table_name = table_name
+    try:
+      self.delete()
+    except:
+      pass
 
   def upsert(self, data):
-    try:
-      self.tbl = self.db.create_table(self.table_name, data=data)
-    except:
-      self.tbl = self.db.open_table(self.table_name)
-      self.tbl.add(data)
+    self.tbl = self.db.create_table(self.table_name, data=data)
 
   def query(self, query_str, top_k=2):
     return self.tbl.search(query_str).limit(top_k).to_pandas()
@@ -120,7 +121,7 @@ class TextDatabase(Database):
     self.embedder = embedder
     self.splitter = splitter
 
-  def upsert(self, data): # data is str
+  def upsert(self, data):  # data is str
     if isinstance(data, str):
       chunks = self.splitter.split_documents(self.splitter.create_documents(self.splitter.split_text(data)))
       chunks = [c.page_content for c in chunks]
@@ -133,7 +134,7 @@ class TextDatabase(Database):
   def query(self, data, top_k=2): # str
     self.top_k = top_k
     embedding = self.embedder.embed_query(data)
-    return super().query(embedding, self.top_k)['chunk'] # text
+    return super().query(embedding, self.top_k)['chunk']  # text
 
   def retriever(self, top_k):
     self.top_k = top_k

@@ -243,8 +243,9 @@ class RAGEval:
             text = self.answer
         else:  # query is an image
             text = self.image2text(question)  # get textual information of an image
+            self.context = ""
         image = self.image_search(question, top_k)
-        return {"text": text, "image": image}
+        return {"text": text, "image": image, "context":self.context}
 
     def image_search(self, question, top_k=2):
         """

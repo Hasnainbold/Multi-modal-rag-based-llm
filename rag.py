@@ -1,7 +1,7 @@
 from streamlit_feedback import streamlit_feedback
 import streamlit as st
 from uuid import uuid4
-import pdfminer
+import spire.pdf
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from llama_index.core.indices import MultiModalVectorStoreIndex
@@ -12,6 +12,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from langchain_openai import ChatOpenAI
 import requests
 from PIL import Image
+import pytesseract
 import fitz
 from unidecode import unidecode
 import weaviate.classes as wvc
@@ -238,7 +239,142 @@ def load_q_model():
 
 
 @st.cache_resource(show_spinner=False)
-def vector_database_prep():
+def load_image_model(model):
+    extractor = AutoFeatureExtractor.from_pretrained(model)
+    im_model = AutoModel.from_pretrained(model)
+    return extractor, im_model
+
+
+@st.cache_resource(show_spinner=False)
+def load_nomic_model():
+    return  AutoImageProcessor.from_pretrained("nomic-ai/nomic-embed-vision-v1.5"), AutoModel.from_pretrained("nomic-ai/nomic-embed-vision-v1.5",
+                                         trust_remote_code=True)
+
+
+@st.cache_resource(show_spinner=False)
+def vector_database_prep(file):
+    def data_prep(file):
+        def findWholeWord(w):
+            return re.compile(r'\b{0}\b'.format(re.escape(w)), flags=re.IGNORECASE).search
+
+        file_name = file.split('/')[-1]
+        image_folder = f'./figures_{file_name}'
+        if not os.path.exists(image_folder):
+            os.makedirs(image_folder)
+        print('1. folder made')
+        with spire.pdf.PdfDocument() as doc:
+            doc.LoadFromFile(file)
+            images = []
+            for page_num in range(doc.Pages.Count):
+                page = doc.Pages[page_num]
+                for image_num in range(len(page.ImagesInfo)):
+                    imageFileName = f'{image_folder}/figure-{page_num}-{image_num}.png'
+                    image = page.ImagesInfo[image_num]
+                    image.Image.Save(imageFileName)
+                    images.append({
+                        "image_file_name": imageFileName,
+                        "image": image
+                    })
+        print('2. image extraction done')
+        image_info = []
+        for image_file in os.listdir(image_folder):
+            if image_file.endswith('.png'):
+                image_info.append({
+                    "image_file_name": image_file[:-4],
+                    "image": Image.open(os.path.join(image_folder, image_file)),
+                    "pg_no": int(image_file.split('-')[1])
+                })
+        print('3. temporary')
+        figures = []
+        with fitz.open(file) as pdf_file:
+            data = ""
+            for page in pdf_file:
+                text = page.get_text()
+                if not (findWholeWord('table of contents')(text) or findWholeWord('index')(text)):
+                    data += text
+            print('4. Data extraction done')
+            hs = []
+            for i in image_info:
+                src = i['image_file_name'] + '.png'
+                headers = {'_': []}
+                header = '_'
+                page = pdf_file[i['pg_no']]
+                texts = page.get_text('dict')
+                for block in texts['blocks']:
+                    if block['type'] == 0:
+                        for line in block['lines']:
+                            for span in line['spans']:
+                                if 'bol' in span['font'].lower() and not span['text'].isnumeric():
+                                    header = span['text']
+                                    print("header: ", header)
+                                    headers[header] = [header]
+                                else:
+                                    headers[header].append(span['text'])
+                                try:
+                                    if findWholeWord('fig')(span['text']):
+                                        i['image_file_name'] = span['text']
+                                        figures.append(span['text'].split('fig')[-1])
+                                    elif findWholeWord('figure')(span['text']):
+                                        i['image_file_name'] = span['text']
+                                        figures.append(span['text'].lower().split('figure')[-1])
+                                    else:
+                                        pass
+                                except re.error:
+                                    pass
+                if not i['image_file_name'].endswith('.png'):
+                    s = i['image_file_name'] + '.png'
+                    i['image_file_name'] = s
+                    os.rename(os.path.join(image_folder, src), os.path.join(image_folder, i['image_file_name']))
+                hs.append({"image": i, "header": headers})
+            print('5. header and figures done')
+            figure_contexts = {}
+            for fig in figures:
+                figure_contexts[fig] = []
+                for page_num in range(len(pdf_file)):
+                    page = pdf_file[page_num]
+                    texts = page.get_text('dict')
+                    for block in texts['blocks']:
+                        if block['type'] == 0:
+                            for line in block['lines']:
+                                for span in line['spans']:
+                                    if findWholeWord(fig)(span['text']):
+                                        print('figure mention: ', span['text'])
+                                        figure_contexts[fig].append(span['text'])
+            print('6. Figure context collected')
+            contexts = []
+            for h in hs:
+                context = ""
+                for q in h['header'].values():
+                    context += "".join(q)
+                s = pytesseract.image_to_string(h['image']['image'])
+                qwea = context + '\n' + s if len(s) != 0 else context
+                contexts.append((
+                    h['image']['image_file_name'],
+                    qwea,
+                    h['image']['image']
+                ))
+            print('7. Overall context collected')
+            image_content = []
+            for fig in figure_contexts:
+                for c in contexts:
+                    if findWholeWord(fig)(c[0]):
+                        s = c[1] + '\n' + "\n".join(figure_contexts[fig])
+                        s = str("\n".join(
+                            [
+                                "".join([h for h in i.strip() if h.isprintable()])
+                                for i in s.split('\n')
+                                if len(i.strip()) != 0
+                            ]
+                        ))
+                        image_content.append((
+                            c[0],
+                            s,
+                            c[2]
+                        ))
+            print('8. Figure context added')
+
+        return data, image_content
+
     # Vector Database objects
     i_model = vision_model
     pinecone_embed = pine_embedding_model()
@@ -252,130 +388,35 @@ def vector_database_prep():
                    RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35))
     vb_list = [vb1, vb2]
 
-    with open('software_final.txt', 'r') as f:  # texts
-        data = f.read()
+    # with open('software_data.txt', 'r') as f:  # texts
+    #     data = f.read()
+    #
+    # image_path = 'figures'
+    # image_info = []
+    # for image_file in os.listdir(image_path):
+    #     if image_file.endswith('.jpg'):
+    #         image_info.append({
+    #             "image_file_name": image_file,
+    #             "image": Image.open(os.path.join(image_path, image_file)),
+    #             "pg_no": int(image_file.split('-')[1])
+    #         })
+    #
+    # image_content = []
+    # pdf_path = './Software Manual SmartFIB v1.2.pdf'
+    # with fitz.open(pdf_path) as pdf_file:
+    #     for image in image_info:
+    #         text = pdf_file[image['pg_no']].get_text()
+    #         image_content.append((
+    #             image['image_file_name'],
+    #             text + '\n' + image['image_file_name'] + '\n' + pytesseract.image_to_string(image['image']),
+    #             image['image']
+    #         ))
 
-    image_path = './figures'
-    image_info = []
-    for image_file in os.listdir(image_path):
-        if image_file.endswith('.jpg'):
-            image_info.append({
-                "image_file_name": image_file,
-                "image": Image.open(os.path.join(image_path, image_file)),
-                "pg_no": int(image_file.split('-')[1])
-            })
-
-    image_content = []
-    pdf_path = './Software Manual SmartFIB v1.2.pdf'
-    with fitz.open(pdf_path) as pdf_file:
-        for image in image_info:
-            text = pdf_file[image['pg_no']].get_text()
-            image_content.append((
-                image['image_file_name'],
-                text + '\n' + image['image_file_name'],
-                image['image']
-            ))
-
+    data, image_content = data_prep(file)
     for vb in vb_list:
         vb.upsert(data)
         vb.upsert(image_content)  # image_cont = dict[image_file_path, context, PIL]
     return vb_list
-
-
-# @st.cache_resource()
-# def image_dataset_creation(file_path):
-#   def image_to_bytes(image):
-#     if image.mode == 'CMYK':
-#         image = image.convert('RGB')
-#     with io.BytesIO() as output:
-#         image.save(output, format="PNG")
-#         return output.getvalue()
-#
-#   content = []
-#   headers = [{
-#       'page_index': 0,
-#       'block_index': 0,
-#       'line_index': 0,
-#       'span_index': 0,
-#       'text': 'Software Manual SmartFIB Application Software for Crossbeam Workstations',
-#       'content': []}]
-#
-#   page_cont = dict()
-#   with fitz.open('Software Manual SmartFIB v1.2.pdf') as pdf_file:
-#     for page_index in range(len(pdf_file)):
-#       page_cont[page_index] = pdf_file[page_index].get_text('dict')
-#
-#   for page_index in page_cont:
-#     page_dict = page_cont[page_index]
-#     blocks = page_dict['blocks']
-#     text_blocks = [block for block in blocks if block['type'] == 0]
-#     for text_block in text_blocks:
-#       lines = text_block['lines']
-#       for line in range(len(lines)):
-#         spans = lines[line]['spans']
-#         for span in spans:
-#           if span['size'] >= 10.4 and 'bol' in span['font'].lower():
-#             new_header = {
-#                 'page_index': page_index,
-#                 'block_index': text_block['number'],
-#                 'line_index': line,
-#                 'span_index': spans.index(span),
-#                 'text': span['text'],
-#                 'content': []
-#             }
-#             headers[-1]['content'] = content
-#             headers.append(new_header)
-#             content = []
-#           else:
-#             content.append(span['text'])
-#   # header_df = pd.DataFrame(headers)
-#
-#   with fitz.open(file_path) as pdf_file:
-#     per_page_text = [pdf_file[page_index].get_text() for page_index in range(len(pdf_file))]
-#     # iterate over pdf pages
-#     images = []
-#     for page_index in range(len(pdf_file)):  # which page in the doc
-#         # get the page itself
-#         page = pdf_file[page_index]
-#         image_list = page.get_images()
-#         # printing number of images found in this page
-#         if image_list:
-#             for image_index, img in enumerate(image_list, start=1):  # which image in the current page
-#               xref = img[0]  # get the XREF of the image
-#               base_image = pdf_file.extract_image(xref)
-#               image_bytes = base_image["image"]  # extract the image bytes
-#               image_ext = base_image["ext"]  # get the image extension
-#               image = Image.open(io.BytesIO(image_bytes))  # load it to PIL
-#               image_content = per_page_text[0] + "\n" + pytesseract.image_to_string(image)
-#               header_names = [i['text'].replace('/','\\') for i in headers if i['page_index'] == page_index and not i['text'].isnumeric()]
-#               if len(header_names) == 0:
-#                 header_names = [pytesseract.image_to_string(image) + ' ' + image_content[:image_content.find(' ')] + '_' + str(page_index)]
-#               image_dict = {
-#                   "page_index": page_index,
-#                   "image_index": image_index,
-#                   "image_ext": image_ext,
-#                   "image": image,
-#                   "image_file_name": ",".join(header_names) + '_' + str(image_index),
-#                   "image_content": image_content
-#               }
-#               images.append(image_dict)
-#   im_df = pd.DataFrame(images)
-#   im_df['image'] = im_df['image'].apply(image_to_bytes)
-#   dataset = Dataset(pa.Table.from_pandas(im_df))
-#   return dataset
-
-
-@st.cache_resource(show_spinner=False)
-def load_image_model(model):
-    extractor = AutoFeatureExtractor.from_pretrained(model)
-    im_model = AutoModel.from_pretrained(model)
-    return extractor, im_model
-
-
-@st.cache_resource(show_spinner=False)
-def load_nomic_model():
-    return  AutoImageProcessor.from_pretrained("nomic-ai/nomic-embed-vision-v1.5"), AutoModel.from_pretrained("nomic-ai/nomic-embed-vision-v1.5",
-                                         trust_remote_code=True)
 
 
 Settings.embed_model = settings()
@@ -385,7 +426,9 @@ chat_model = load_chat_model()
 cross_model = load_cross()
 extractor, image_model = load_image_model("google/vit-base-patch16-224-in21k")
 
-file_path = "software_data.txt"
+pdf_file = "./Software Manual SmartFIB v1.2.pdf"
+file_name = pdf_file.split('/')[-1]
+image_folder = f'./figures_{file_name}'
 url = st.secrets["WEAVIATE_URL"]
 v_key = st.secrets["WEAVIATE_V_KEY"]
 gpt_key = st.secrets["GPT_KEY"]
@@ -397,8 +440,6 @@ f_api = st.secrets['FEEDBACK_API']
 feedback_file = "feedback_loop.txt"
 im_db_url = st.secrets["IMAGE_URL"]
 im_db_key = st.secrets["IMAGE_API"]
-image_file = 'Software Manual SmartFIB v1.2.pdf'
-image_folder = './figures'
 txt_db_url = st.secrets["TEXT_URL"]
 txt_db_key = st.secrets["TEXT_API"]
 
@@ -406,7 +447,7 @@ fd = False
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
 mistral_parser = RunnableLambda(MistralParser().invoke)
-vb_list = vector_database_prep()
+vb_list = vector_database_prep(pdf_file)
 q_model = load_q_model()
 alt_parser = RunnableLambda(lambda x: x[x.find('1. '):])
 gpt_model = RunnableLambda(ChatGPT("gpt-4o", api_key=gpt_key, template="""You are an assistant for question-answering tasks.
@@ -419,7 +460,6 @@ gq_model = RunnableLambda(ChatGPT('gpt-3.5-turbo', api_key=gpt_key, template="""
     Question: {question}
     Context: {context}
     Answer:""").chat)
-# dataset = image_dataset_creation(image_file)
 weaviate_embed = weaviate_embedding_model()
 pine_embed = pine_embedding_model()
 feedback_db = TextDatabase('feedback', 'lancedb/rag')
@@ -453,7 +493,7 @@ for message in st.session_state.messages:
         mes.append(message['role'] + ": " + message["content"])
 print(f"Run_ID -> {st.session_state.run_id}, {mes}")
 
-st.title('RAG Bot')
+st.title('Feedback Assisted Multi-Agentic RAG based LLM')
 st.subheader('Converse with our Chatbot')
 st.markdown("You may input text or image")
 st.markdown("Some sample questions to ask:")
@@ -553,6 +593,8 @@ if prompt := st.chat_input("What's Up?"):
     fd = True
     st.session_state.messages.append({"role": "user", "content": prompt})
     response = req.query(prompt, 5)  # prompt is a str
+    # st.subheader('Context')
+    # st.markdown(response['context'])
     images = response['image']
     st.session_state.messages.append({"role": "assistant", "content": response['text']})
 
@@ -573,7 +615,7 @@ for conv_id in st.session_state['conv_id']:
         st.markdown(ai_messages["content"])
     if len(images) > 0:
         for image in images:
-            st.image(Image.open(os.path.join('./figures', image)), use_column_width=True)
+            st.image(Image.open(os.path.join(image_folder, image)), use_column_width=True)
 
 if fd:
     with st.form('form'):

@@ -48,7 +48,7 @@ class QueryAgent(ContextAgent):
         return result
 
     def fetch(self, question):
-        prior_context = [vb.query(question) for vb in self.vb_list]
+        prior_context = [vb.query(question)['text_data'] for vb in self.vb_list]
         cont = ["".join(i) for i in prior_context]
         c = self.cross_model.rank(
             query=question,
@@ -118,7 +118,7 @@ class AlternateQuestionAgent(ContextAgent):
           Returns the context for the given question
         """
 
-        prior_context = [vb.query(question) for vb in self.vb_list]
+        prior_context = [vb.query(question)['text_data'] for vb in self.vb_list]
         cont = []
         for i in prior_context:
             context = ""
@@ -186,7 +186,7 @@ class SubQueryAgent(ContextAgent):
         super().__init__(vb_list, q_model, cross_model, parser)
 
     def fetch(self, question):
-        prior_context = [vb.query(question) for vb in self.vb_list]
+        prior_context = [vb.query(question)['text_data'] for vb in self.vb_list]
         cont = []
         for i in prior_context:
             context = ""

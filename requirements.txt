@@ -44,6 +44,9 @@ einops
 unstructured
 unstructured_inference
 unstructured.pytesseract
+pdfminer
 llama-index-embeddings-clip
 scikit-image
 scikit-learn
+matplotlib
+Spire.Pdf
