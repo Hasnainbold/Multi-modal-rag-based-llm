@@ -1,28 +1,14 @@
-from langchain_openai import ChatOpenAI
-import requests
 from typing_extensions import TypedDict
-from langchain_community.document_loaders import TextLoader
-from langchain_community.vectorstores import Weaviate
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema.runnable import RunnablePassthrough
-from langchain.schema.output_parser import *
-from datasets import Dataset
-import os
 from ragas.metrics import (
     faithfulness,
     answer_relevancy,
     context_recall,
-    context_precision,
-    answer_correctness,
-    answer_similarity
+    context_precision
 )
-from langgraph.prebuilt import ToolNode
-from langgraph.graph import END, MessageGraph, Graph, StateGraph
+from langgraph.graph import END, StateGraph
 from ragas import evaluate
-import matplotlib.pyplot as plt
-from langchain_core.runnables import RunnableLambda
-from Query_agent import *
-from Databases import *
+from src.Query_agent import *
+from src.Databases import *
 
 
 class RAGEval:
@@ -265,8 +251,8 @@ class RAGEval:
         return unique_images  # list
 
     def image2text(self, question, top_k=2):
-        result = [vb.query(question, top_k) for vb in self.vb_list] # list[dic['image_data', 'text_data']]
-        image_details = [i['image_data'] for i in result] # list[dict[list, list]]
+        result = [vb.query(question, top_k) for vb in self.vb_list]  # list[dic['image_data', 'text_data']]
+        image_details = [i['image_data'] for i in result]  # list[dict[list, list]]
         return ["".join(i['context']) for i in image_details]
 
     def ragas(self, raise_exceptions=False):

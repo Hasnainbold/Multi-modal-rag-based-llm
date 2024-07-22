@@ -20,13 +20,13 @@ class Database(ABC):
   def __init__(self, table_name, uri='lancedb/rag'):
     self.db = lancedb.connect(uri)
     self.table_name = table_name
-    try:
-      self.delete()
-    except:
-      pass
 
   def upsert(self, data):
-    self.tbl = self.db.create_table(self.table_name, data=data)
+    try:
+      self.tbl = self.db.open_table(self.table_name)
+      self.tbl.add(data)
+    except:
+      self.tbl = self.db.create_table(self.table_name, data=data)
 
   def query(self, query_str, top_k=2):
     return self.tbl.search(query_str).limit(top_k).to_pandas()
