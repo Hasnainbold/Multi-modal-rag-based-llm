@@ -41,6 +41,7 @@ class RAGEval:
         """
         self.prompt = ChatPromptTemplate.from_template(self.template)
         self.vb_list = vb_list
+        self.ground_truth = ""
 
     def ground_truths_prep(self, questions):  # questions is a file with questions
         """
@@ -70,6 +71,7 @@ class RAGEval:
         # self.query_agent = RunnableLambda(QueryAgent(self.vb_list, model,self.cross_model, parser).query)
         # self.query_agent = RunnableLambda(AlternateQuestionAgent(self.vb_list, model, self.cross_model, parser).query)
         self.query_agent = RunnableLambda(TreeOfThoughtAgent(self.vb_list, model, self.cross_model, parser).query)
+        self.context_agent = RunnableLambda(ContextAgent(model, parser).reword)
         # self.query_agent = RunnableLambda(AugmentedQueryAgent(self.vb_list, model,self.cross_model,parser).query)
 
     def feedback_prep(self, uri, table_name, embedder, splitter, file):
@@ -251,9 +253,18 @@ class RAGEval:
         return unique_images  # list
 
     def image2text(self, question, top_k=2):
+        def unique(l):
+            u = []
+            for i in l:
+                if i not in u:
+                    u.append(i)
+            return u
+
         result = [vb.query(question, top_k) for vb in self.vb_list]  # list[dic['image_data', 'text_data']]
         image_details = [i['image_data'] for i in result]  # list[dict[list, list]]
-        return ["".join(i['context']) for i in image_details]
+        contexts = unique(["\n".join(i['context']) for i in image_details])
+        contexts = self.context_agent.invoke("\n".join(contexts))
+        return contexts
 
     def ragas(self, raise_exceptions=False):
         """

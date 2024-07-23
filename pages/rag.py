@@ -272,10 +272,10 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 if uploaded_file is not None:
     result = req.query(Image.open(uploaded_file), 5)  # dict
     images = result['image']  # list
-    ai_response = "Context for the image: " + "".join(result['text'])  # str
+    ai_response = "Context for the image:\n" + "".join(result['text'])  # str
     conv_id = uuid.uuid4()
     st.session_state.messages.append({"role": "assistant", "content": ai_response})
-    st.session_state['image'] += images
+    st.session_state['image'] += [Image.open(uploaded_file)] + images
     st.session_state['conv_id'][conv_id] = {
         "user_messages": {},
         "ai_messages": {"role": "assistant", "content": ai_response},

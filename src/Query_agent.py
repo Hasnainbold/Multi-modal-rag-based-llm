@@ -215,7 +215,7 @@ class SubQueryAgent(ContextAgent):
             contexts += context
             prompt += "\nsub-question : {Question}\nsub-context: {Context}"
             agent = self.QueryGen(self.q_model, self.parser, prompt=prompt)
-            sub_q = agent(sub_q, context)
+            sub_q = agent(sub_q, "\n".join(context))
             print(f"Sub question: {sub_q}\n")
         uni = []
         for c in contexts:
@@ -273,3 +273,29 @@ class TreeOfThoughtAgent(SubQueryAgent, AlternateQuestionAgent):
                 uni_contexts.append(u[i])
         # uni_contexts = u
         return "@@".join(uni_contexts)
+
+
+class ContextAgent:
+    def __init__(self, model, parser=StrOutputParser()):
+        self.model = model
+        self.parser = parser
+        self.prompt = ChatPromptTemplate.from_template(
+            template="""
+            You are given some sentences and phrases.  Summarise them appropriately.
+            Format:
+            Context: {context}
+            Answer:
+            """
+        )
+        self.chain = {"context": RunnablePassthrough()} | self.prompt | self.model | self.parser
+
+    def reword(self, context):
+        def unique(l):
+            u = []
+            for i in l:
+                if i not in u:
+                    u.append(i)
+            return u
+
+        unique_contexts = unique(self.chain.invoke(context).split('\n'))
+        return "\n".join(unique_contexts)
