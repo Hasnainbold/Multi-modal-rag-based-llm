@@ -6,7 +6,7 @@ from src.Databases import *
 
 
 class ContextAgent(ABC):
-    def __init__(self, vb_list, q_model, cross_model, parser=RunnableLambda(lambda x: x)):
+    def __init__(self, vb_list, q_model, cross_model, parser):
         self.vb_list = vb_list
         self.q_model = q_model
         self.cross_model = cross_model
@@ -74,93 +74,94 @@ class QueryAgent(ContextAgent):
 
 
 class AlternateQuestionAgent(ContextAgent):
+  """
+    Prepares some alternate questions for given question and returns the cumulative context
+  """
+
+  best = 2
+
+  def __init__(self, vb_list, agent, cross_model, parser=StrOutputParser()):
+    super().__init__(vb_list, agent, cross_model, parser)
+    self.prompt = ChatPromptTemplate.from_template(
+      template="""You are given a question {question}.
+          Generate 2 alternate questions based on it. They should be numbered and seperated by newlines.
+          Do not answer the questions. Header of the output should be 'alternate-questions :'
+          """
+    )
+    self.chain = {"question": RunnablePassthrough()} | self.prompt | self.q_model | self.parser
+
+  def mul_qs(self, question):
     """
-      Prepares some alternate questions for given question and returns the cumulative context
+      Prepares multiple questions for the given question
     """
 
-    best = 2
+    qs = [i[3:] for i in (self.chain.invoke(question)).split('\n')] + [question]
+    if '' in qs:
+      qs.remove('')
+    uni_q = []
+    for q in qs:
+      if q not in uni_q:
+        uni_q.append(q)
+    return uni_q  # assuming the questions are labelled as 1. q1 \n 2. q2
 
-    def __init__(self, vb_list, agent, cross_model, parser=StrOutputParser()):
-        super().__init__(vb_list, agent, cross_model, parser)
-        self.prompt = ChatPromptTemplate.from_template(
-            template="""You are given a question {question}.
-      Based on it, you must only generate two alternate questions separated by newlines and numbered which are related to the given question.""",
-        )
-        self.chain = {"question": RunnablePassthrough()} | self.prompt | self.q_model | self.parser
+  def query(self, question):
+    """
+      Returns the cumulative context for the given question
+    """
 
-    def mul_qs(self, question):
-        """
-          Prepares multiple questions for the given question
-        """
+    questions = self.mul_qs(question)
+    for q in questions:
+      print(q)
+    return self.fetch(questions)
 
-        qs = [i[3:] for i in (self.chain.invoke(question)).split('\n')] + [question]
-        if '' in qs:
-            qs.remove('')
-        uni_q = []
-        for q in qs:
-            if q not in uni_q:
-                uni_q.append(q)
-        return uni_q  # assuming the questions are labelled as 1. q1 \n 2. q2
+  def retrieve(self, question):
+    """
+      Returns the context for the given question
+    """
 
-    def query(self, question):
-        """
-          Returns the cumulative context for the given question
-        """
+    prior_context = [vb.query(question)['text_data'] for vb in self.vb_list]
+    cont = []
+    for i in prior_context:
+      context = ""
+      for j in i:  # list to str
+        context += j
+      cont.append(context)
 
-        questions = self.mul_qs(question)
-        for q in questions:
-            print(q)
-        return self.fetch(questions)
+    c = self.cross_model.rank(
+      query=question,
+      documents=cont,
+      return_documents=True
+    )[:len(prior_context) - self.best + 1]
+    return [i['text'] for i in c]  # list of text
 
-    def retrieve(self, question):
-        """
-          Returns the context for the given question
-        """
+  def fetch(self, questions):
+    """
+      Fetches contexts from the Vector Databases
+    """
 
-        prior_context = [vb.query(question)['text_data'] for vb in self.vb_list]
-        cont = []
-        for i in prior_context:
-            context = ""
-            for j in i:  # list to str
-                context += j
-            cont.append(context)
-
-        c = self.cross_model.rank(
-            query=question,
-            documents=cont,
-            return_documents=True
-        )[:len(prior_context) - self.best + 1]
-        return [i['text'] for i in c]  # list of text
-
-    def fetch(self, questions):
-        """
-          Fetches contexts from the Vector Databases
-        """
-
-        contexts = [self.retrieve(q) for q in questions]
-        uni_contexts = []
-        for i in contexts:
-            for j in i:
-                if j not in uni_contexts:
-                    uni_contexts.append(j)
-        u = []
-        for i in uni_contexts:
-            k = re.split("(\.|\?|!)\n", i)
-            for j in k:
-                if j in '.?!':
-                    continue
-                if j not in u:
-                    u.append(j)
-        uni_contexts = []
-        for i in range(len(u)):
-            for j in range(len(u)):
-                if j != i and u[i] in u[j]:
-                    break
-            else:
-                uni_contexts.append(u[i])
-        # uni_contexts = u
-        contexts = "@@".join(uni_contexts)
-        return contexts
+    contexts = [self.retrieve(q) for q in questions]
+    uni_contexts = []
+    for i in contexts:
+      for j in i:
+        if j not in uni_contexts:
+          uni_contexts.append(j)
+    u = []
+    for i in uni_contexts:
+      k = re.split("(\.|\?|!)\n", i)
+      for j in k:
+        if j in '.?!':
+          continue
+        if j not in u:
+          u.append(j)
+    uni_contexts = []
+    for i in range(len(u)):
+      for j in range(len(u)):
+        if j != i and u[i] in u[j]:
+          break
+      else:
+        uni_contexts.append(u[i])
+    contexts = "@@".join(uni_contexts)
+    return contexts
 
 
 class SubQueryAgent(ContextAgent):
@@ -171,7 +172,9 @@ class SubQueryAgent(ContextAgent):
         def __init__(self, q_model, parser=RunnableLambda(lambda x: x), prompt="""
         You will be given a pair of question and its context as an input.You must form a question contextually related to both of them.
         Question : {Question}\nContext: {Context}
-        Output should in the format: sub-question : <sub_question>"""):
+        Do not answer the sub-question. Only provide the sub-question. You must make a sub-question only for the question and context provided.
+        Add the prefix 'sub-question :' before outputting
+        """):
             self.context = ""
             self.prompt = ChatPromptTemplate.from_template(prompt.strip())
             self.chain = {"Question": RunnablePassthrough(),
@@ -201,22 +204,27 @@ class SubQueryAgent(ContextAgent):
         return [i['text'] for i in c]  # list of text
 
     def query(self, question):
+        all_sub_qs = []
         agent = self.QueryGen(self.q_model, self.parser)
         sub_q = agent(question)
-        print(f"Sub question: {sub_q}\n")
-
+        print(f"First Sub question: {sub_q}\n")
+        all_sub_qs.append(sub_q)
         contexts = []
-        prompt = f"""You are given a main Question {question} and a pair of its subquestion and related sub context.
-    You must generate a question based on the main question, and all of the sub-question and sub-contexts pairs.
-    Output should in the format: sub-question : <sub_question>"""
+        prompt = f"""
+        You are given a main Question {question} and a pair of its subquestion and related sub context.
+        You must generate a question based on the main question, and all of the sub-question and sub-contexts pairs.
+        Do not answer the subquestion.  Only provide the sub-question. You must make a sub-question only for the questions and contexts provided.        
+        """
         for i in range(self.turns - 1):
             print(f"ITERATION NO: {i}")
             context = self.fetch(sub_q)
             contexts += context
-            prompt += "\nsub-question : {Question}\nsub-context: {Context}"
-            agent = self.QueryGen(self.q_model, self.parser, prompt=prompt)
-            sub_q = agent(sub_q, "\n".join(context))
-            print(f"Sub question: {sub_q}\n")
+            total_context = "\n".join(context)
+            agent = self.QueryGen(self.q_model, self.parser,
+                    prompt=prompt+"\nsubquestion : {Question}\nsubcontext: {Context}\nAdd the prefix 'sub-question :' before outputting")
+            prompt += f"\nsubquestion : {sub_q}\nsubcontext: {total_context}\n"
+            sub_q = agent(sub_q, total_context)
+            print(f"{i+2}th Sub question: {sub_q}\n")
         uni = []
         for c in contexts:
             if c not in uni:
@@ -224,17 +232,17 @@ class SubQueryAgent(ContextAgent):
         return "@@".join(uni)
 
 
-class TreeOfThoughtAgent(SubQueryAgent, AlternateQuestionAgent):
+class TreeOfThoughtAgent(ContextAgent):
     """
       Forms multiple questions for a given question
       Prepares some serial subquestion for each of the alternate question
       Fetches contexts for each subquestion and returns the sum of them
     """
 
-    def __init__(self, vb_list, model, cross_model, parser=RunnableLambda(lambda x: x)):
+    def __init__(self, vb_list, model, cross_model, parser=(RunnableLambda(lambda x: x), RunnableLambda(lambda x: x))):
         super().__init__(vb_list, model, cross_model, parser)
-        self.alt_agent = RunnableLambda(AlternateQuestionAgent(vb_list, model, cross_model, parser).mul_qs)
-        self.sub_agent = RunnableLambda(SubQueryAgent(vb_list, model, cross_model, parser).query)
+        self.alt_agent = RunnableLambda(AlternateQuestionAgent(vb_list, model, cross_model, parser[0]).mul_qs)
+        self.sub_agent = RunnableLambda(SubQueryAgent(vb_list, model, cross_model, parser[1]).query)
 
     def query(self, question):
         """
@@ -275,7 +283,7 @@ class TreeOfThoughtAgent(SubQueryAgent, AlternateQuestionAgent):
         return "@@".join(uni_contexts)
 
 
-class ContextAgent:
+class ImageContextAgent:
     def __init__(self, model, parser=StrOutputParser()):
         self.model = model
         self.parser = parser

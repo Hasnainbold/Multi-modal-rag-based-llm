@@ -1,5 +1,11 @@
 from streamlit_feedback import streamlit_feedback
 import streamlit as st
+st.set_page_config(
+    page_title="RAG Chatbot",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 from uuid import uuid4
 from llama_index.core import Settings
 from langchain_openai.embeddings import OpenAIEmbeddings
@@ -51,15 +57,15 @@ class MistralParser:
     Wrapper Class for StrOutputParser Class
     Custom made for Mistral models
   """
-  stopword = 'Answer:'
 
-  def __init__(self):
+  def __init__(self, stopword='Answer:'):
     """
       Initiliases a StrOutputParser as the base parser
     """
     self.parser = StrOutputParser()
+    self.stopword = stopword
 
-  def invoke(self,query):
+  def invoke(self, query):
     """
       Invokes the parser and finds the Model response
     """
@@ -143,7 +149,9 @@ embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
 mistral_parser = RunnableLambda(MistralParser().invoke)
 vb_list = st.session_state['vb_list']
 q_model = st.session_state['q_model']
-alt_parser = RunnableLambda(lambda x: x[x.find('1. '):])
+alt_parser = RunnableLambda(MistralParser('alternate-questions :\n').invoke)
+sub_parser = RunnableLambda(MistralParser('sub-questions : ').invoke)
+image_parser = RunnableLambda(MistralParser().invoke)
 gpt_model = RunnableLambda(ChatGPT("gpt-4o", api_key=gpt_key, template="""You are an assistant for question-answering tasks.
     Use the following pieces of retrieved context to answer the question accurately.
     Question: {question}
@@ -163,7 +171,7 @@ feedback_db.upsert(feedback)
 
 req = RAGEval(vb_list, cross_model)
 req.model_prep(chat_model, mistral_parser)
-req.query_agent_prep(q_model, alt_parser)
+req.query_agent_prep(q_model, (alt_parser, sub_parser, image_parser))
 req.feedback_prep(uri='../lancedb/rag', table_name='feedback',
                   file=feedback_file, embedder=weaviate_embed,
                   splitter=RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35))
@@ -270,17 +278,20 @@ def plot_images(images_path, output_path, image_name, top_k=5):
 all_images = []
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
-    result = req.query(Image.open(uploaded_file), 5)  # dict
-    images = result['image']  # list
-    ai_response = "Context for the image:\n" + "".join(result['text'])  # str
-    conv_id = uuid.uuid4()
-    st.session_state.messages.append({"role": "assistant", "content": ai_response})
-    st.session_state['image'] += [Image.open(uploaded_file)] + images
-    st.session_state['conv_id'][conv_id] = {
-        "user_messages": {},
-        "ai_messages": {"role": "assistant", "content": ai_response},
-        "images": images  # list
-    }
+    with Image.open(uploaded_file) as up_image:
+        name = uploaded_file.name.split('/')[-1]
+        up_image.save(name)
+        result = req.query(up_image, 5)  # dict
+        images = [name] + result['image']  # list
+        ai_response = "Context for the image:\n" + "".join(result['text'])  # str
+        conv_id = uuid.uuid4()
+        st.session_state.messages.append({"role": "assistant", "content": ai_response})
+        st.session_state['image'] += [name] + images
+        st.session_state['conv_id'][conv_id] = {
+            "user_messages": {},
+            "ai_messages": {"role": "assistant", "content": ai_response},
+            "images": images  # list
+        }
 
 if prompt := st.chat_input("What's Up?"):
     fd = True

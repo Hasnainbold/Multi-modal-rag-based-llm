@@ -46,6 +46,7 @@ class SentenceTransformerEmbeddings:
 def settings():
     return HuggingFaceEmbedding(model_name="BAAI/bge-base-en")
 
+
 @st.cache_resource(show_spinner=False)
 def pine_embedding_model():
     return SentenceTransformerEmbeddings(model_name="all-mpnet-base-v2")  # 784 dimension + euclidean
@@ -80,7 +81,7 @@ def weaviate_embedding_model():
 
 @st.cache_resource(show_spinner=False)
 def load_cross():
-    return CrossEncoder("cross-encoder/ms-marco-TinyBERT-L-2-v2", max_length=512, device="cpu")
+        return CrossEncoder("cross-encoder/ms-marco-TinyBERT-L-2-v2", max_length=512, device="cpu")
 
 
 @st.cache_resource(show_spinner=False)
@@ -138,10 +139,9 @@ def vector_database_prep(file):
         file_name = file.name
         pdf_file_path = f'../pdfs/{file_name}'
         image_folder = f'../figures_{file_name}'
-        with st.spinner():
-            os.chdir('pages')
-            if not os.path.exists(image_folder):
-                os.makedirs(image_folder)
+        os.chdir('pages')
+        if not os.path.exists(image_folder):
+            os.makedirs(image_folder)
 
         # everything down here is wrt pages dir
         print('1. folder made')

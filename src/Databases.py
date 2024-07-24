@@ -141,21 +141,21 @@ class TextDatabase(Database):
     return RunnableLambda(self.query)
 
 
-class UnifiedDatabase(ImageDatabase, TextDatabase):  # Assuming TextDatabase is defined similarly
+class UnifiedDatabase(ImageDatabase, TextDatabase):
   def __init__(self, table_name, uri):
     self.im_table_name = table_name + '_image'
     self.txt_table_name = table_name + '_text'
     ImageDatabase.__init__(self, self.im_table_name, uri)
-    TextDatabase.__init__(self, self.txt_table_name, uri)  # Uncomment if TextDatabase is defined
+    TextDatabase.__init__(self, self.txt_table_name, uri)
 
   def model_prep(self, extractor, model, embedder, splitter):
     ImageDatabase.image_model_prep(self, extractor, model)
     ImageDatabase.text_model_prep(self, embedder)
-    TextDatabase.model_prep(self, embedder, splitter)  # Uncomment if TextDatabase is defined
+    TextDatabase.model_prep(self, embedder, splitter)
 
   def upsert(self, data):
     if isinstance(data, str):  # text
-      TextDatabase.upsert(self, data)  # Uncomment if TextDatabase is defined
+      TextDatabase.upsert(self, data)
     elif isinstance(data, list) and isinstance(data[0], tuple):  # image
       ImageDatabase.upsert(self, data)
 

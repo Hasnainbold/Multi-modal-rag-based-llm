@@ -70,8 +70,8 @@ class RAGEval:
 
         # self.query_agent = RunnableLambda(QueryAgent(self.vb_list, model,self.cross_model, parser).query)
         # self.query_agent = RunnableLambda(AlternateQuestionAgent(self.vb_list, model, self.cross_model, parser).query)
-        self.query_agent = RunnableLambda(TreeOfThoughtAgent(self.vb_list, model, self.cross_model, parser).query)
-        self.context_agent = RunnableLambda(ContextAgent(model, parser).reword)
+        self.query_agent = RunnableLambda(TreeOfThoughtAgent(self.vb_list, model, self.cross_model, parser[:2]).query)
+        self.context_agent = RunnableLambda(ImageContextAgent(model, parser[2]).reword)
         # self.query_agent = RunnableLambda(AugmentedQueryAgent(self.vb_list, model,self.cross_model,parser).query)
 
     def feedback_prep(self, uri, table_name, embedder, splitter, file):
