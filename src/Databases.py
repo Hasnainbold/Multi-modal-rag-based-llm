@@ -1,28 +1,27 @@
 import torch
-import weaviate.classes as wvc
 from PIL import Image
 import torchvision.transforms as T
 from datasets import Dataset
 import io
-import weaviate
 import pytesseract
-from pinecone import Pinecone, ServerlessSpec
 import uuid
 import time
-from weaviate.auth import AuthApiKey
-from weaviate.classes.init import AdditionalConfig, Timeout
 from abc import ABC, abstractmethod
 import lancedb
 from langchain_core.runnables import RunnableLambda
 
 
 class Database(ABC):
+  """
+  Base Class for Database Object
+  """
+
   def __init__(self, table_name, uri='lancedb/rag'):
     self.db = lancedb.connect(uri)
     self.table_name = table_name
 
   def upsert(self, data):
-    try:
+    try:  # if table exists
       self.tbl = self.db.open_table(self.table_name)
       self.tbl.add(data)
     except:
@@ -39,6 +38,11 @@ class Database(ABC):
 
 
 class ImageDatabase(Database):
+  """
+  1. Database to store images with metadata as their context
+  2. Database to store texts with metadata as their images
+  """
+
   top_k = 2
 
   def __init__(self, table_name, uri):
@@ -46,6 +50,10 @@ class ImageDatabase(Database):
     self.txt_db = Database(table_name + '_txt', uri)
 
   def image_model_prep(self, extractor, model):
+    """
+    Preparation of Chain for Image-to-Vector Conversion
+    """
+
     self.extractor = extractor
     self.model = model
     self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -58,9 +66,17 @@ class ImageDatabase(Database):
     ])
 
   def text_model_prep(self, embedder):
+    """
+    Embedder definition
+    """
+
     self.embedder = embedder
 
   def _get_image_embedding(self, image):
+    """
+    Get the embedding for image
+    """
+
     image_transformed = self.transformation_chain(image).unsqueeze(0)
     new_batch = {"pixel_values": image_transformed.to(self.device)}
     with torch.no_grad():
@@ -68,6 +84,10 @@ class ImageDatabase(Database):
     return embeddings.flatten().tolist()
 
   def _get_text_embedding(self, text):
+    """
+    Get embedding for query
+    """
+
     return self.embedder.embed_query(text)
 
   def upsert(self, data):  # image_file, image_context, PIL Object
@@ -118,6 +138,10 @@ class TextDatabase(Database):
     super().__init__(table_name, uri)
 
   def model_prep(self, embedder, splitter):
+    """
+    Set up embedder and text splitter
+    """
+
     self.embedder = embedder
     self.splitter = splitter
 
@@ -137,11 +161,19 @@ class TextDatabase(Database):
     return super().query(embedding, self.top_k)['chunk']  # text
 
   def retriever(self, top_k):
+    """
+    Set up RunnableLambda retriever (for rag-graph usage)
+    """
+
     self.top_k = top_k
     return RunnableLambda(self.query)
 
 
 class UnifiedDatabase(ImageDatabase, TextDatabase):
+  """
+  Database with both Image and Text Database interface
+  """
+
   def __init__(self, table_name, uri):
     self.im_table_name = table_name + '_image'
     self.txt_table_name = table_name + '_text'
@@ -149,6 +181,10 @@ class UnifiedDatabase(ImageDatabase, TextDatabase):
     TextDatabase.__init__(self, self.txt_table_name, uri)
 
   def model_prep(self, extractor, model, embedder, splitter):
+    """
+    Setup of models for extraction
+    """
+
     ImageDatabase.image_model_prep(self, extractor, model)
     ImageDatabase.text_model_prep(self, embedder)
     TextDatabase.model_prep(self, embedder, splitter)

@@ -13,7 +13,7 @@ from src.Databases import *
 
 class RAGEval:
     """
-    Feedback-assisted agentic textual-visual RAG based LLM
+    Multi-modal RAG based LLM for Information Retrieval
 
     Utility method:
     1. Call RAGEval()
@@ -27,7 +27,7 @@ class RAGEval:
     best = 2
     parse = StrOutputParser()
 
-    def __init__(self, vb_list, cross_model):  # , q_model, q_parser, q_choice=1): # vb_list = [(vb,splitter)]
+    def __init__(self, vb_list, cross_model):
         self.cross_model = cross_model
 
         self.template = """You are an assistant for question-answering tasks.
@@ -50,7 +50,7 @@ class RAGEval:
 
         self.ground_truths = [[s] for s in self.query(questions)]
 
-    def model_prep(self, model, parser_choice=parse):  # model_link is the link to the model
+    def model_prep(self, model, parser_choice=parse):
         """
           Prepares the LLM and parser
         """
@@ -66,6 +66,7 @@ class RAGEval:
           2. AlternateQuestionAgent
           3. AugmentedQueryAgent
           4. TreeOfThoughtAgent
+          5. ImageContextAgent
         """
 
         # self.query_agent = RunnableLambda(QueryAgent(self.vb_list, model,self.cross_model, parser).query)
@@ -78,8 +79,7 @@ class RAGEval:
         """
           Prepares the feedback retriever
           Current Options for the Database:
-            1. Weaviate
-            2. Pinecone
+            1. Lancedb
         """
         self.fd_db = TextDatabase(table_name, uri)
         self.fd_db.model_prep(embedder, splitter)
@@ -88,7 +88,7 @@ class RAGEval:
         self.fd_db.upsert(data)
         self.fd_db.retriever(top_k=5)
 
-    def context_prep(self):
+    def _context_prep(self):
         """
           Internal Method for context preparation for a given question
         """
@@ -106,7 +106,7 @@ class RAGEval:
         )[:self.best]
         self.context = str("\n".join([i['text'] for i in c]))
 
-    def rag_graph(self):
+    def _rag_graph(self):
         """
           Main Text-to-Text RAG graph method
           Utilises the following components:
@@ -168,7 +168,7 @@ class RAGEval:
               Adds context to the state
             """
 
-            self.context_prep()
+            self._context_prep()
             return {"question": state["question"], "context": self.context, "answer": ""}
 
         def answer(state):  # state modifier
@@ -225,17 +225,17 @@ class RAGEval:
             print(f"MAIN QUESTION {question}")
             self.question = question
             state = {"question": self.question, "context": "", "answer": ""}
-            self.rag_graph()
+            self._rag_graph()
             answer_state = self.ragchain.invoke(state)
             self.answer = answer_state["answer"]
             text = self.answer
         else:  # query is an image
-            text = self.image2text(question)  # get textual information of an image
+            text = self._image2text(question)  # get textual information of an image
             self.context = ""
-        image = self.image_search(question, top_k)
+        image = self._image_search(question, top_k)
         return {"text": text, "image": image, "context":self.context}
 
-    def image_search(self, question, top_k=2):
+    def _image_search(self, question, top_k=2):
         """
           Returns list of images associated with the query
         """
@@ -252,7 +252,7 @@ class RAGEval:
                 unique_images.append(i)
         return unique_images  # list
 
-    def image2text(self, question, top_k=2):
+    def _image2text(self, question, top_k=2):
         def unique(l):
             u = []
             for i in l:

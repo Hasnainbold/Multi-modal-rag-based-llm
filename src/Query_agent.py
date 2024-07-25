@@ -6,6 +6,10 @@ from src.Databases import *
 
 
 class ContextAgent(ABC):
+    """
+    Base Class for Query Context Agents
+    """
+
     def __init__(self, vb_list, q_model, cross_model, parser):
         self.vb_list = vb_list
         self.q_model = q_model
@@ -22,6 +26,10 @@ class ContextAgent(ABC):
     
 
 class QueryAgent(ContextAgent):
+    """
+    Forms question according to the question and context provided
+    """
+
     max_turns = 3
     best = 2
     prompt = """
@@ -165,10 +173,19 @@ class AlternateQuestionAgent(ContextAgent):
 
 
 class SubQueryAgent(ContextAgent):
+    """
+    Prepares sub-questions based on question and context provided and returns cumulative contexts
+    """
+
     best = 2
     turns = 3
 
-    class QueryGen:
+    class _QueryGen:
+        """
+        Prepares question based on provided question and context
+        Subclass used by SubQueryAgent
+        """
+
         def __init__(self, q_model, parser=RunnableLambda(lambda x: x), prompt="""
         You will be given a pair of question and its context as an input.You must form a question contextually related to both of them.
         Question : {Question}\nContext: {Context}
@@ -205,7 +222,7 @@ class SubQueryAgent(ContextAgent):
 
     def query(self, question):
         all_sub_qs = []
-        agent = self.QueryGen(self.q_model, self.parser)
+        agent = self._QueryGen(self.q_model, self.parser)
         sub_q = agent(question)
         print(f"First Sub question: {sub_q}\n")
         all_sub_qs.append(sub_q)
@@ -216,11 +233,11 @@ class SubQueryAgent(ContextAgent):
         Do not answer the subquestion.  Only provide the sub-question. You must make a sub-question only for the questions and contexts provided.        
         """
         for i in range(self.turns - 1):
-            print(f"ITERATION NO: {i}")
+            print(f"ITERATION NO: {i+1}")
             context = self.fetch(sub_q)
             contexts += context
             total_context = "\n".join(context)
-            agent = self.QueryGen(self.q_model, self.parser,
+            agent = self._QueryGen(self.q_model, self.parser,
                     prompt=prompt+"\nsubquestion : {Question}\nsubcontext: {Context}\nAdd the prefix 'sub-question :' before outputting")
             prompt += f"\nsubquestion : {sub_q}\nsubcontext: {total_context}\n"
             sub_q = agent(sub_q, total_context)
@@ -284,6 +301,10 @@ class TreeOfThoughtAgent(ContextAgent):
 
 
 class ImageContextAgent:
+    """
+    Summarises the context retrieved from an image in a readable format
+    """
+
     def __init__(self, model, parser=StrOutputParser()):
         self.model = model
         self.parser = parser
@@ -298,6 +319,10 @@ class ImageContextAgent:
         self.chain = {"context": RunnablePassthrough()} | self.prompt | self.model | self.parser
 
     def reword(self, context):
+        """
+        Rephrases the contexts of an image
+        """
+
         def unique(l):
             u = []
             for i in l:
