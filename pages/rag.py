@@ -1,3 +1,4 @@
+import re
 from streamlit_feedback import streamlit_feedback
 import streamlit as st
 st.set_page_config(
@@ -150,7 +151,7 @@ mistral_parser = RunnableLambda(MistralParser().invoke)
 vb_list = st.session_state['vb_list']
 q_model = st.session_state['q_model']
 alt_parser = RunnableLambda(MistralParser('alternate-questions :\n').invoke)
-sub_parser = RunnableLambda(MistralParser('sub-questions : ').invoke)
+sub_parser = RunnableLambda(MistralParser('sub-question : ').invoke)
 image_parser = RunnableLambda(MistralParser().invoke)
 gpt_model = RunnableLambda(ChatGPT("gpt-4o", api_key=gpt_key, template="""You are an assistant for question-answering tasks.
     Use the following pieces of retrieved context to answer the question accurately.
@@ -294,12 +295,12 @@ if uploaded_file is not None:
         }
 
 if prompt := st.chat_input("What's Up?"):
+    prompt = prompt
     fd = True
     st.session_state.messages.append({"role": "user", "content": prompt})
     response = req.query(prompt, 5)  # prompt is a str
     images = response['image']
     st.session_state.messages.append({"role": "assistant", "content": response['text']})
-
     conv_id = uuid.uuid4()
     st.session_state['conv_id'][conv_id] = {
         "user_messages": {"role": "user", "content": prompt},
@@ -335,7 +336,7 @@ rt.post()
 def reset_conversation():
     st.session_state.messages = []
     st.session_state['image'] = []
-    st.session_state['conv_id'] = []
+    st.session_state['conv_id'] = {}
 
 
 st.button('Reset Chat', on_click=reset_conversation)

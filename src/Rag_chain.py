@@ -24,7 +24,7 @@ class RAGEval:
     6. Call query()
     """
 
-    best = 2
+    best = 4
     parse = StrOutputParser()
 
     def __init__(self, vb_list, cross_model):
@@ -93,6 +93,9 @@ class RAGEval:
           Internal Method for context preparation for a given question
         """
 
+        def findWholeWord(w):
+            return re.compile(r'\b{0}\b'.format(re.escape(w)), flags=re.IGNORECASE).search
+
         con = self.query_agent.invoke(self.question).split('@@')
         uni_con = []
         for i in con:
@@ -104,7 +107,17 @@ class RAGEval:
             documents=uni_con,
             return_documents=True
         )[:self.best]
-        self.context = str("\n".join([i['text'] for i in c]))
+        cons = [i['text'] for i in c]
+
+        self.figure_mentions = []
+        for c in cons:
+            print('HERE')
+            print(c)
+            if findWholeWord('fig')(c) or findWholeWord('figure')(c):
+                print('GOGO')
+                self.figure_mentions.append(c.split(':')[0])
+
+        self.context = str("\n".join(cons))
 
     def _rag_graph(self):
         """
@@ -182,36 +195,18 @@ class RAGEval:
             ans = chain.invoke(state["question"])
             return {"question": state["question"], "context": state["context"], "answer": ans}
 
-        def feedback_answer(state):
-            """
-              DEPRECATED
-            """
-
-            template = """
-          You are an assistant for question-answering tasks. You are given a question and its answer in a short form. Eloborate the answer till 2 sentences.
-          Question: {question}
-          Answer: {answer}
-          """
-            prompt = ChatPromptTemplate.from_template(template)
-            chain = {"question": RunnablePassthrough(),
-                     "answer": RunnableLambda(lambda x: state["answer"])} | prompt | self.chat_model | self.parser
-            return {"question": state["question"], "context": state["context"],
-                    "answer": chain.invoke(state["question"])}
-
         self.RAGraph = StateGraph(GraphState)
         self.RAGraph.set_entry_point("entry")
         self.RAGraph.add_node("entry", RunnablePassthrough())
         self.RAGraph.add_node("feedback", feedback)
         self.RAGraph.add_node("fetch", fetch)
         self.RAGraph.add_node("answerer", answer)
-        # self.RAGraph.add_node("f_answer", feedback_answer)
         self.RAGraph.add_edge("entry", "feedback")
         self.RAGraph.add_conditional_edges(  # conditional edge based on feedback check
             "feedback",
             feedback_check,
             {"f_answer": END, "fetch": "fetch"}
         )
-        # self.RAGraph.add_edge("f_answer", END)
         self.RAGraph.add_edge("fetch", "answerer")
         self.RAGraph.add_edge("answerer", END)
         self.ragchain = self.RAGraph.compile()
@@ -229,11 +224,21 @@ class RAGEval:
             answer_state = self.ragchain.invoke(state)
             self.answer = answer_state["answer"]
             text = self.answer
+
+            image = []
+            if len(self.figure_mentions) != 0:
+                print('FOUND ONE')
+                for fig in self.figure_mentions:
+                    for vb in self.vb_list:
+                        k = vb.search_name(fig)
+                        image += k['image_file'].tolist()
+                return {"text": text, "image": image, "context": self.context}
+
         else:  # query is an image
             text = self._image2text(question)  # get textual information of an image
             self.context = ""
         image = self._image_search(question, top_k)
-        return {"text": text, "image": image, "context":self.context}
+        return {"text": text, "image": image, "context": self.context}
 
     def _image_search(self, question, top_k=2):
         """

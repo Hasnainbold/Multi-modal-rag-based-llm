@@ -692,31 +692,31 @@ Software Manual SmartFIB | en1.2 | 346000-8083-000 37
 2
 6
 Fig. 1: SmartFIB main window
-1 Tools Toolbar [} 38]
+1 Tools Toolbar [- 38]
 The Tools Toolbar contains tools for the Working Area. Some of them
 are universal and others are mode specific.
-2 Working Area [} 41]
+2 Working Area [- 41]
 In the Working Area, the virtual specimen and any drawn shapes are
 displayed and can be edited.
 Sample Mode: virtual specimen and positions
 Live Mode: captured image and drawn elements. Editing of elements is
 possible only inLive Mode.
-3 Menu Bar [} 42]
+3 Menu Bar [- 42]
 The menus on the Menu Bar contain basic commands that you need to
 work with SmartFIB. The functionality of some of items in the menu are
 different for sample mode and Live Mode.
-4 Standard Toolbar [} 55]
+4 Standard Toolbar [- 55]
 The Standard Toolbar contains various buttons for quickly accessing a
 subset of the commands contained in the Menu Bar.
 Additionally, there are various exclusive functions, such as previews and
 mode switching.
 4 User Interface | 4.1 Tools Toolbar
 38 Software Manual SmartFIB | en1.2 | 346000-8083-000
-5 Control Panel [} 58]
+5 Control Panel [- 58]
 Some of the commands on the Menu Bar or the Standard Toolbar do
 not open dialog windows to obtain user input. Instead, they will open
 tabs in this Control Panel.
-6 Status Bar [} 143]
+6 Status Bar [- 143]
 The Status Bar informs you e.g. about the current mouse position in the
 Working Area (left hand side).
 The status bar also allows for controlling some properties of the working
@@ -839,7 +839,7 @@ Edit Contains commands for editing elements to be
 exposed.
 View Contains parameters to set the display properties of
 the working area.
-Sample [} 45] Contains sample specific commands e.g. Sample
+Sample [- 45] Contains sample specific commands e.g. Sample
 Adjustment or setting up of a Focus plane.
 Image Contains specific commands for capturing images and
 the display properties for the images.
@@ -961,7 +961,7 @@ You can click a region of interest and its coodinates will be
 automatically transferred to the X: and Y: input fields.
 Use focus checkbox If activated, the current focus settings are added when saving
 a stage position using the Add button. For related
-information see Sample Focus Plane [} 49].
+information see Sample Focus Plane [49].
 Delete button Allows you to delete selected positions from the list.
 Add button Adds the current X and Y coordinates to the list. This button is
 only available if both X and Y values are determined.
@@ -1003,7 +1003,7 @@ Switches between Live mode and sample mode.
 Captures an image: Continues scanning until the end of the frame is
 reached and then stops it. This equals Freeze on = End Frame in
 SmartSEM.
-For more information refer to Image Capture [} 134].
+For more information refer to Image Capture [134].
 3 Infobar
 Allows to show or hide the infobar.
 4 Normalize
@@ -1231,15 +1231,15 @@ User Interface |
 Fig. 7: Control Panel tabs
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 59
-1 Import [} 60]
-2 Process List [} 61]
-3 Stage [} 138]
-4 Attributes (Live Mode) [} 64] / Settings (Sample Mode) [} 129]
-5 Move [} 130]
-6 Clipping [} 132]
+1 Import [60]
+2 Process List [61]
+3 Stage [138]
+4 Attributes (Live Mode) [64] / Settings (Sample Mode) [129]
+5 Move [- 130]
+6 Clipping [- 132]
 7 Offset
-8 Image Capture [} 134]
-9 Exposure [} 140]
+8 Image Capture [- 134]
+9 Exposure [- 140]
 4 User Interface | 4.5 Control Panel
 60 Software Manual SmartFIB | en1.2 | 346000-8083-000
 4.5.1 Import
@@ -1329,7 +1329,7 @@ usage of SmartFIB. Besides this it contains several expandable sections that you
 show optionally when you have to perform a specific task such as creating a new
 recipe.
 Fig. 9: Attributes tab > Recipe tab
-1 Common [} 67] section
+1 Common [- 67] section
 2 Topmost Expander button
 These expandable sections provide detailed information about assigned
 recipes or in case of Exclusive mode they are allowing the adaptation of
@@ -1340,11 +1340,11 @@ With the dedicated expander buttons you can expand or collapse each
 section individually.
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 67
-3 Description [} 73] expandable section
-4 Details [} 74] expandable section
-5 Scanning [} 81] expandable section
-6 GIS [} 84] expandable section
-7 Precision [} 86] expandable section
+3 Description [- 73] expandable section
+4 Details [- 74] expandable section
+5 Scanning [- 81] expandable section
+6 GIS [- 84] expandable section
+7 Precision [- 86] expandable section
 4.5.3.1.1 Common Section
 The common section contains the following control elements:
 Control Element Description
@@ -1608,7 +1608,7 @@ computed parameter is therefore always the Dwell time. For
 points the number of Cycles being not 1 only makes sense in
 case of very high dose values so that the maximum Dwell time
 for one Cycle is exceeded or when you want to expose the point
-in intervals with inserted cycle delay, see Precision [} 86].
+in intervals with inserted cycle delay, see Precision [- 86].
 4 User Interface | 4.5 Control Panel
 76 Software Manual SmartFIB | en1.2 | 346000-8083-000
 Section Control Element Description
@@ -1646,7 +1646,7 @@ the Dwell time.
 Cycles: input field with arrow
 buttons
 This sub-field is only displayed for SEM deposition and is used to
-set the number of repeats for the scan, see Scanning [} 81].
+set the number of repeats for the scan, see Scanning [- 81].
 For SEM Lithography the value is set implicitly to 1 and the
 computed parameter is therefore always the Dwell time. .
 4 User Interface | 4.5 Control Panel
@@ -1729,7 +1729,7 @@ Gauge/Regauge button). Please note for non-gauged recipes the
 displayed value is 0.000 nm.
 Gauge / Regauge button Depending on the status of the recipe (gauged or non-gauged)
 the label of the button changes between Gauge and Regauge
-(see also Gauging in the Common [} 67] section of the Recipe
+(see also Gauging in the Common [- 67] section of the Recipe
 tab). In both cases following Gauging dialog opens.
 Gauging Dialog Enables the user to gauge, regauge or remove an existing gauging of a recipe or
 the current set of exposure parameters.
@@ -1822,7 +1822,7 @@ side of the drop down menu).
  Unidirectional: All subsequent tracks are scanned in the same direction.
  Bidirectional: The tracks are alternately scanned in opposite direction.
  By purpose: The relative orientation of two subsequent tracks is determined by
-the purpose of the recipe, see also Common Section [} 67], which is bidirectional
+the purpose of the recipe, see also Common Section [- 67], which is bidirectional
 for the four momentarily used purposes (FIB Milling, FIB Deposition, SEM
 Lithography or SEM Deposition).
 4 User Interface | 4.5 Control Panel
@@ -1856,9 +1856,9 @@ pronounced redeposition of material can be tolerated.
  Serial-section:Same scan style as when choosing cross-section but additionally
 allows to choose a number of Tracks after which a SEM-image can be grabbed
 automatically during the milling process, see also Obtaining Serial Section Images [
-} 168].
+- 168].
  By purpose: The Cycle Mode is determined by the purpose of the recip, see also
-Common Section [} 67].
+Common Section [- 67].
 Tracks input field with
 arrow buttons
 Allows to set the number of tracks to be scanned between grabbing the SEM-images.
@@ -2506,7 +2506,7 @@ buttons
 Allows to convert the line to a polygon with a defined width.
 If line width is not zero, the Angle section appears. It offers
 the possibility to adapt the scan geometry. For more
-information refer to Polygon [} 118], Angle section.
+information refer to Polygon [- 118], Angle section.
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 107
 4.5.3.4.6 Polyline
@@ -2539,7 +2539,7 @@ buttons
 Allows to convert the line to a polygon with a defined width.
 If line width is not zero, the Angle section appears. It offers
 the possibility to adapt the scan geometry. For more
-information refer to Polygon [} 118], Angle section.
+information refer to Polygon [- 118], Angle section.
 4.5.3.4.7 Spiral
 Fig. 26: Attributes tab > Spiral tab
 4 User Interface | 4.5 Control Panel
@@ -2585,7 +2585,7 @@ Allows to convert the spiral to a polygon with a defined
 width.
 If line width is not zero, the Angle section appears. It offers
 the possibility to adapt the scan geometry. For more
-information refer to Polygon [} 118], Angle section.
+information refer to Polygon [- 118], Angle section.
 4 User Interface | 4.5 Control Panel
 110 Software Manual SmartFIB | en1.2 | 346000-8083-000
 4.5.3.4.8 Rectangle
@@ -2624,7 +2624,7 @@ Prototype Reference image The reference image shows the assignment of the axes a
 the dimensions.
 The image is not freely rotated (only flips and rotations by
 +/-90 are accounted for).
-Angles For information refer to Polygon [} 118], Angle section.
+Angles For information refer to Polygon [- 118], Angle section.
 4 User Interface | 4.5 Control Panel
 112 Software Manual SmartFIB | en1.2 | 346000-8083-000
 4.5.3.4.9 Circle
@@ -2846,7 +2846,7 @@ angle is selected implicitly rather than explicitly.
 Allows to select the edge which determines the scan
 directions.
 The selected edge indicates the end of the scan, see also
-Tools Toolbar [} 38] Tool: Edge Select.
+Tools Toolbar [- 38] Tool: Edge Select.
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 121
 4.5.3.4.13 Trapezoid
@@ -2896,7 +2896,7 @@ You can enter values manually or use the arrow buttons to
 rotate the trapezoid in increments of 0.1.
 Prototype Reference image The reference image shows the assignment of the axes and
 the dimensions.
-Angles For information refer to Polygon [} 118], Angle section.
+Angles For information refer to Polygon [- 118], Angle section.
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 123
 4.5.3.4.14 Parallelogram
@@ -2940,7 +2940,7 @@ You can enter values manually or use the arrow buttons to
 rotate the parallelogram in increments of 0.1.
 Prototype Reference The reference shows the assignment of the axes and the
 dimensions.
-Angles For information refer to Polygon [} 118], Angle section.
+Angles For information refer to Polygon [- 118], Angle section.
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 125
 4.5.3.4.15 Text
@@ -2976,7 +2976,7 @@ arrow buttons
 Allows you to rotate the text around its center. You can enter
 values manually or use the arrow buttons to move the
 currently loaded image in increments of 0.1.
-Angles For information refer to Ellipse [} 114], Angle section.
+Angles For information refer to Ellipse [- 114], Angle section.
 4 User Interface | 4.5 Control Panel
 Software Manual SmartFIB | en1.2 | 346000-8083-000 127
 4.5.3.4.16 Image
@@ -3051,8 +3051,8 @@ Determines the number of sub-iterations.
 Section Control Element Description
 - Selection: readout Shows the selected number of elements or layers.
 The Settings tab contains the following tabs:
- Recipe [} 66]
- Drift Correction [} 87]
+ Recipe [- 66]
+ Drift Correction [- 87]
 4 User Interface | 4.5 Control Panel
 130 Software Manual SmartFIB | en1.2 | 346000-8083-000
 4.5.5 Move
@@ -3387,10 +3387,10 @@ processes.
 Working with the Software |
 5.2 General Operation
 In the following two main workflows are illustrated:
- Performing a Basic Exposure/Milling process [} 148] describes a basic
+ Performing a Basic Exposure/Milling process [- 148] describes a basic
 procedure that uses Live Mode only. The other procedures are based on this
 section.
- Performing a Multi-Site Exposure/Milling Workflow [} 153] describes how to
+ Performing a Multi-Site Exposure/Milling Workflow [- 153] describes how to
 work with objects that have transferred from Live Mode to Sample Mode.
 5 Working with the Software | 5.2 General Operation
 148 Software Manual SmartFIB | en1.2 | 346000-8083-000
@@ -3398,10 +3398,10 @@ work with objects that have transferred from Live Mode to Sample Mode.
 The following section describes a basic exposure/milling process using Live Mode
 only.
 The procedure contains the following steps:
- Acquiring an Image [} 148]
- Creating Shapes/Elements to be Exposed/Milled [} 149]
- Setting the Exposure/Milling Parameters [} 150]
- Starting the Exposure/Milling Process [} 152]
+ Acquiring an Image [- 148]
+ Creating Shapes/Elements to be Exposed/Milled [- 149]
+ Setting the Exposure/Milling Parameters [- 150]
+ Starting the Exposure/Milling Process [- 152]
 5.2.1.1 Acquiring an Image
 First step of a basic exposure/milling workflow is to acquire a FIB image. This image
 serves as an orientation for placing geometric elements to be exposed/milled at the
@@ -3454,13 +3454,13 @@ In Live Mode, you can choose between setting parameters for the whole layer and
 exclusive parameters for single geometric elements and for multi-selections. If an
 element defines parameters other than none, then the layer parameters are
 overwritten. To be able to understand how these settings interact, refer to section
-Hierarchy of Exposure Parameter Assignment [} 31].
+Hierarchy of Exposure Parameter Assignment [- 31].
 Prerequisite  You have created a background image
  You have drawn some geometric elements
 Procedure 1 Select an element, a group of elements or a layer.
 2 On the Control Panel, select the Attributes tab > Recipe.
 3 Choose a recipe from the Material drop-down list.
-For more information refer to Recipe [} 66].
+For more information refer to Recipe [- 66].
 4 You can select a different probe from the Probe drop-down list.
 5 You can set depth by the input field.
 6 Click Preview.
@@ -3506,7 +3506,7 @@ Procedure
 1 On the Standard Toolbar, click the Expose icon.
 On the Control Panel, the Exposure dialog opens.
 2 Change the desired settings. For a detailed description of each parameter, refer
-to the section Exposure [} 140].
+to the section Exposure [- 140].
 3 Select an entry from the On End Mill: drop-down list.
 This enables you to be able to see the result of the exposure process as soon
 as it is finished, or to trigger an operation of the microscope.
@@ -3537,13 +3537,13 @@ corrections. This can be especially useful while preparing a TEM lamella.
 before you start the exposure.
 5.2.2 Performing a Multi-Site Exposure/Milling Workflow
 Requires the licence AUTOPREP.
-Compared to Performing a Basic Exposure/Milling process [} 148],which only uses
+Compared to Performing a Basic Exposure/Milling process [- 148],which only uses
 Live Mode, the following example shows a very simple multi-site exposure/milling
 workflow using both Live Mode and Sample Mode.
 You can expand this principle to more challenging tasks.
 Procedure 1 In Live Mode, draw some geometric elements as described in Creating
-Shapes/Elements to be Exposed/Milled [} 149].
-2 Apply a drift correction as described in Using a Drift Correction [} 151].
+Shapes/Elements to be Exposed/Milled [- 149].
+2 Apply a drift correction as described in Using a Drift Correction [- 151].
 3 Click the Transfer to sample mode icon.
 The positions are not being processed but added to the Process list called
 Transferred.
@@ -3778,7 +3778,7 @@ according position.
 5 Working with the Software | 5.5 Task-Oriented Workflows
 162 Software Manual SmartFIB | en1.2 | 346000-8083-000
 Prerequisite  You have already created some shapes as described in Creating Shapes/
-Elements to be Exposed/Milled [} 149]
+Elements to be Exposed/Milled [- 149]
 Procedure u On the Control Panel, select the Process List tab.
 * Prozessliste: Alle Positionen und Parameter werden gespeichert. Ohne Drift-
 Korrektur. Über die Prozessliste im Live Mode kann man die Positionen nicht
@@ -3806,7 +3806,7 @@ Difference to Cross Section:
  Deposition is not possible.
  Just one milling step.
  Automatic proximity.
-Procedure 1 Switch to Live mode and capture an image, see Acquiring an Image [} 154].
+Procedure 1 Switch to Live mode and capture an image, see Acquiring an Image [- 154].
 2 On the Tools Toolbar, click the Simple Cross section icon.
 3 Move the cursor to the intended location of the cross section to be prepared.
 5 Working with the Software | 5.5 Task-Oriented Workflows
@@ -3841,7 +3841,7 @@ Prerequisite  Electron beam has been switched on
  Settings in SmartSEM: FIB mode active, 30 kV FIB, 5 kV SEM, WD at the
 coincidence point
  The area of interest has been selected
-Procedure 1 Switch to Live mode and capture an image, see Acquiring an Image [} 154].
+Procedure 1 Switch to Live mode and capture an image, see Acquiring an Image [- 154].
 2 On the Tools Toolbar, click the Cross section icon.
 3 Move the cursor to the intended location of the cross section to be prepared.
 4 To create a line, click and drag with the mouse. This defines the width of the
@@ -3864,7 +3864,7 @@ Software Manual SmartFIB | en1.2 | 346000-8083-000 165
 The polishing tilt is only applied for the last milling step.
 5 Adjust the other parameters as required.
 If polishing tilt and milling steps are selected, a drift correction is required,
-refer to Using a Drift Correction [} 151].
+refer to Using a Drift Correction [- 151].
 9 On the Standard Toolbar, click the Exposure icon.
 The Exposure dialog opens.
 The estimated exposure time will be computed based on beam current.
@@ -3883,7 +3883,7 @@ Prerequisite  Electron beam has been switched on
  Settings in SmartSEM: FIB mode active, 30 kV FIB, 5 kV SEM, WD at the
 coincidence point
  The area of interest has been selected
-Procedure 1 Switch to Live mode and capture a FIB image, see Acquiring an Image [} 154].
+Procedure 1 Switch to Live mode and capture a FIB image, see Acquiring an Image [- 154].
 2 On the Tools Toolbar, click the Lamella icon.
 3 Move the cursor to the intended location of the TEM lamella to be prepared.
 4 To create a line, click and drag with the mouse.
@@ -3907,9 +3907,9 @@ Software Manual SmartFIB | en1.2 | 346000-8083-000 167
 4 If necessary, adjust the Polishing Tilt.
 The polishing tilt is only applied for the last milling step.
 5 Adjust the other parameters as required.
-For more information refer to Lamella [} 99].
+For more information refer to Lamella [- 99].
 If polishing tilt and milling steps are selected, a drift correction is required,
-refer to Using a Drift Correction [} 151].
+refer to Using a Drift Correction [- 151].
 9 Define Cut Out parameters.
 1 Expand the Cut Out section.
 2 Select a probe from the Probe: drop-down list.
@@ -3917,7 +3917,7 @@ The probe that has been used during the last session is set by default.
 3 Adjust the Depth Tuning Factor.
 4 Choose a link position.
 5 Adjust the other parameters as required.
-For more information refer to Lamella [} 99].
+For more information refer to Lamella [- 99].
 10 To save the settings, click Export .
 11 On the Standard Toolbar, click the Exposure icon.
 The Exposure dialog opens.
@@ -3963,7 +3963,7 @@ or mix detector signals.
 Preferences > Tools.
 9 Save the image.
 10 Switch back to SmartFIB and click the Expose icon.
-For best results, we recommend to apply a drift correction [} 151].
+For best results, we recommend to apply a drift correction [- 151].
 TIP
 Note that the DC correction interval does now mean SEM images instead of
 seconds.
@@ -4029,7 +4029,7 @@ Prerequisite  Electron beam is switched on
  FIB gun pressure is better than the threshold
  Wanted precursor gases are outgased.
  Ion beam is switched on
-Procedure 1 Draw or select a geometric element [} 149].
+Procedure 1 Draw or select a geometric element [- 149].
 2 On the Control Panel, select the Recipe tab.
 3 Select Exclusive from the drop-down list.
 4 From the Purpose drop-down list, select FIB Deposition.
@@ -4041,7 +4041,7 @@ Procedure 1 Draw or select a geometric element [} 149].
 the deposition process, tick the Auto park checkbox.
 10 If you want a pop-up message before the GIS movement, enable the
 Acknowledge: checkbox.
-11 Continue with Starting the Exposure/Milling Process [} 152].
+11 Continue with Starting the Exposure/Milling Process [- 152].
 5.6.2 Gas-Assisted Etching
 Gas assisted etching (GAE) allows you to selectively increase etching rates
 comparing to etching with the ion beam or the electron beam alone.
@@ -4097,7 +4097,7 @@ Prerequisite  Electron beam is switched on
  FIB gun pressure is better than the threshold
  Wanted precursor gases are outgased.
  Ion beam is switched on
-Procedure 1 Draw or select a geometric element [} 149].
+Procedure 1 Draw or select a geometric element [- 149].
 2 On the Control Panel, select the Recipe tab.
 3 Select Exclusive from the drop-down list.
 4 From the Purpose drop-down list, select FIB Deposition.
@@ -4109,7 +4109,7 @@ Procedure 1 Draw or select a geometric element [} 149].
 the deposition process, tick the Auto park checkbox.
 10 If you want a pop-up message before the GIS movement, enable the
 Acknowledge: checkbox.
-11 Continue with Starting the Exposure/Milling Process [} 152].
+11 Continue with Starting the Exposure/Milling Process [- 152].
 5 Working with the Software | 5.6 Working with the Gas Injection System
 5.6.3 Electron Beam Deposition
 Depositing and etching with the electron beam is a suitable method for materials
@@ -4134,13 +4134,13 @@ u Move the specimen surface to the coincidence point before starting the
 deposition or etching process.
 Procedure 1 In the Tools Toolbar, select SEM from the Microscope Control drop-down
 list.
-2 Switch to Live mode and capture a FIB image, see Acquiring an Image [} 154].
+2 Switch to Live mode and capture a FIB image, see Acquiring an Image [- 154].
 3 To perform SEM Beam current adjustment, in the toolbar, click the Measure
 beam current icon.
 The Measure Beam Current window opens.
 4 Type in the beam current you have selected in SmartSEM. If necassary measure
 it by using a Faraday Cup.
-5 Draw or select a geometric element [} 149].
+5 Draw or select a geometric element [- 149].
 6 On the Control Panel, select the Recipe tab.
 7 From the Materials: drop-down list, select Exclusive.
 5 Working with the Software | 5.7 Working with Recipes
@@ -4153,13 +4153,13 @@ it by using a Faraday Cup.
 the deposition process, tick the Auto park checkbox.
 14 If you want a pop-up message before the GIS movement, enable the
 Acknowledge: checkbox.
-15 Continue with Starting the Exposure/Milling Process [} 152].
+15 Continue with Starting the Exposure/Milling Process [- 152].
 Working with the Software |
 5.7 Working with Recipes
 Recipes allow the user to run SmartFIB with preferred operating parameters.
 5.7.1 Using Existing Recipes
-Procedure 1 Switch to Live mode and capture a FIB image, see Acquiring an Image [} 154].
-2 Draw or select a geometric element [} 149].
+Procedure 1 Switch to Live mode and capture a FIB image, see Acquiring an Image [- 154].
+2 Draw or select a geometric element [- 149].
 3 If desired, change the probe.
 4 If the recipe is gauged, enter a target depth.
 5 Alternatively you can change the dose factor to use a fraction or multiple of
@@ -4167,7 +4167,7 @@ the reference dose.
 6 On the Control Panel, select the Attributes tab > Recipe Tab.
 7 From the Material drop-down list, select an existing recipe.
 5.7.2 Creating/Editing Recipes
-Procedure 1 Draw or select a geometric element [} 149].
+Procedure 1 Draw or select a geometric element [- 149].
 2 On the Control Panel, select the Attributes tab > Recipe Tab.
 3 From the Material drop-down list, select an existing recipe.
 4 To edit the assigned recipe, press the Edit button
@@ -4183,7 +4183,7 @@ The new/edited recipe should be available from the Materials: drop-down list.
 5.7.3 Creating a Recipe with Exclusive Function
 The exclusive function is used to create new recipes by using default parameter
 values.
-Procedure 1 Draw or select a geometric element [} 149].
+Procedure 1 Draw or select a geometric element [- 149].
 2 On the Control Panel, select the Attributes tab > Recipe Tab.
 3 From the Material drop-down list, select Exclusive.
 The parameter values are predefined.

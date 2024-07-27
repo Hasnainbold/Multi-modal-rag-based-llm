@@ -90,7 +90,7 @@ class ImageDatabase(Database):
 
     return self.embedder.embed_query(text)
 
-  def upsert(self, data):  # image_file, image_context, PIL Object
+  def upsert(self, data):  # image_file_name, image_context, PIL Object
     if isinstance(data, list) and all(isinstance(i, tuple) and len(i) == 3 for i in data):
       image_embeddings = [{"image_file": i[0], "image_context": i[1], "vector": self._get_image_embedding(i[2])} for i
                           in data]
@@ -130,6 +130,13 @@ class ImageDatabase(Database):
     self.top_k = top_k
     return RunnableLambda(self.query)
 
+  def search_name(self, name):
+      embed = self._get_text_embedding(name)
+      print(name)
+      df = self.txt_db.tbl.search(embed, 'vector'
+      ).limit(1).to_pandas()
+      return df
+
 
 class TextDatabase(Database):
   top_k = 2
@@ -149,9 +156,8 @@ class TextDatabase(Database):
     if isinstance(data, str):
       chunks = self.splitter.split_documents(self.splitter.create_documents(self.splitter.split_text(data)))
       chunks = [c.page_content for c in chunks]
-      chunk_embeddings = [{"chunk":chunk,"vector":self.embedder.embed_documents(chunk)} for chunk in chunks]
+      chunk_embeddings = [{"chunk": chunk, "vector": self.embedder.embed_documents(chunk)} for chunk in chunks]
       super().upsert(chunk_embeddings)
-      #self.tbl.create_index(num_partitions=256, num_sub_vectors=96)
     else:
       raise TypeError("Data should be a string")
 

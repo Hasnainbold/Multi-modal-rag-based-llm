@@ -189,8 +189,7 @@ class SubQueryAgent(ContextAgent):
         def __init__(self, q_model, parser=RunnableLambda(lambda x: x), prompt="""
         You will be given a pair of question and its context as an input.You must form a question contextually related to both of them.
         Question : {Question}\nContext: {Context}
-        Do not answer the sub-question. Only provide the sub-question. You must make a sub-question only for the question and context provided.
-        Add the prefix 'sub-question :' before outputting
+        Output should in the format: sub-question : <sub_question>
         """):
             self.context = ""
             self.prompt = ChatPromptTemplate.from_template(prompt.strip())
@@ -221,6 +220,7 @@ class SubQueryAgent(ContextAgent):
         return [i['text'] for i in c]  # list of text
 
     def query(self, question):
+        question = question
         all_sub_qs = []
         agent = self._QueryGen(self.q_model, self.parser)
         sub_q = agent(question)
@@ -229,17 +229,17 @@ class SubQueryAgent(ContextAgent):
         contexts = []
         prompt = f"""
         You are given a main Question {question} and a pair of its subquestion and related sub context.
-        You must generate a question based on the main question, and all of the sub-question and sub-contexts pairs.
-        Do not answer the subquestion.  Only provide the sub-question. You must make a sub-question only for the questions and contexts provided.        
+    You must generate a question based on the main question, and all of the sub-question and sub-contexts pairs.
+    Output should in the format: sub-question : <sub_question>        
         """
         for i in range(self.turns - 1):
             print(f"ITERATION NO: {i+1}")
             context = self.fetch(sub_q)
             contexts += context
-            total_context = "\n".join(context)
+            total_context = "\n".join(contexts)
             agent = self._QueryGen(self.q_model, self.parser,
-                    prompt=prompt+"\nsubquestion : {Question}\nsubcontext: {Context}\nAdd the prefix 'sub-question :' before outputting")
-            prompt += f"\nsubquestion : {sub_q}\nsubcontext: {total_context}\n"
+                    prompt=prompt+"\nsub-question : {Question}\nsub-context: {Context}")
+            prompt += f"\nsub-question : {sub_q}\nsub-context: {total_context}"
             sub_q = agent(sub_q, total_context)
             print(f"{i+2}th Sub question: {sub_q}\n")
         uni = []

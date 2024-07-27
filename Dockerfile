@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 8501
 
-CMD ["nohup", "streamlit","run","rag.py", "&"]
+CMD ["nohup", "streamlit","run","landing_page.py", "&"]

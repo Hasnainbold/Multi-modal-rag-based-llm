@@ -1,3 +1,4 @@
+import shutil
 import streamlit as st
 st.set_page_config(
    page_title="RAG Configuration",
@@ -99,6 +100,7 @@ def load_chat_model():
     template = '''
     You are an assistant for question-answering tasks.
     Use the following pieces of retrieved context to answer the question accurately.
+    If the question is not related to the context, just answer 'I don't know'.
     Question: {question}
     Context: {context}
     Answer:
@@ -175,6 +177,8 @@ def vector_database_prep(file):
                 text = page.get_text()
                 if not (findWholeWord('table of contents')(text) or findWholeWord('index')(text)):
                     data += text
+            data = data.replace('}', '-')
+            data = data.replace('{', '-')
             print('4. Data extraction done')
             hs = []
             for i in image_info:
@@ -298,8 +302,9 @@ st.subheader('Converse with our Chatbot')
 st.markdown('Enter a pdf file as a source.')
 uploaded_file = st.file_uploader("Choose an pdf document...", type=["pdf"], accept_multiple_files=False)
 if uploaded_file is not None:
-    with open(f'./pdfs/{uploaded_file.name}', mode='wb') as w:
+    with open(uploaded_file.name, mode='wb') as w:
         w.write(uploaded_file.getvalue())
+    shutil.move(uploaded_file.name, './pdfs')
     st.session_state['pdf_file'] = uploaded_file.name
     with st.spinner('Extracting'):
         vb_list = vector_database_prep(uploaded_file)
