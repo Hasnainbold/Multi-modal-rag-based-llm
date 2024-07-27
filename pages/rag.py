@@ -279,20 +279,36 @@ def plot_images(images_path, output_path, image_name, top_k=5):
 all_images = []
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
-    with Image.open(uploaded_file) as up_image:
-        name = uploaded_file.name.split('/')[-1]
-        up_image.save(name)
-        result = req.query(up_image, 5)  # dict
-        images = [name] + result['image']  # list
-        ai_response = "Context for the image:\n" + "".join(result['text'])  # str
-        conv_id = uuid.uuid4()
-        st.session_state.messages.append({"role": "assistant", "content": ai_response})
-        st.session_state['image'] += [name] + images
-        st.session_state['conv_id'][conv_id] = {
-            "user_messages": {},
-            "ai_messages": {"role": "assistant", "content": ai_response},
-            "images": images  # list
-        }
+    up_image = Image.open(uploaded_file)
+    name = uploaded_file.name.split('/')[-1]
+    up_image.save(name)
+
+    associated_text = st.text_area("Provide a query wrt to image if any else input \'None\' ")
+    while True:
+        if len(associated_text):
+            result = req.query(up_image, 5)  # dict
+            images = [name] + result['image']  # list
+            image_context = "Context for the image:\n" + "".join(result['text'])  # str
+
+            if associated_text.lower().strip() != 'none':
+                prompt = associated_text
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                ai_response = req.query("Given " + image_context + '; Here is the user query: ' + prompt)['text']
+                user_response = {"role": "user", "content": prompt}
+            else:
+                prompt = ""
+                ai_response = image_context
+                user_response = {}
+
+            conv_id = uuid.uuid4()
+            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+            st.session_state['image'] += [name] + images
+            st.session_state['conv_id'][conv_id] = {
+                "user_messages": user_response,
+                "ai_messages": {"role": "assistant", "content": ai_response},
+                "images": images  # list
+            }
+            break
 
 if prompt := st.chat_input("What's Up?"):
     prompt = prompt

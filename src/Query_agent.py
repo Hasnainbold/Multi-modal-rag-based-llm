@@ -310,7 +310,7 @@ class ImageContextAgent:
         self.parser = parser
         self.prompt = ChatPromptTemplate.from_template(
             template="""
-            You are given some sentences and phrases.  Summarise them appropriately.
+            You are given some sentences and phrases.  Summarise them appropriately in 20 words.
             Format:
             Context: {context}
             Answer:
