@@ -333,7 +333,11 @@ for conv_id in st.session_state['conv_id']:
     with st.chat_message(ai_messages["role"]):
         st.markdown(ai_messages["content"])
     if len(images) > 0:
+        unique_images = []
         for image in images:
+            if image not in unique_images:
+                unique_images.append(image)
+        for image in unique_images:
             st.image(Image.open(os.path.join(image_folder, image)), use_column_width=True)
 
 if fd:
