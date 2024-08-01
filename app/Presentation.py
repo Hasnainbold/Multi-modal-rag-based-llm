@@ -14,14 +14,14 @@ class PresentationRAG:
     slide.placeholders[1].text = "By\n" + author
 
   def table_of_contents(self, toc): # dict(str, dict) # TO FIX
-    def subtree(self, k, i, l, tf):
+    def subtree(k, i, l, tf):
       p = tf.add_paragraph()
       p.text = k
       p.level = i
       if len(list(l[k]))==0:
         return
-      for j in k:
-          self.subtree(j, i+1, l[k], p)
+      for j in l[k]:
+          subtree(j, i+1, l[k], tf)
 
     toc_slide_layout = self.prs.slide_layouts[1]
     slide = self.prs.slides.add_slide(toc_slide_layout)
@@ -30,17 +30,19 @@ class PresentationRAG:
     title_shape = shapes.title
     title_shape.text = 'Table Of Contents'
 
+    tf = shapes.placeholders[1].text_frame
+
     level = 1
     for sub_header in toc:
-      body_shape = shapes.placeholders[1]
-      tf = body_shape.text_frame
-      tf.text = sub_header
+      p = tf.add_paragraph()
+      p.text = sub_header
+      p.level = level
 
       if len(list(toc[sub_header].keys()))==0:
         continue
       else:
         for item in toc[sub_header]:
-          self.subtree(item, 1, toc[sub_header], tf)
+          subtree(item, level, toc[sub_header], tf)
 
   def section_header(self, header):
     section_header_slide_layout = self.prs.slide_layouts[2]

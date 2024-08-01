@@ -139,9 +139,8 @@ def vector_database_prep(file):
             return re.compile(r'\b{0}\b'.format(re.escape(w)), flags=re.IGNORECASE).search
 
         file_name = file.name
-        pdf_file_path = f'../pdfs/{file_name}'
-        image_folder = f'../figures_{file_name}'
-        os.chdir('pages')
+        pdf_file_path = os.path.join(os.getcwd(), 'pdfs', file_name)
+        image_folder = os.path.join(os.getcwd(), f'figures_{file_name}')
         if not os.path.exists(image_folder):
             os.makedirs(image_folder)
 
@@ -153,7 +152,7 @@ def vector_database_prep(file):
             for page_num in range(doc.Pages.Count):
                 page = doc.Pages[page_num]
                 for image_num in range(len(page.ImagesInfo)):
-                    imageFileName = f'{image_folder}/figure-{page_num}-{image_num}.png'
+                    imageFileName = os.path.join(image_folder, f'figure-{page_num}-{image_num}.png')
                     image = page.ImagesInfo[image_num]
                     image.Image.Save(imageFileName)
                     images.append({
@@ -304,9 +303,10 @@ uploaded_file = st.file_uploader("Choose an pdf document...", type=["pdf"], acce
 if uploaded_file is not None:
     with open(uploaded_file.name, mode='wb') as w:
         w.write(uploaded_file.getvalue())
-    shutil.move(uploaded_file.name, './pdfs')
+    shutil.move(uploaded_file.name, os.path.join(os.getcwd(), 'pdfs'))
     st.session_state['pdf_file'] = uploaded_file.name
     with st.spinner('Extracting'):
         vb_list = vector_database_prep(uploaded_file)
     st.session_state['vb_list'] = vb_list
+    os.chdir('pages')
     st.switch_page('rag.py')

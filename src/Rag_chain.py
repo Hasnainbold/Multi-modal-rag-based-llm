@@ -220,11 +220,11 @@ class RAGEval:
             print(f"MAIN QUESTION {question}")
             self.question = question
             state = {"question": self.question, "context": "", "answer": ""}
+            self.figure_mentions = []
             self._rag_graph()
             answer_state = self.ragchain.invoke(state)
             self.answer = answer_state["answer"]
             text = self.answer
-
             image = []
             if len(self.figure_mentions) != 0:
                 print('FOUND ONE')
@@ -233,7 +233,6 @@ class RAGEval:
                         k = vb.search_name(fig)
                         image += k['image_file'].tolist()
                 return {"text": text, "image": image, "context": self.context}
-
         else:  # query is an image
             text = self._image2text(question)  # get textual information of an image
             self.context = ""

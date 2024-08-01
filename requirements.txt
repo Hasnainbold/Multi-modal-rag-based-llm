@@ -50,3 +50,4 @@ scikit-image
 scikit-learn
 matplotlib
 Spire.Pdf
+python-pptx
