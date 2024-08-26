@@ -303,6 +303,8 @@ uploaded_file = st.file_uploader("Choose an pdf document...", type=["pdf"], acce
 if uploaded_file is not None:
     with open(uploaded_file.name, mode='wb') as w:
         w.write(uploaded_file.getvalue())
+    if not os.path.exists(os.path.join(os.getcwd(), 'pdfs')):
+        os.makedirs(os.path.join(os.getcwd(), 'pdfs'))
     shutil.move(uploaded_file.name, os.path.join(os.getcwd(), 'pdfs'))
     st.session_state['pdf_file'] = uploaded_file.name
     with st.spinner('Extracting'):
