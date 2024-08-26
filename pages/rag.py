@@ -287,7 +287,7 @@ if uploaded_file is not None:
     while True:
         if len(associated_text):
             result = req.query(up_image, 5)  # dict
-            images = [name] + result['image']  # list
+            images = result['image']  # list
             image_context = "Context for the image:\n" + "".join(result['text'])  # str
 
             if associated_text.lower().strip() != 'none':
