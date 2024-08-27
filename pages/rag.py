@@ -19,12 +19,10 @@ import base64
 from io import BytesIO
 import requests
 import matplotlib.pyplot as plt
-os.chdir('..')
 from src.Rag_chain import *
 from src.Query_agent import *
 from langsmith.run_trees import RunTree
 from src.Databases import *
-os.chdir('pages')
 showWarningOnDirectExecution = False
 
 
@@ -129,7 +127,7 @@ weaviate_embed = st.session_state['weaviate_embed']
 
 pdf_file = st.session_state['pdf_file']
 file_name = pdf_file
-image_folder = f'../figures_{file_name}'
+image_folder = f'./figures_{file_name}'
 url = st.secrets["WEAVIATE_URL"]
 v_key = st.secrets["WEAVIATE_V_KEY"]
 gpt_key = st.secrets["GPT_KEY"]
@@ -138,7 +136,7 @@ os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
 os.environ["OPENAI_API_KEY"] = gpt_key
 f_url = st.secrets['FEEDBACK_URL']
 f_api = st.secrets['FEEDBACK_API']
-feedback_file = "../feedback_loop.txt"
+feedback_file = "./feedback_loop.txt"
 im_db_url = st.secrets["IMAGE_URL"]
 im_db_key = st.secrets["IMAGE_API"]
 txt_db_url = st.secrets["TEXT_URL"]
@@ -164,16 +162,16 @@ gq_model = RunnableLambda(ChatGPT('gpt-3.5-turbo', api_key=gpt_key, template="""
     Context: {context}
     Answer:""").chat)
 pine_embed = st.session_state['pinecone_embed']
-feedback_db = TextDatabase('feedback', '../lancedb/rag')
+feedback_db = TextDatabase('feedback', './lancedb/rag')
 feedback_db.model_prep(weaviate_embed, RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35))
-with open('../feedback_loop.txt', 'r') as f:
+with open('./feedback_loop.txt', 'r') as f:
   feedback = f.read()
 feedback_db.upsert(feedback)
 
 req = RAGEval(vb_list, cross_model)
 req.model_prep(chat_model, mistral_parser)
 req.query_agent_prep(q_model, (alt_parser, sub_parser, image_parser))
-req.feedback_prep(uri='../lancedb/rag', table_name='feedback',
+req.feedback_prep(uri='./lancedb/rag', table_name='feedback',
                   file=feedback_file, embedder=weaviate_embed,
                   splitter=RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35))
 
@@ -205,7 +203,7 @@ st.markdown("- What are alignment marks, and how are they used in the alignment 
 st.markdown("- What is the alignment process in lithography, and how does eLitho facilitate this procedure?")
 st.markdown("- What can you do with the insertable layer in Smart FIB?")
 
-open('../feedback.txt', 'w').close()
+open('./feedback.txt', 'w').close()
 
 rt = RunTree(
     name="RAG RunTree",
@@ -237,12 +235,12 @@ def fbcb():
             else:
                 s += fsa[-1]['text']
         s += '\n'
-    with open('../feedback.txt', 'r+') as fd:  # feedback records all feedback for this run
+    with open('./feedback.txt', 'r+') as fd:  # feedback records all feedback for this run
         fd.write(s)
-    with open('../feedback_loop.txt', 'r+') as fd:  # feedback loop records feedback for all runs
+    with open('./feedback_loop.txt', 'r+') as fd:  # feedback loop records feedback for all runs
         fd.write(s)
     feedback_db.upsert(s)
-    with open('../feedback.txt', 'r') as fd:
+    with open('./feedback.txt', 'r') as fd:
         feed = fd.read()
     client.create_feedback(
         run_id=st.session_state.run_id,
@@ -348,7 +346,7 @@ if fd:
         if not submit_button:
             print('Click the Submit button')
 
-with open('../feedback.txt', 'r')as f:
+with open('./feedback.txt', 'r')as f:
     rt.end(outputs={'outputs': f.read()})
 rt.post()
 
