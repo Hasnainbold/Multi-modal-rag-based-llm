@@ -310,5 +310,4 @@ if uploaded_file is not None:
     with st.spinner('Extracting'):
         vb_list = vector_database_prep(uploaded_file)
     st.session_state['vb_list'] = vb_list
-    os.chdir('pages')
-    st.switch_page('rag.py')
+    st.switch_page('pages/rag.py')
