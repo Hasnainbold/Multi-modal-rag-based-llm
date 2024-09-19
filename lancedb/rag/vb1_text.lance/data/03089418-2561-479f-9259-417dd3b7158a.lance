@@ -1,0 +1,1139 @@
+Composites Science and Technology 218 (2022) 109186
+Available online 29 November 2021
+0266-3538/Â© 2021 Elsevier Ltd. All rights reserved.
+Prediction of stiffness degradation based on machine learning: Axial elastic 
+modulus of [0m /90n ]s composite laminates 
+Mingqing Yuan a, Haitao Zhao a,*, Yuehan Xie b, Hantao Ren b, Li Tian a, Zhuoxin Wang a, 
+Boming Zhang c, Jiâ€™an Chen a,** 
+a School of Aeronautics and Astronautics, Shanghai Jiao Tong University, Shanghai, 200240, China 
+b Composites Centre, Commercial Aircraft Corporation of China Ltd, Shanghai, 201210, China 
+c School of Materials Science and Engineering, Beihang University, Beijing, 100191, China   
+A R T I C L E  I N F O   
+Keywords: 
+Matrix cracking 
+Stiffness degradation 
+Machine learning 
+Cross-ply laminates 
+Kernel ridge regression 
+A B S T R A C T   
+This paper, for the first time, proposed an axial elastic modulus degradation prediction method of [0m/90n]s 
+cross-ply laminates using a machine learning (ML) model. The data set of the ML model is established based on 
+the published experiments and a small amount of finite element analysis (FEA) results. The effect of data size on 
+the accuracy of ML prediction is also discussed. The proposed ML model focuses on the process of translating amechanical problem of damage into a non-linear regression problem of ML, and the mapping between the input 
+and output data, which is hopefully considered for some complex mechanical problems of composites. MeanÂ­
+while, the ML method also provides accurate and efficient solution for the engineering practice.   
+1. Introduction 
+In 2016, Agrawal and Choudhary [1] proposed the four paradigms of 
+science: empirical, theoretical, computational, and data-driven, which 
+revealed the big potential of the data-based method for scientific probÂ­
+lems. In recent years, machine learning (ML) has also been considered 
+for solving mechanical problems of composite materials. It has provided 
+new perspectives on mechanical studies using state-of-the-art compuÂ­
+tational methods [2]. For instance, Yang et al. [3] predicted stress-strain 
+curves of binary composites; Qi et al. [4] and Golkarnarenji et al. [5] 
+predicted elastic properties of carbon fibre based on macroscopic paÂ­
+rameters of composites; Lucon and Donovan [6] and Yang et al. [7] 
+calculated the macroscopic elastic properties of the composites; Gu and 
+Chen [8] predicted composite toughness and strength; and Khan et al. 
+[9] predicted the mechanical properties by using material type, 
+composition and number of reinforcement and matrix layers. ConvoluÂ­tional neural networks (CNN) and artificial neural networks (ANN) were 
+very common in these studies [2,6â€“9]. ML method is an efficient way to 
+find out the relations between the input and output parameters, which 
+has big potential for the studies of composite materials. For example, 
+unidirectional fibre-reinforced laminate is one of the most widely 
+studied composites, while the other kinds of fibre-reinforced 
+composites, such as chopped fibre-reinforced, 2-dimensional woven 
+fabric and 3-dimensional woven fabric, still need large amount of exÂ­
+periments to obtain their mechanical behaviors [10]. But the ML method 
+may find out the mapping relations of mechanical properties between 
+the composites with different reinforcement architectures. 
+Regarding non-linear regression, kernel ridge regression (KRR) is a 
+powerful ML approach [11â€“16] with high accuracy and high time effiÂ­
+ciency, but is rarely used in the published works about composite maÂ­
+terial mechanics. Nowadays, the application of ML is made simple and 
+convenient with open-source packages, such as scikit-learn [17]. 
+Therefore, an application of the KRR model in the nonlinear constitutive 
+model of composite laminates is theoretically appropriate and low cost. 
+In this work, for the first time, the equivalent axial modulus of cross-ply composite laminates with matrix cracking is predicted using the KRR 
+model. The data set of the ML model is established based on the pubÂ­
+lished experimental data and a small number of FEA results. The optiÂ­
+mum ML model is obtained through a series of attempts, which can be 
+directly used to predict the axial elastic modulus degradation of [0m/ 
+90n]s composite laminates. The effect of data size on the accuracy is also 
+discussed. This paper aims at translating a mechanical problem of 
+damage into a non-linear regression problem of ML. The proposed ML 
+model focuses on the mapping between the experimental data, instead of 
+* Corresponding author. 
+** Corresponding author. 
+E-mail addresses: zht@sjtu.edu.cn (H. Zhao), ja-chen@sjtu.edu.cn (J. Chen).  
+Contents lists available at ScienceDirect 
+Composites Science and Technology 
+journal homepage: www.elsevier.com/locate/compscitech 
+https://doi.org/10.1016/j.compscitech.2021.109186 
+Received 2 September 2021; Received in revised form 7 November 2021; Accepted 28 November 2021   
+Composites Science and Technology 218 (2022) 109186
+2
+providing a mechanical model with idealised assumptions and simpliÂ­
+fications. In this way, data-based methodology is hopefully considered 
+for the composites with various reinforcement architecture, and somecomplex mechanical problems, such as fatigue, interface characterisaÂ­
+tion, and intralaminar fracture, etc. Meanwhile, the ML method provides 
+an accurate and efficient solution, which is helpful in the engineering 
+practice. 
+2. Data preparation 
+The mechanical problem of axial elastic modulus degradation in 
+[0m/90n]s cross-ply laminates is illustrated and discussed in Section 2.1, 
+where the input and output parameters are defined. m and n of the [0m/ 
+90n]s cross-ply laminates refer to the numbers of lamina of 0â—¦plies and 
+90â—¦plies, respectively. In Section 2.2, the published experiments and 
+FEA results are collected and labelled to establish the data set of axial 
+elastic modulus degradation of [0m/90n]s cross-ply laminates. Two 
+testing data sets of glass-fibre-reinforced plastic (GFRP) and carbon- 
+fibre-reinforced plastic (CFRP) are separated from the whole data set 
+to verify prediction accuracy. 
+2.1. Axial elastic modulus degradation of [0m/90n]s composite laminates 
+The experimental results of composite laminates with matrix 
+cracking [18â€“28] showed that the matrix crackings are usually parallel 
+to the fibre directions and penetrate through the thickness directions in 
+the consecutive plies with the same ply angles. They are periodicallydistributed in their transverse directions. Crack density Ï is defined to 
+describe the average number of matrix crackings per length. The unit 
+used for this is 1/mm or 1/cm. Regarding [0m/90n]s cross-ply laminates 
+under uniaxial loading, matrix crackings only appear in 90â—¦plies, while 
+0â—¦plies are undamaged. Therefore, Ï refers to the crack density of 90â—¦
+plies in this study. The schematic of [0m/90n]s laminates with matrix 
+crackings in 90â—¦ply are shown in Fig. 1. In Fig. 1, t1 and t2 refer to the 
+thicknesses of 0â—¦plies and 90â—¦plies, respectively. In this paper, t1 = m Ã—
+t0 and t2 = 2 Ã— n Ã— t0, where t0 is the ply thickness. Matrix cracking leads 
+to the stiffness degradation of the laminated composites. This mainly 
+concerns the degradation of axial elastic modulus Ex(Ï), in-plane PoisÂ­
+sonâ€™s ratio vxy(Ï) and in-plane shear modulus Gxy(Ï). The degradation of 
+axial elastic modulus is predicted using the ML method in this paper, as 
+it is the most common used to study objects in both experiments and FEA 
+simulations and the available data is rich. Normalised axial modulus is 
+defined as Ex(Ï)/Ex(0), where Ex(0) is the axial elastic modulus of the 
+laminate without matrix cracking. In-plane Poissonâ€™s ratio vxy(Ï) and 
+in-plane shear modulus Gxy(Ï) are not discussed in this paper, becausethe amount of available experimental data cannot meet the requirement 
+of ML method. Theoretically, the degradation of in-plane Poissonâ€™s ratio 
+and in-plane shear modulus can also be predicted by using the ML 
+method, because they are also induced by the matrix cracking and local 
+delamination, which is similar to the degradation of axial elastic 
+modulus. 
+Regarding to the mechanical model, there are following idealised 
+assumptions and simplifications of the axial elastic modulus degradation 
+of the cross-ply composite laminates:  
+(1) The laminates behave as linear-elastic, orthotropic homogenized 
+materials;  
+(2) The classical laminated plate theory is adopted, namely only the 
+in-plane properties (Ex, Ey, vxy and Gxy) are considered;  
+(3) Matrix crackings are parallel to the fibre directions, penetrate 
+through the thickness and transverse directions, and are periodÂ­
+ically distributed in the transverse directions;  
+(4) Local delamination accompanying the matrxi cracking is 
+neglected;  
+(5) The 0â—¦plies of the laminates are considered undamaged. 
+The mechanical assumptions and simplifications can simplify the 
+definition and selection of the input and output parameters for the ML 
+method. However, the process of ML is only related to the formation andaccuracy of the data set, and dose not concern with the assumptions and 
+simplifications of the mechanical model. For example, the experimental 
+results of the axial elastic modulus degradation actually involve the efÂ­
+fect of local delamiantion. Although the mechanical model neglects the 
+local delamination, its influence still reflects in the experimental results 
+of normalised axial modulus. Therefore, experimental results are proper 
+for the establishment of ML data set, which can minimize the effect of 
+assumptions and simplifications of the mechanical model. The ML 
+training can also carry out based on the data set of FEA or analytical 
+methods, but the mapping obtained by ML method in this way refers to 
+the one of FEA or the analytical methods, instead of the mechanical 
+problem itself. 
+2.2. Obtaining and labelling the data set 
+The purpose of this study is to predict the normalised axial modulus 
+of the [0m/90n]s laminates, which is affected by the material properties 
+of the lamina, thicknesses of the plies and crack density of 90â—¦ply, acÂ­
+cording to the published studies regarding stiffness degradation of 
+laminated composite with matrix crackings [20â€“31]. Therefore, in-plane 
+elastic properties of the composite lamina (E1, E2, v12, and G12), thickÂ­ness of 0â—¦ply (t1), thickness of 90â—¦ply (t2) and crack density of 90â—¦ply 
+(Ï) are defined as input parameters, labelled as F0â€“F6. The normalised 
+axial modulus of the [0m/90n]s laminate is defined as the output 
+parameter, labelled as F7. The features are listed in Table 1. 
+The available experimental data and some of the FEA results have 
+been collected from published works to establish the data set, as shown 
+in Table 2. Both GFRP and CFRP laminates are involved in the data set. 
+The total number of the samples is 467, including 380 experimental and 
+87 FEA results. 
+The purpose of this ML model is to predict the axial elastic modulus 
+degradation of cross-ply composite laminates; therefore, a random 
+testing data set cannot meet the requirements of the study. A GFRP 
+laminate and a CFRP laminate are separated from the whole data set to 
+be used as testing data. The testing data of GFRP comprises of the FEA 
+results of a [03/904]s laminate with a layer thickness of 0.144 mm [31], 
+labelled as Test-1. The testing data of CFRP comprises of the experiments 
+of a [0/904]s laminate with a layer thickness of 0.132 mm [23], labelled 
+as Test-2. The two testing data are chosen because their material propÂ­
+erties, thicknesses of 0â—¦ply and 90â—¦ply and maximum crack densitiesare all within the span of the whole data set. It should be noted that the 
+training data set does not contain its testing data. 
+The input data and the output data for ML training can be expressed 
+Fig. 1. Schematic [0m/90n]s laminate with periodic matrix crackings in 90â—¦ply.  
+Table 1 
+Definitions of the input and output features.   
+Input 
+Output 
+Label 
+F0 
+F1 
+F2 
+F3 
+F4 
+F5 
+F6 
+F7 
+Parameter 
+E1 
+E2 
+v12 
+G12 
+t1 
+t2 
+Ï 
+Ex(Ï)/Ex(0)  
+M. Yuan et al.                                                                                                                                                                                                                                   
+Composites Science and Technology 218 (2022) 109186
+3
+as X and y in matrix form, as shown in Eq. (1) and Eq. (2), respectively: 
+X =
+â¡
+â¢â¢â£
+x1
+T
+x2
+T
+â‹®
+xnum
+T
+â¤
+â¥â¥â¦=
+â¡
+â¢â¢â£
+x11
+x12
+â‹¯
+x1f
+x21
+x22
+â‹¯
+x2f
+â‹®
+â‹®
+â‹±
+â‹®
+xnum,1
+xnum,2
+â‹¯
+xnum,f
+â¤
+â¥â¥â¦
+(1)  
+y =
+â¡
+â¢â¢â£
+y1
+y2
+â‹®
+ynum
+â¤
+â¥â¥â¦
+(2)  
+where f is the number of input features, which equals 7 in this paper; 
+num is the number of training data, which equals to 467 minus the 
+number of testing data nt; xi is a f-dimensional vector, which refers to the 
+feature vector of the i-th sample, and its corresponding output data is yi;xij refers to the value of the j-th feature of the i-th sample. Every row of X 
+refers to the input data of a single sample, namely the values of F0â€“F6 of 
+this sample. The column of X refers to all input data of one of the feature. 
+y refers to all output data, namely the values of F7. 
+3. ML models 
+Section 3.1 and Section 3.2 give brief introductions of feature seÂ­
+lection and KRR method, respectively, and explicate the selection basis 
+of the algorithms. Feature selection is carried out by Least Absolute 
+Shrinkage and Selection Operator (LASSO) and cross validation (CV). 
+Process of standardisation is illustrated in Section 3.3, which is necesÂ­
+sary for ridge regression. Accuracy estimation methods are briefly 
+illustrated in Section 3.4. The complete ML process for practical appliÂ­
+cation is shown in Fig. 2. This paper discusses the influence of feature 
+selection, kernel function, and data size on modelsâ€™ accuracy. Therefore, 
+the process and some parameters of the ML model are different. 
+3.1. Process of feature selection 
+Features are empirically defined in Section 2.2, but the prediction 
+model with all features may not present optimal accuracy. If some of the 
+features are invalid for the data training or have too many outliers, 
+removing these features can improve the accuracy of the prediction,simplify the ML model and save the cost of calculation. Therefore, 
+feature selection is an important process before starting the ML training 
+â€“ especially for a problem that the ML method has not yet been applied 
+to. The LASSO [32] and ridge regression [11] are two similar linear 
+regression models adding L1-norm and L2-norm regularisation to the 
+loss function of least squares method, respectively. Both the LASSO and 
+ridge regression can calculate coefficients of the corresponding features, 
+which can quantitatively describe the importance of the features in the 
+Table 2 
+Laminate structures of the data set (available in supplementary data).  
+Reference 
+Stacking 
+sequence 
+Ply 
+thickness 
+(mm) 
+Material 
+Maximum 
+crack density 
+(1/mm) 
+Highsmith 
+(1982) 
+[18] 
+[0/903]s 
+0.203 
+GFRP (E1 = 41.7 
+GPa, E2 = 13.0 
+GPa, v12 = 0.3, 
+G12 = 3.4 GPa) 
+0.708 
+Hashin 
+(1986) 
+[20] 
+[0/904]s 
+0.147 
+CFRP (E1 = 123.0 
+GPa, E2 = 8.7 GPa, 
+v12 = 0.33, G12 =
+3.9 GPa) 
+0.836 
+[0/906]s 
+0.735 
+Groves 
+(1986) 
+[21] 
+[0/90]s 
+0.127 
+CFRP (E1 = 144.8 
+GPa, E2 = 9.6 GPa, 
+v12 = 0.31, G12 =
+4.8 GPa) 
+1.831 
+[02/902]s 
+2.206 
+[0/902]s 
+1.718 
+[0/903]s 
+0.754 
+Smith (1990) 
+[22] 
+[0/90]s 
+0.155 
+GFRP (E1 = 40.0 
+GPa, E2 = 10.0 
+GPa, v12 = 0.31, 
+G12 = 5.0 GPa) 
+2.055 
+Takeda 
+(1994) 
+[23] 
+[0/902]s 
+0.132 
+CFRP (E1 = 148.0[0/902]s 
+0.132 
+CFRP (E1 = 148.0 
+GPa, E2 = 9.6 GPa, 
+v12 = 0.356, G12 
+= 4.5 GPa) 
+1.324 
+[0/904]s 
+0.925 
+[0/906]s 
+0.657 
+Varna (2001) 
+[24] 
+[02/904]s 
+0.144 
+GFRP (E1 = 44.7 
+GPa, E2 = 12.8 
+GPa, v12 = 0.297, 
+G12 = 5.8 GPa) 
+0.618 
+McCartney 
+(2003) 
+[25] 
+[02/902]s 
+0.284 
+CFRP (E1 = 121.2 
+GPa, E2 = 9.1 GPa, 
+v12 = 0.32, G12 =
+3.9 GPa) 
+1.121 
+[02/904]s 
+0.868 
+[02/906]s 
+0.806 
+Lundmark 
+(2005) 
+[19] 
+[02/902]s 
+0.138 
+GFRP (E1 = 44.7 
+GPa, E2 = 12.8 
+GPa, v12 = 0.3, 
+G12 = 3.5 GPa) 
+1.222 
+[0/902]s 
+1.260 
+Katerelos 
+(2008) 
+[26] 
+[0/90]s 
+0.305 
+GFRP (E1 = 43.0 
+GPa, E2 = 13.0 
+GPa, v12 = 0.3, 
+G12 = 4.7 GPa) 
+0.752 
+Loukil 
+(2013)a 
+[29] 
+[024/908]s 
+0.5 
+GFRP (E1 = 45.0 
+GPa, E2 = 15.0 
+GPa, v12 = 0.3, 
+G12 = 5.0 GPa) 
+0.250 
+[08/908]s 
+[02/908]s 
+[024/908]s 
+CFRP (E1 = 150.0 
+GPa, E2 = 10.0 
+GPa, v12 = 0.3, 
+G12 = 5.0 GPa) 
+[08/908]s 
+[02/908]s 
+Salavatian 
+(2014) 
+[27] 
+[0/907]s 
+0.2875 
+GFRP (E1 = 48.1 
+GPa, E2 = 14.2 
+GPa, v12 = 0.276, 
+G12 = 6.7 GPa) 
+2.002 
+Montesano 
+(2018)a 
+[30] 
+[0/90]s 
+0.132 
+CFRP (E1 = 145.0 
+GPa, E2 = 11.4 
+GPa, v12 = 0.3, 
+G12 = 6.5 GPa) 
+2.000 
+[0/902]s 
+0.5 
+GFRP (E1 = 46.0 
+GPa, E2 = 13.0 
+GPa, v12 = 0.3, 
+G12 = 5.0 GPa) 
+[0/90]s 
+Fikry (2018) 
+[28] 
+[03/9012]s 
+0.05 
+CFRP (E1 = 130.0 
+GPa, E2 = 9.53 
+GPa, v12 = 0.34, 
+G12 = 3.2 GPa) 
+1.265 
+[03/9018]s 
+1.3681.265 
+[03/9018]s 
+1.368 
+[03/906]s 
+0.1 
+GFRP (E1 = 38.2 
+GPa, E2 = 11.1 
+GPa, v12 = 0.31, 
+G12 = 3.9 GPa) 
+0.501 
+[03/9012]s 
+0.435 
+Yuan (2021)a 
+[31] 
+[0/904]s 
+0.144 
+GFRP (E1 = 44.7 
+GPa, E2 = 12.8 
+GPa, v12 = 0.297, 
+G12 = 5.8 GPa) 
+1.000 
+[03/904]s 
+[04/904]s  
+a FEA results. 
+Fig. 2. Flow chart of the ML model.  
+M. Yuan et al.                                                                                                                                                                                                                                   
+Composites Science and Technology 218 (2022) 109186
+4
+regression models. However, the coefficients obtained by using the 
+LASSO are sparse solutions, while the ones obtained by using ridge 
+regression tend to be uniform. The sparse solutions refer to the coÂ­
+efficients that unimportant to the regression are zero, which make it 
+easy to pick the unnecessary features. Therefore, the LASSO is a popular 
+model for feature selection, which is also adopted in this paper. On the 
+other hand, both the LASSO and ridge regression have a parameter Î±, 
+which is usually obtained via trial-and-error. Therefore, CV is needed to 
+find out the optimal model with the appropriate value of Î±. CV is a kindof method to evaluate the performance of ML training. In a k-fold CV 
+process, the data set is randomly divided into k parts. Every part of the 
+data set takes turn as testing data, while the rest of them becomes 
+training data. Then, the ML prediction is carried out for k times, and the 
+average score of the predictions is evaluated. Score of the ML prediction 
+refers to the accuracy or the performance of the prediction, which can be 
+defined as the values of average error rate, root mean squared error 
+(RMSE) or R-squared. Three-fold CV with the LASSO is adopted in this 
+paper, which is illustrated in Fig. 3. The available values of Î± are 1, 0.1, 
+0.01, 10âˆ’3, 10âˆ’4 and 10âˆ’5. The average scores of the LASSO CV models 
+are obtained with different values of Î±, the evaluation method of which 
+is set as the value of RMSE, namely the LASSO CV with minimum value 
+of RMSE is provided with optimum value of Î±. 
+3.2. KRR prediction 
+Ridge regression is a kind of biased estimation regression method for 
+collinear data, which is an improved least square method. For fitting ill- 
+conditioned data, it is more practical and reliable than the least square 
+method, as it abandons the unbiased property of the least square method 
+and obtains the regression coefficients at the cost of losing a part of theinformation and reducing precision [33]. The parameter of eliminating 
+the influence of ill-conditioned data is Î±, which is a coefficient of the 
+regularisation term. Î± is used to control sensitivity to outliers. Therefore, 
+the larger the Î± value, the less sensitivity to outliers there is. The 
+appropriate value of Î± is determined by LASSO and CV in the process of 
+feature selection. 
+KRR is a ridge regression method with kernel function [11]. The 
+kernel function works by mapping data in a vector space with higher 
+dimensionality, and considering the linear regression in such 
+high-dimensional space. A suitable kernel function can simplify a 
+non-linear relation in the original space as a linear relation in the 
+high-dimensional space. The commonly used kernel functions are linear 
+kernel, polynomial kernel, radial basis function (RBF) kernel and LapÂ­
+lacian kernel. The normalised axial modulus versus crack density is 
+non-linear according to the experiments and FEA simulations. In this 
+paper, both the polynomial kernel, RBF kernel and Laplacian kernel are 
+adopted to predict axial elastic modulus degradation, as shown in Eqs. 
+(3)â€“(5). The accuracy of the predictions using the three kernels will be 
+compared in Section 4.3. 
+Polynomial kernel: 
+K
+(
+xi, xj
+)
+=
+(
+Î³xi
+Txj + C
+)d
+(3) 
+RBF kernel: 
+K
+(
+xi, xj)d
+(3) 
+RBF kernel: 
+K
+(
+xi, xj
+)
+= exp
+(
+âˆ’Î³
+âƒ¦âƒ¦xi âˆ’xj
+âƒ¦âƒ¦2)
+, Î³ > 0
+(4) 
+Laplacian kernel: 
+K
+(
+xi, xj
+)
+= exp
+(
+âˆ’
+Ì…Ì…Ì…Ì…Ì…
+1
+2Î³
+âˆš
+âƒ¦âƒ¦xi âˆ’xj
+âƒ¦âƒ¦
+)
+, Î³ > 0
+(5)  
+where K(xi, xj) is the kernel function; xi and xj are the feature vectors of 
+the i-th sample and the j-th sample, respectively; Î³ is the coefficient of 
+kernel function, which is the reciprocal of the number of features; and C 
+and d in Eq. (3) are the constant term and polynomial degree of the 
+polynomial kernel, where C = 0 and d = 3 in this prediction. 
+It should be noted that the kernel function directly defines the inner 
+production of two samples in the high-dimensional space. The function 
+for mapping data from the original space into the high-dimensional 
+space is not required. Generally, in the conventional analytical closed- 
+form solution, the normalised stiffness can be expressed as a function 
+of orthotropic material properties, thickness of each layer, and crack 
+density. But the KRR prediction cannot provide analytical closed-form 
+solutions, or explain the relations between the input features (F0â€“F6) 
+and the output features (F7), because the regression is obtained based on 
+the kernel functions instead of the original data. However, the usage of 
+kernel function simplifies the complex relation between the input andoutput data, and improves the performance of regression analysis. KRR 
+prediction makes it possible to obtain the numerical solutions of comÂ­
+plex scientific problems. 
+3.3. Process of standardisation 
+The input data for ridge regression (X in Eq. (1)) are needed to be 
+standardised. The standardisation is carried out separately in each colÂ­
+umn. The standardised xij is defined as xijâ€™, which is obtained by Eq. (6): 
+xij
+â€² = xij âˆ’uj
+sj
+(6)  
+where uj is the mean value of all values of the j-th feature, which is 
+calculated by Eq. (7); sj is the standard deviation of all values of the j-th 
+feature, which is expressed as Eq. (8). 
+uj =
+âˆ‘
+num
+i=1
+xij
+num
+(7)  
+sj =
+Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…
+âˆ‘
+num
+i=1
+(
+xij âˆ’uj
+)2
+num
+âˆš
+âˆš
+âˆš
+âˆš
+âˆš
+(8) 
+It should be noted that the testing data are also standardised, and the 
+parameters of standardisation (uj and sj) are obtained from the standÂ­
+ardisation of input data for ML training. The mean value and standard 
+deviation of the input data of every feature become zero and one after 
+srandardisation, respectively. The output data for ML training y do not 
+require standardisation. 
+3.4. Accuracy evaluation 
+Average error rate, RMSE and R-squared (R2) are used to evaluate the 
+accuracy of the ML. Average error rate is the average deviation of thetesting data set, as shown by Eq. (9). 
+Fig. 3. Schematic three-fold CV.  
+M. Yuan et al.                                                                                                                                                                                                                                   
+Composites Science and Technology 218 (2022) 109186
+5
+Average â€‹ error â€‹ rate =
+âˆ‘
+nt
+i=1
+(
+â€–yiâˆ’Ì‚yiâ€–||
+Ì‚yi
+)
+nt
+Ã— 100%
+(9)  
+where nt is the number of testing samples; and yi and Ì‚yi are the true and 
+predicted values, respectively. 
+RMSE in Eq. (10) is a frequently used measure of the differences 
+between the true and predicted values. RMSE values are also adopted in 
+the process of feature selection to determine the optimum value of Î±. 
+RMSE =
+Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…Ì…
+âˆ‘
+nt
+i=1
+(yi âˆ’Ì‚yi)
+nt
+âˆš
+âˆš
+âˆš
+âˆš
+âˆš
+(10) 
+The R-squared value is used to measure the fitness of the prediction 
+values to the experimental values, and normally ranges from 0 to 1, as 
+shown in Eq. (11). A model with an R2 value over 0.9 is generally 
+considered to be an excellent prediction. 
+R2 = 1 âˆ’
+âˆ‘
+nt
+i=1
+[
+(yi âˆ’Ì‚yi)2]
+âˆ‘
+nt
+i=1
+[(
+yi âˆ’1
+nt
+âˆ‘
+nt
+i=1
+yi
+)2]
+(11)  
+4. Results and discussions 
+The optimum KRR prediction model is obtained through a series of 
+attempts. The KRR model with feature selection, polynomial kernelfunction (C = 0, d = 3) and an optimum value of Î± using the LASSO CV 
+model (Î± = 0.01 in this paper) has the minimum average error rate, the 
+minimum RMSE, the maximum R-squared and the minimum time cost. 
+It should be noted that the prediction models in this section all adopt the 
+optimum parameters, except the one for comparison. 
+4.1. Results and discussion of feature selection 
+The optimum value of Î± is 0.01 for feature selection of the whole data 
+set. Coefficients of the LASSO model are shown in Fig. 4. Coefficients of 
+the LASSO model can quantitatively describe the importance of the 
+features for the model. As shown in Fig. 4, the coefficient of F2 is zero, 
+which indicates that F2 is useless to the training and may even decrease 
+the accuracy of the prediction model. The accuracy of KRR prediction 
+with F2 and without F2 will be compared in Section 4.2. F2 refers to the 
+in-plane Poissonâ€™s ratio of the composite lamina, and the values of F2 for 
+the whole data set are 0.316 Â± 12.7%. The values of F2 not only flucÂ­
+tuate a little, but also may have low accuracy. The in-plane shear 
+modulus (F3) also has low impact on the axial elastic modulus degraÂ­
+dation. The most important feature according to feature selection is 
+crack density (F6), which is a very reasonable conclusion. The axial andtransverse moduli of the lamina, as well as the thicknesses of 0â—¦ply and 
+90â—¦ply are all essential for the axial elastic modulus degradation 
+prediction. 
+4.2. Effect of feature selection 
+The accuracy of the KRR prediction with and without F2 is shown in 
+Table 3, and the prediction results of the testing data set are plotted in 
+Fig. 5. The optimum values of Î± for these models are all 0.01. Both the 
+results of Test-1 and Test-2 show that feature selection improves the 
+accuracy, as the average error rate, RMSE and R-squared of the KRR 
+prediction without F2 are all better than the ones with all features. Time 
+cost of the prediction is slightly decreased by using feature selection. 
+Therefore, feature selection is successful in the ML method for predicting 
+axial elastic modulus degradation. 
+4.3. Effect of kernel functions 
+Results of KRR prediction with different kernel functions are plotted 
+in Fig. 6, and their accuracy is given in Table 4. The models with the 
+polynomial kernel (C = 0 and d = 3) have the optimum accuracy, while 
+the accuracies of the models with RBF and Laplacian kernels are poor. 
+The parameter of Î³ in RBF kernel is also adjusted, but no KRR prediction 
+with better accuracy was obtained. Moreover, over-fitting is present in 
+the models with Laplacian kernel, as shown in Fig. 6.4.4. Effect of data size 
+A ten-fold CV process with KRR prediction is carried out to verify the 
+effect of data size on the KRR training accuracy. The data sizes are 
+10â€“460 with an increment of 10, and the data sets are randomly selected 
+from Table 2. Then, 9/10 of the data are used for the KRR training and 
+1/10 of the data are used for KRR prediction and accuracy estimation. 
+The accuracy of KRR prediction is evaluated by the mean values of R- 
+squared, namely the prediction with greater mean value of R-squared is 
+considered more accurate. Feature selection, standardisation, and 
+polynomial kernel with C = 0 and d = 3 are adopted, which constitute 
+the optimum process obtained in this paper. The available values of Î± are 
+1, 0.1, 0.01, 10âˆ’3, 10âˆ’4, 10âˆ’5, 10âˆ’6 and 10âˆ’7. 
+The random selection of the data sets leads to different results from a 
+single job and another. Therefore, KRR prediction and accuracy estiÂ­
+mation are carried out 10 times with the same data size, which are 
+labelled as Job 1 to Job 10, respectively. The mean values of R-squared 
+of KRR prediction with different data size are plotted in Fig. 7(a). The 
+average R-squared values of the jobs with the same data size are plotted 
+in Fig. 7(b). Obviously, the accuracy of the ML prediction is acceptablewhen the data size exceeds 400, namely the training data size exceeds 
+360. In Fig. 7(b), the values of R-squared are close to 0.9 with the data 
+size greater than 400, which indicates excellent predictions. It should be 
+noted that this accuracy estimation cannot verify the data size in need 
+for other composite mechanical problems or other ML algorithms. 
+5. Concluding remarks 
+This study proposes an axial elastic modulus degradation prediction 
+Fig. 4. Coefficients of the LASSO model.  
+Table 3 
+Accuracy and time cost of the KRR prediction with and without feature selection.   
+Test-1 
+Test-2 
+without F2 
+with F2 
+without F2 
+with F2 
+Average error rate (%) 
+0.805 
+1.97 
+0.297 
+3.55 
+RMSE 
+0.0107 
+0.0203 
+0.00817 
+0.0337 
+R-squared 
+0.980 
+0.929 
+0.954 
+0.225 
+Prediction time (s) 
+0.490 
+0.495 
+0.481 
+0.517 
+Time cost improvement (%) 
+1.06 
+7.04  
+M. Yuan et al.                                                                                                                                                                                                                                   
+Composites Science and Technology 218 (2022) 109186
+6
+method of [0m/90n]s cross-ply laminates using ML. The data set of the 
+ML model is established based on previously published experiments anda small amount of FEA results. Two testing data sets, GFRP and CFRP, 
+are separated from the whole data set to verify the accuracy of the 
+prediction from multiple indices. The optimum ML model is obtained 
+through a series of attempts. The KRR model with standardisation, 
+feature selection, polynomial kernel function (C = 0, d = 3) and an 
+optimum value of Î± using the LASSO CV model (Î± = 0.01 in this paper) is 
+the optimum model. The prediction results of the two testing data sets 
+have an average error rate of less than 1% and an R-squared value of 
+greater than 0.95, which indicates very good accuracy. The effect of data 
+size on the accuracy is discussed by using ten-fold CV with KRR model. 
+The accuracy of the ML prediction is acceptable when the training data 
+size exceeds 360, namely the values of R-squared are close to 0.9. The 
+Fig. 5. Results of the KRR prediction with and without F2: (a) Test-1 (Î± = 0.01); (b) Test-2 (Î± = 0.01).  
+Fig. 6. Results of KRR prediction with different kernel functions: (a) Test-1 (Î± = 0.01); (b) Test-2 (Î± = 0.01).  
+Table 4 
+Accuracy of KRR predictions with different kernel functions.   
+Test-1 
+Test-2 
+RBF 
+polynomial 
+Laplacian 
+RBF 
+polynomial 
+Laplacian 
+Average error rate (%) 
+3.85 
+0.805 
+3.72 
+0.887 
+0.297 
+1.24 
+RMSE 
+0.0343 
+0.0107 
+0.0327 
+0.0118 
+0.008170.0107 
+0.0327 
+0.0118 
+0.00817 
+0.0158 
+R-squared 
+0.796 
+0.980 
+0.815 
+0.905 
+0.954 
+0.830  
+Fig. 7. R-squared of KRR prediction versus size of data set: (a) single job; (b) average valu  
+M. Yuan et al.                                                                                                                                                                                                                                   
+Composites Science and Technology 218 (2022) 109186
+7
+development of this successful ML model is owed to the reliable works 
+conducted by the mechanical researchers. However, the accuracy of ML 
+model is dependent on the reliability and amount of the data, which may 
+limit its application of other mechanical problems. 
+Regarding the axial elastic modulus degradation of [0m/90n]s lamiÂ­
+nates, the in-plane Poissonâ€™s ratio and in-plane shear modulus have little 
+contribution to the degradation of axial elastic modulus. The axial 
+elastic modulus of the lamina have positive relations with the normalÂ­
+ised axial modulus, which indicates that the axial modulus of GFRP 
+decreased more rapidly with crack density than the one in CFRP. In 
+addition, the thicker 0â—¦ply and a thinner 90â—¦ply can both inhibit the 
+degradation of the axial modulus of the composite laminates.The ML method of other composite mechanical problems will be 
+studied in the future, as it is believed that ML is promising for science 
+and engineering. ML prediction of stiffness degradation of the laminates 
+with arbitrarily stacking sequence will be considered in the near future. 
+Whether the other features can improve the accuracy of ML prediction 
+will be discussed, such as interlamina strength and fibre volume 
+fraction. 
+Author statement 
+Mingqing Yuan: Methodology, Software, Formal analysis, InvestiÂ­
+gation, Writing - Original Draft, Visualization, Writing - Review & 
+Editing. Haitao Zhao: Conceptualization, Methodology, Software, Data 
+Curation, Supervision, Writing - Review & Editing. Yuehan Xie: SoftÂ­
+ware, Formal analysis, Visualization. Hantao Ren: Software, Formal 
+analysis, Visualization. Li Tian: Validation, Investigation, Resources. 
+Zhuoxin Wang: Validation, Resources, Project administration. Boming 
+Zhang: Software, Investigation, Project administration. Jiâ€™an Chen: 
+Conceptualization, Methodology, Software, Investigation, Supervision. 
+Declaration of competing interest 
+The authors declare that they have no known competing financial 
+interests or personal relationships that could have appeared to influence 
+the work reported in this paper. 
+AcknowledgementAcknowledgement 
+The authors gratefully acknowledge The 3rd COMAC International 
+Science, Technology and Innovation Week for the support of this project. 
+Appendix A. Supplementary data 
+Supplementary data to this article can be found online at https://doi. 
+org/10.1016/j.compscitech.2021.109186. 
+References 
+[1] A. Agrawal, A. Choudhary, Perspective: materials informatics and big data: 
+realization of the â€œfourth paradigmâ€ of science in materials science, Apl. Mater. 4 
+(5) (2016), 053208. 
+[2] C.T. Chen, G.X. Gu, Machine learning for composite materials, MRS 
+Communications 9 (2) (2019) 556â€“566. 
+[3] C. Yang, Y. Kim, S. Ryu, et al., Prediction of composite microstructure stress-strain 
+curves using convolutional neural networks, Mater. Des. 189 (2020) 108509. 
+[4] Z. Qi, N. Zhang, Y. Liu, et al., Prediction of mechanical properties of carbon fiber 
+based on cross-scale FEM and machine learning, Compos. Struct. 212 (2019) 
+199â€“206. 
+[5] G. Golkarnarenji, M. Naebe, K. Badii, et al., A machine learning case study with 
+limited data for prediction of carbon fiber mechanical properties, Comput. Ind. 105 
+(2019) 123â€“132. 
+[6] P.A. Lucon, R.P. Donovan, An artificial neural network approach to multiphase 
+continua constitutive modeling, Compos. B Eng. 38 (7â€“8) (2007) 817â€“823.[7] Z. Yang, Y.C. Yabansu, R. Al-Bahrani, et al., Deep learning approaches for mining 
+structure-property linkages in high contrast composites from simulation datasets, 
+Comput. Mater. Sci. 151 (2018) 278â€“287. 
+[8] G.X. Gu, C.T. Chen, M.J. Buehler, De novo composite design based on machine 
+learning algorithm, Extrem. Mech. Lett. 18 (2018) 19â€“28. 
+[9] S.M. Khan, S.A. Malik, N. Gull, et al., Fabrication and modelling of the macro- 
+mechanical properties of cross-ply laminated fibre-reinforced polymer composites 
+using artificial neural network, Adv. Compos. Mater. 28 (4) (2019) 409â€“423. 
+[10] V. Khatkar, B.K. Behera, Experimental investigation of composite leaf spring 
+reinforced with various fiber architecture, Adv. Compos. Mater. 29 (2) (2020) 
+129â€“145. 
+[11] K.P. Murphy, Machine Learning: A Probabilistic Perspective, chapter 14.4.3, The 
+MIT Press, 2012, pp. 492â€“493. 
+[12] N. Kim, Y.S. Jeong, M.K. Jeong, et al., Kernel ridge regression with lagged- 
+dependent variable: applications to prediction of internal bond strength in a 
+medium density fiberboard process, IEEE Trans. Syst. Man Cybern. C Appl. Rev. 42 
+(6) (2012) 1011â€“1020. 
+[13] P.Y. Wu, C.C. Fang, ChangJM, et al., Cost-effective kernel ridge regression 
+implementation for keystroke-based active authentication system, IEEE Trans.Cybern. 47 (11) (2016) 3916â€“3927. 
+[14] Z. Guo, X. Zhao, Y. Chen, et al., Short-term passenger flow forecast of urban rail 
+transit based on GPR and KRR, IET Intell. Transp. Syst. 13 (9) (2019) 1374â€“1382. 
+[15] M. Ali, R. Prasad, Y. Xiang, et al., Complete ensemble empirical mode 
+decomposition hybridized with random forest and kernel ridge regression model 
+for monthly rainfall forecasts, J. Hydrol. 584 (2020) 124647. 
+[16] L.H. Peng, L.Q. Zhou, X. Chen, et al., A computational study of potential miRNA- 
+disease association inference based on ensemble learning and kernel ridge 
+regression, Front. Bioeng. Biotechnol. 8 (2020) 40. 
+[17] F. Pedregosa, G. Varoquaux, A. Gramfort, et al., Scikit-learn: machine learning in 
+Python, J. Mach. Learn. Res. 12 (2011) 2825â€“2830. 
+[18] A. Highsmith, K. Reifsnider, Stiffness reduction mechanism in composite laminates, 
+in: Damage in Composite Materials, American Society for Testing and Materials, 
+Philadelphia (PA), 1982, pp. 103â€“117. ASTM STP 775. 
+[19] P. Lundmark, J. Varna, Constitutive relationships for laminates with ply cracks in 
+in-plane loading, Int. J. Damage Mech. 14 (3) (2005) 235â€“259. 
+[20] Z. Hashin, Analysis of stiffness reduction of cracked cross-ply laminates, Eng. Fract. 
+Mech. 25 (5â€“6) (1986) 771â€“778.Mech. 25 (5â€“6) (1986) 771â€“778. 
+[21] S.E. Groves, C.E. Harris, A.L. Highsmith, et al., An experimental and analytical 
+treatment of matrix cracking in cross-ply laminates, Exp. Mech. 27 (1) (1987) 
+73â€“79. 
+[22] P.A. Smith, J.R. Wood, Poissonâ€™s ratio as a damage parameter in the static tensile 
+loading of simple crossply laminates, Compos. Sci. Technol. 38 (1) (1990) 85â€“93. 
+[23] N. Takeda, S. Ogihara, Initiation and growth of delamination from the tips of 
+transverse cracks in CFRP cross-ply laminates, Compos. Sci. Technol. 52 (3) (1994) 
+309â€“318. 
+[24] J. Varna, R. Joffe, R. Talreja, A synergistic damage-mechanics analysis of 
+transverse cracking in [Â±Î¸/904]s laminates, Compos. Sci. Technol. 61 (5) (2001) 
+657â€“665. 
+[25] L.N. McCartney, Physically based damage models for laminated composites, Proc. 
+IME J. Mater. Des. Appl. 217 (3) (2003) 163â€“199. 
+[26] D.T.G. Katerelos, M. Kashtalyan, C. Soutis, et al., Matrix cracking in polymeric 
+composites laminates: modelling and experiments, Compos. Sci. Technol. 68 (12) 
+(2008) 2310â€“2317. 
+[27] M. Salavatian, L.V. Smith, The effect of transverse damage on the shear response of 
+fiber reinforced laminates, Compos. Sci. Technol. 95 (2014) 44â€“49. 
+[28] M.J.M. Fikry, S. Ogihara, V. Vinogradov, Effect of matrix cracking on mechanicalproperties in FRP angle-ply laminates, in: ECCM 2018â€”18th European Conference 
+on Composite Materials, AML, Athens, 25â€’28 June 2018, pp. 793â€“812. 
+[29] M.S. Loukil, J. Varna, Z. Ayadi, Engineering expressions for thermo-elastic 
+constants of laminates with high density of transverse cracks, Compos. Appl. Sci. 
+Manuf. 48 (2013) 37â€“46. 
+[30] J. Montesano, B. McCleave, C.V. Singh, Prediction of ply crack evolution and 
+stiffness degradation in multidirectional symmetric laminates under multiaxial 
+stress states, Compos. B Eng. 133 (2018) 53â€“67. 
+[31] M. Yuan, H. Zhao, Y. Peng, et al., A micro-mechanical constitutive model for 
+cracked plies of laminated composites considering the constraint effect of the 
+adjacent plies, Mech. Adv. Mater. Struct. (2021) 1â€“12, https://doi.org/10.1080/ 
+15376494.2021.1890864 [in press]. 
+[32] R. Tibshirani, Regression shrinkage and selection via the lasso, J. Roy. Stat. Soc. B 
+58 (1) (1996) 267â€“288. 
+[33] J. Tian, On SAS program of ridge regression, Appl. Stat. Manag. 3 (1999) 53â€“55 (in 
+Chinese). 
+M. Yuan et al.        û      %
+      R      r      p      ¬      ±#      ¹(      Í-      ü2      38      `=      B      G      £L      ÜQ      W      ]\      Áa      ïf      !l      8q      Kv      }{      €      ²…      ÊŠ      ò      ü”      š      O      Ãz!½úm&½0<0¼aì=Ä¤P½­N½Éâ1<™½µ÷ö<Ä•½Ç  =Ö%<tv~<Å*½Æ•‹<í/½ÿ«<
+Ğ‚»+ïœ=M
+=Ëi9=ñ3I½Ä#Q=w~;°¼<Cº»š·ª=ì´‡<§o»:ò/;¡°¼%SZ½0ïo<IN·»ëúy<m5á;Sî½[–y½‘÷½Óşò»2§<'~¼ÎùÙ¼8>ó'=Vë8½HÍ½àøâ¼øoù<Å%(½ì‚
+:Ş”=1QM< ¨8¼Q½½¥1¼¼Ë¥ ;­¥=bÇ‹¼¬ÿ®¼½ZÆ½C¯
+=K:­¼ÿİ;ı¡Õ<S´¼-ø=·ƒÊ½‡¸W:Æ>Ó½Ÿº€¼o˜<×G¼<Y¼™z=ëÇ!=ƒFŞ<oŒ»¼–==3®'; »<Cõİ;Œ †½ÿô˜»	c7<Ïúé¼¢^;¦•¼9ˆ:ëÎ>$o¦=ûßˆ»+T½í‡<Õ/=^¹½£u»8½ãyC<µüá½Óå™=Éï€<Ko=L‘<îN<sJ=µ|Î=ù> ½pZ¼zªH=èáÄ½,½Ïf½¼›½b==!}»¼¦¥¾¼¦z<^¼ZRp<Û<y R<àh½òq“½1Ÿë½Ü#°	&Ã½ˆ~"<¤&¼c½·f1½ÔÏ^½‚äµ;”×,;ªëÇ=µ Â¼“d~½µƒ§¼ÀĞc»WÖ<=oÎ<üú„=|¦=¥ÜK½™Ö¼B¢½š7©<xše½™\ƒ=š‘<Nà<’Í<üïš=ı[½×CÆ½6<‘4;<œ”ò<e8.½ÇK=g;~»\…½˜Ü ½Tó5=SW<w³t=Jù½½Ø(½ì=Œ=Ğ<Ş<vŒ<İ¸ô¼mªH=!‚=ÚP2:Öè¼û=®’«<=Ù+½„ªT½ÇşN½Ü`°=ş°ª==¢ƒ½!Ì¼ıA½JÜ<¼‚<Û½Ã;¤ì8½!Ó<¿Š<Z®	½{2=Ç|:â°g½ñ€=LNt¼ò¬‰<oçH=Ÿ±a;‹!C¼q»4é2= 	=õ>”<p"=Ö­›=/‡½CL˜½+a¼V/8½WÔ=ÓIS½®HD<ÿs½ªA½ÒÕ€½ßè€=Y—=Œé;½<Š¿L==»•;Ë†½Ú—=öû;j ¬½Zu[½Ïßµ='@­½[‡Ä½¥×=ƒ”-½±³¼©F'=¸´=S<>ø$ş½şd »E?½Nº-½s½6l¦¼ãLË=¿	t=Ï¼"õ9½ÔãĞ»—™½ŞqZ=hø=¸Nû½ö@ü<¶:=<¤åè=y?P=áÇ§=m-»© £»ED:=ÉûÛ¼X	˜=u…=*×½/Öµ½×=½È0.½¸Í¨¼Æ$3<¥—Ê=`§ ¼Pø{=šÇ(<”¸…;¬‹» FºRòZ<6h„½ò£—=;5†¼+<ÎP½#¿…<¼ñ¤»‹:=¬„=vÕ¬<¤Ü-½û½UgU½—"=efÏ¼ìÅJ;£9=Z	½¥›¼½{½?Ì‚¼[Yµ½ÆH,½O!=‡N=„”J½fƒ¸»/ƒˆ=¬¶j¼CXh»ƒö\=«Q=m¯u¼[v½]b<Ø9³»èˆº<]›=LmÒ:Úø_³Q•¼+øM=Š’¹i×<Af˜=õ’‚<¼Ç`½¶Æ´¼ób=Kk‰½LÈ=e€½û|½At	:L¬½šıX¼ƒˆ
+½3m%<†=²b@¼5Ë¼”X½,İ
+>‡	=2Üd¼û­ø½%
+	¾$Xö¼Ÿ•{=úÉ:=¼¢½À<"L&=öi¼ãù‰=…ì‚=cgH=ƒ&p½ƒ77=¤S˜=w<«lI<ü‹M¼ï!½Éæ>jÉ—¼Ô©=UYf½ÁÇ¦º&i½…Òİ=9<[A<j==K½=âT½’š ½)(1»*ÌÈ=îß¼p¼e‰½ĞMº*F»¼®Ü8½bq÷¼BĞ=¹M†<“ğ¹Ûf½5v=½ Ö;=@Èl½á›=ó¢½€z=ÏGş<,”Ã<gkŠ½¢#<PÇ	¼=~9½-eg=ìş=	Y;÷·ù¼Ú
+L=?—K=•<Xú„¼)Œ=p…Â¼Nÿ¼¼“#ï»ÔD½Ä¯½Ú=r#'½Çv=eú%¼60­¼+½˜O¶¼_#B½S0C½ıä<UŞ½E
+F>Æ]=[¡k=*Îõ½I-ü¼‰  =1÷Û½n§ó¼îB=Ä <În<ŒAlº1_±=˜4½Y=>¾¼†â;=†M–½©’¼õş$»É8»= [=ğA=ÒW·<ğçW½JÚ=+wø¼VN<3‚¦;sôK=Ó=Ğ]Ó<Í¹î¼D“Ê<,\ù¼â8=Ñ¯<RÇ<„|õ:ìxÅ¼ö¾¼â=$R5½Ó’4=-ËÒ9Ö„ö<W|®=W¯I=u]4½ÌDÒ<B<ïšá;ª½•dè¼P¥™=ğs<=Øw½†½Î<Ğ4¯;sµ<ß…<P5½SF!=>§¬<ì»>wÊ¼=Î£<´L=üÙL½‚šo½ı½3.Ç½¥J„=5Š¼@X!=Ã#•=d C;Ş8®½gËè»±dk¸_,Ì;Â”½6rR½÷=¼"*=¹	<¸%=°J…½v3#=½_2½o$5¼5=Ï›Í¼
+™½ÒÑ<ÿ/½¿~ =f”9<Ö †=®-G=nö¨: ,*½9öæ½ÁÅ½ßn-½DÀ =˜P„<	-^»øJ=|’†=M†;×¹½*O¼àÚ;.Dà;F ­½÷ä=“º:Ps¼ÊB½8´Ó<®	½ò› =ïå+:yÕ<Ãs>û–<öz÷;”é…;©„£<¢F¼á.Y»¶’B½:íd¼ÆÒD¼V³»Dox½P~E½WdÒ=jc»Æ)¦½È1n¼¹ r¼éK¼·T*½jÊœ=÷|c¼}¤±¼ä™³=(ÊĞ½·‡p=~•©=çÒ†»ÿ×);€P$»ÿ=;¶y½˜å<§g3=w^<¹˜½ä<u‚:C—¼©_=(’¹ª3P½Õ¢½­Æ{=i#»<:N‹½VÕè¼4et½¦·½Óğ¢¼!øu¼®
+•¼
+tì:Ær9‰|½êÀç<iáè¹d>§ê=ìÔ½Œªã½D‰=rù¼mç’¼Ş=&[¨½õX³¼m&ª=2§<Mü‰=D»¾ÔŸo½ôµ¼'Á½DÌ» G=$æü:¨—<- %<J0Õ¼ı»m½«“½Ú_,<ôù.=$µ¼=œİ¼}|-»Şl=Y¸î¼)Íª=øÊ;ÌÈJ=«–c=Ö‘½e×K=Zrf= Ä½µóõ½qÇB:³é½ÈÚñ;¸¯¼ÍFÏ=>èœ=<ñª=%v<“ì<…Ú^½;ˆ<î×;X€½n§0=D‰<Z=Ù+è½	œc<„_=¿%é<¸úƒ<Z¢ş<¸˜“½ÀÎ¼œÅ½,Î¼	åc;$øŒ=¤¶X=æÚ»}˜ºk×˜½ŒK¼m#½Ú]¾Gï"=lºË= /½b[Ë<iÌ=CT½v­¬<[>¼=N`F<Ô;ˆ¼Ğ 6½¡n½ƒ©™=S)v¼´è’<Lµ½5[[³•”½¶¡Î»jŠ:7U8½`h3=‚²}=Ïò¼rÿ×<®­¼pÊ€½q±t=¾$½2½1™Ş<F§½ÀÅ×¼'1Ü»¾×ë»€5>½8£h¼u/=À®U½Î=vì)=QkX=Üô½ò6İ½ÃT­<Ş'à»1{=Ù"¤½ÍV’º×‚¯=]“Ñ<yÌC<ÚÚ_=3OI<˜Xƒ½ï¦½©ò^=o[;½ÛÇ|< ‘¼PØ:¼V­=Şe˜¼üà”<„X½äë¼gj3==«E&=(GÁ¼ÇÇ£=JTš=ëßs;¦§üº²;ÖÅ<p$Õ»ƒ!~=ï‘½ÀÅ <9ã‡½`JÙ½p^¬½d2·»á{<KZ<q)=İÕP½Têœ¼¦_×¼á|—=ânÛ:K¸h=GØ;ë§1=âÜ®½šË"=V=(¡F=X„½‡4=Ö®½Öèu<R	½Úë6»»ˆ=¢œ=œr½¼ü©=æö®¼g"F¼ï¨<f%È»=½M§–=ßù¼ê1)=jîh½ÊÏ¼Ÿ„Ö½48m½r'ÿ¹ÚÀh½º…»Ê¹¼KJ>\=
+¿»(7Ÿ½×G;L×<P¹º½î"¼!ªâ<J¶<È3s=IZ¼_ =Æœî»>ï=Vİ?=½ı=Ñ+÷¼ñ/½”Óì<„9>=îé<BD½ş\ƒ=ïw½5š7¼ÍTo<¸11==‘=E»‰=Ô¹G=„ƒ;6®½=‚…•=Z5<¡d=‰Î	½)5= ‚`<±Ù½™Nè¼z=¿6Q½|¥=7…'½ÒŸ<JN=—Ê>=øÚk½õ ½NHÌ<i|"<WÉ‹½´<+:’"l=<<ú<Â`½‡_Ó<õ.”¼IÅz=„w—<x‚<sÉ¹=Kš	=aé=¤u¼CD¤¼À:A½Z•‚½º–Ù¼ÑÒ¼Bh ¾PÁĞ=‡£:½8tˆ=´^œ=H8;^¦é¼m»¸«»æ`]½µİ#½3¾eì3	a½6¡<½ı<\}Ï½àD’<z.¯½sÙ»LÀ%½ç>¶âª¼_û–½ş¢<Ê~p½¹‘=7</á~<½ı-=ä|¼ƒÊJ»n|5½Ó…a½M+½@°Ä<«d;¾<-cğ»]Mu=ğ)G½©ò½ım.»÷|=&%ï<Œ«W½¾×=9¦‘¼»Í½åñ½GÊô<1ûö;ÜÄ‰=‹ÑÄ¼øX<ra=§_W=¦±¼*x½×v­={Ø<Í»À»óç¼V’=˜Ò=Dï;mKÿ½@b¼UN…=¡É3= &¶¼J½æ,‡¼î…½Ã[½±¾2=};¦½5õ¼´”¶<-p½Ìí„=.¿1=^á	¼N£ºBHŞ;–Õ¶<<¥8;ëD+=bÂü<ĞA½zTª½á»«<ü3<R^ï=÷§¼ßù><ÙpÅ¼;î=±à=ş<€V=à¨$½[O¼r´½Ï{ºkõ;Î6=Š}‰»@Z=Ğfå=ãG,½cfæ<Ô¦<x­B½0ã«½µë(=ßäÒ»Œšo<o >M=‚<ß¬;[kŒ=÷°t=ZâÃ=,y¾Rø¼[¯IºhÔ‰½ª†¼£»=Étƒ<¤³©<j?½^–q½®^›½dn6=–Ï#¼¬m¡<u‰€¼•c±½%û½c÷l="‚=S?L="ß»J¥À:üZ.<%$Ÿ½ëŸæ=T(=«Ê¦¼ïÿ¾­R½É©»åÓŠ<§û»!>C=ü<.ùQ=YÎ†=\!½rŒ½±L¼¼	àê»î|û¼tc`=y}z;Wˆ=®†>½[H‘9ˆ"=&Öæ¼Æ‡«<»È[=´ƒ½é&¼ËÏ·½’·a<x½(@)<Ó†¹= L¼<!ºÃN¾@ÏÜ»İ—«¼vN½ï=ACV=©v×¼BÑ˜<<vZ=¬À»/º=—ñ<H×Z<¸1=r¡½¾y¿<ñò˜=û±à;æ{‚<ö1±¼F]³ãä¼¼ ğ‘ºGùèºıR:/¥„;µøºä`z¼<ê ½
+½,¼Û¼E¤œ=…]Q½)½–½ö ½ğZë¼Õ®;ı£;ä ‚<Y&¨½<,=œ¼"2Õ<ÿÔğ=Î±'=¡àÎ½[¼¾…×ˆ<YĞP=áq‚=mß-¼$K¶<y8 ½G•%¼g¹ÁºìY=ÇUB=\E¶½J[½ïô<™˜Ñ<wÆ¨<´l‰¼èåÁ¼–^|=ñ¼'G=m«¾µ½¼”Jô¼a‹Æ=]ƒ½Ğ5¼å]z=<t{=—ÿb½Şâí;AÁg½	ö`=Ü…:ÿ¼½JÆ<½Îï <Y¿]½’¿)½òÂ¼Åg‹=bú	»µ<ø¿Y½œ™—½6ò°<€¢½8L=`SB½nÌ—=a+:=V=+3½÷b =ç·ƒ<ê'<É/ü¼ò¼×=ªÀ <Õÿ"<CV—½Xé;ŒM)¼""=È¼Ëƒ<=ÓÄ ¼°_=½?z=<ñe–<b
+[;jó&=ıéy<…e;¼&d.½(ˆ½:l»½OÜ¼ì}œ¼à}c<Î7"¼c˜½=T/>æÑA¼íš/=MÏº½ü=F½°É=FfÄ½÷i±¼ÜÙp=ÙÙw<T7¼š¼P½åù<=]†B¼ê=øİ}¼¦f<|ºnx9½ÒWã»›W±=9ï,¼7:Û¼¸!¤»¯,½&^™=0ë'½ƒÀ¼ql=|3È¼¨à9=<K;%°˜¼;dş¼¨¦½<V–™=Ş®ñ;™Ta<\8½½C”%½Ï§#=dv•¼Oæ<ŸÑõ<Lâ¼‚±=×$n=)™D½B¿=c¸<€=CÓ½wu ½SŞ,=•"‡»ÂAœ½r==º‹¸¼ûr=º¤—½LÌ½F<ˆÒ=š¶=+å<Û‘U=e¹<°øN½äw½)W%½¿„¾Ì= M{½-âİ<j«<(d|=ÉE„¼’ =;‰Á;iw½&¼dï½
+z²	Ìd½áI3=¯í<à¾‚½îÎè<¨«I½sWY;é	ü;×»¬=³–±¸âE½¼I;Ê/\<8;eyá¼)§s=,Ò=ñ½=b:V½¤¸½1b½P¾¼Æ=²=‹Tx<`j=B
+D<dğ==1¾s½íæ½0Èh<÷‚<wÃ=ó÷~½²0²=Ò)½q‡¼{ƒ¸¼qÁÍ¼!ı
+½I†=ó»	½{ƒ;3ò=eË=R=<…g½§^‡<øL=$¼öºÁ¼ç’»Èû%=a6½€¼²¼¾ç£½M0ÿ=·>“<Vä½q¬à<ƒ½»Or’¼>‡‚½Í¾{=¼+,½t™===è;©úI½ÆLY=Âğ8=´r<Åõ¨<MŒ¼­N•;…¿<¸v:½Ú/¼¡éa¼T¾ÿ<¡|™=à»Ò‡=Œ'´=_‘²»Â²Œ½µì+½iŞÆ<|s=œA±¼Tî©<{­½a>Ï»˜`F½É‚¼’.˜»ı)<{á‰É·<šÔ4<mv¯¼LÎ»=ªT=æI7¾lÔv½—Œ²=é4+½”@½–
+ê=Ñnj½×¯¼I¬=_±=Â˜Î=ì(İ½7nT½*½C†0½³d¼íJ¨¼ËK,<“a=j¼^<½¤ic½­v–½†b<î3=*h±½ƒêò»#®¼òÏ¨=ó¢¯<˜³=¬­X¼*=lµ=“Ë¿½Üz=›‘=ş¦½Û½âeµ¼F›½O˜.=Ë½=“†Ü=éLé;k¾=ÖF9¼3èˆ;œ€H¼dò[=)¬¼¬Æ¼bD;øEH½Ş®;=_½^Ğ5=5<@(X=üÎ©=…ÿ\<`EU½ˆ ¼Çë¬½&ÿÃ<øÉh¼"‚<éD== â¼ß½î¼½ó$Æ¼4RŠ<$M½‚mu=²le=B½#2<Xy·=NUÙ<€#Æ¼ÇGa=gná;AYæ¼“¯½‡Ë¼£¬‚ºqá`<ò¶¼ïøâ:ÒEx³İ\¬½Î±=Aœ½Æ­…<úŸñ<y"¼Ó»ŞW-<‹F=ê
+ˆ½>Œ=•Šv½áRI½ç6Û<ôÈÃ½Íe½"5Ğ;ùL=Ó‘E½ÃŒ½pìm;„u½
+B>Ù]=¹U»9½ ¾“¼– =”p¼<tĞÁ½1aù¼»A=dáT<?b=~?õ<u=ÁëA½œ–%½>ë[<[d¼E)ƒ¼¿I<@´½[-Ô=Ïˆ”<?Ô—<Î±Š½@;¼tÖÍ;?‹=öB·<âÒO<}e=ßµ‡=âÃŸ¹gş;{,£<ÈaÚ=a}È¼Âè<UÖ½h—;6ùA½â±<¡b½gçÕ:w&½ˆ‚Š=)-†¼`½X=He½^Š¼E|½¨q=¸öÉ<ÆÉ€=påÄ»ÕL½P"{½0%Ôºïa)½l>mH=3ØM<% h½÷fb=ó˜<uB»â*?½‰<i7Í<*|Ò<+]?¼L†¼há¼ÅD&=gÉ|=f°»-—O»zªñ½*/L½âÁ‹½av•½.•=3%½s“Å»~Iñ=–Q="ÿô¼Qp½aL½h˜=öÛN½ÃC=nTœ<å´¼-=]L;›´<‡A¾;v¼ªğ&=™m½â]½…;=*6á¼Éqê<ÿšÿ<]ş@½¿Í^¼ùIh½²8½Œ·½ƒHU½ qû<8æÿ<ÔÔÙ¼ã{(=L=¾IºæÅ8½Æ£`=Æä<r§š<Ç˜;¼÷*½E*½}9™<çU»vÇ:ö¢½Ü¢\=Nm¼=^ÓØ=ö:P<ÌZÙ<QT›=8!m=ÌÒ½zhP;É:=çğ¼]Fx½íœ<ÁÎ:=½[=|^½d„»!3O=X:¨=ñ@v=äRy;J—¼mØY=Z‚ˆ½³D½Hö¼+½ûœ =Äíã;1€µ»¦<©;?–Ã<ï”¼t§Œ=]¥—»Yæ½Çñê¼“(½ÌvÍ÷¼Us½n2¹¼¦Ø¨½‰{4½å’n»Ô{$¼ÂL±<´(>ğG&½¶è¼yı÷;Ã„»z7A½úÃ–=º	=©yf=ª{¦¼ù}¯<J(W½.f³<R•¼5Ì=f™<œ¶=Qû†<=»ïC½ÜÒê½„§-¼¸+=§¾»>%–½0€=h“«¼©3(½hÚ;Tõ;¥š¼/Bû=™CY½Ûjğ;Ğ=³Àş<=m–¼Qa<ü€«=Ş9/½V“ ½¦âl»¤´=PdX½%ä‚½ƒñ7½¼å<ği$=§Ô“½ğÖ;¤ƒb½}!¼¥gâ½¥Ğ’=§ñ$¼|Ê<3f¼p—½Ã¢=ÿú<İå¼^¤=„>½¨î½,ñv=c¶ú?Ï;[­e½û˜R=L8H=ôÚ·<ì_4=I{>ãG2¼€ŞÁ½r,&=aÏ<`¢Ã=Zr-½°¤==N…½2x&=Æ¡N½…:Ô<–vY<LûT¼ü;‰43Ï;ìƒ<‹”ò¼v#=:ù;;8¾°¾Â¼×·!=k‚½^½%…“=Àƒh½ô‚2½U"=×h=	­×=U­ğ½…ŸÉ»ÑX¾½%½‚Àç»×÷	½v5k=¡o=×< =«>Ë»zÀ¼E¾h®š=½¼¤¼^8K½Ğ:`=Şã\=î–>·Ê=§‹<_+€»ŒFˆ;öî.=;$ß¼¤QÁ=¨R¯=ë¦Z;¶¿×½ò½ßÑ¼Ôî:ZÇ¼¨™¬=z¤p»¢>¼=WîÃ¼Ô}=7ÿ$½İà‰=6hÛ¼.R<k•"=Œ3Á½‹Ø<kı³<ÜNŠ;/‚<¨†»4<†=‘‡=N&ã;À^½ñ¼Ç½6iºd=—¥=Pú¼Ø­ ¼yŞô¼@S½£™	»¦7Ü;1ê~=^0=Øk¢¼÷ëI½‚fÁ=„˜‹½"ˆÕ¼?ÂÄ<õŒ¦<€¬0½¢Ã—½¬È¼©#“¼ås>=î­=Â“|=ÖU³ö	½N»$=c?t½‘ ª»¼ 8<%!½#ÉP½b<Ì<Yã”½ÇQÁ; HP½>–4¼Íê8¼-¶á¼¾ı¨½÷}<(ö£¼7my=ËÍ"<ÀT¼5v½ ¼˜=óbÍ="Ô˜½Á3½H¦ñ½˜÷2<óq=ÊÆÖ<xçŒ½_¨'½¡™<à<s@+¼’A<?§z=$ò½^°ºJTÏ=ÍAc<âfñ½]í=­$¡¼Fİ±=V'‰½7h=ê˜º|gL½Û-½Ó±=•ò©¼Î<ˆë<Ï¯¼{h½ÃE»§Ro=½7=Ó¹J¼ÒãY¼ãe³¼*Å˜<ìG´½¾í§»ÿJ½Î–¼0(«½@;m<‚4ş¼Ù~A½7ñ<Qyİ¼go<ÃA­»l$`=ŞE†=\é‰<vÆÉ:À/<ØH0½‘,¼}V½Xl(>°; =ı”½¬­!½&v »§>»5¤ˆ<|½™¼Şî´;Í=…ºq»,¼Ğˆ°;Áq»·Çæ<uf´<åW½c‚=Ùu½Úír½'&™¼¿½nƒ=xJ½hø<KÈË=>¼’~«:ª@¼£ü½+ŞF=T&r½ôÚ™<qÖM<âüï<·ih<LÿÜ¼'çŸ¼ŸÓF= à|¼5Ô½¼eÓ&¼ÀÆÁ¼îÉá<H¶º¼×ú›=1Û;vâ½pª/½ÁÂ½˜A=<óª½*—½²ç¨<Ó»ƒ÷½W
+'=¹0½Ì(½L½)`U=ı¼U<÷´<ô°‘¼ƒ½û6¼·)=ù€Õ»û#¤< Ù<×ë|<Òu°=Áœ~=&½r>à<0‹=dÑ€=î–Û½²Óç:Be=Twş¼­4)½^†ü;Cúp=LW=^*¿½Ü(‘»Ç×»ÍTù=
+Éµ=çu<y=™?»`½|/W½ÒU‚½É„§½{~7=)AM<›¬c<fÊÌ¼%c<_%<ÑS"<WzÀ<Ï<U¼µ~@¼6Ÿ½½		B•|½ÊYº•Ñ'¼>Ş”<@åj½”¬$¼şšÃ»5Ø:”>22½?¸!½^g= ì <jp¼d¡;¾TY=¼Ö=(Ò6¼•?¼lĞ½À9¼Šô¼…vË=9&="{3=~Î¼Ñ› = Ô½´¦É½»¶„;#¸=Sß¹Ï^½±Ø;X´½öV»ØÛï¼íy=ÈÍİ:U
+_=`P™½¦X½h)º=¢1³<R`¼1i®½Æè<%=üa¼KÁ{½ª›î»$%ğ<·Æë»T&1¼´ ½˜)=UÒ@=ÆV½î€ º:o¼°j;5L²½T›=öGT<iÌ=Ğø½LwŠ½5N‹=ö‘f=	€5;â™ú<\n½|7a<Á{B=Á=½Ü‰»å~½(Œ=1€=vR†=ª=?Òª=&Iï¼„ÿ`½áÌ½4.™<U#™=Øäh¼k¢=n~A¼Ec=»±Ä½—¢»ƒ)½Ş”ç<«Ş‰çU=Gåî¼xÈc½p=–&q=YP¾¿½ÛÃø=nnP½xİ½;k¦=ô„¼·Ï½÷+=ÔÉ£=_u_=ÊßÍ½8E=.š¡½
+Ûy½Sò:N¿•½‡.=ºÿ”=€T=ÄX¼nÁe¼<²æ½ <ğm¢=Ø½?#€:µìZ¼IœF>yÑ=bç^<ıŒ”<ıö~=œô6=(½=ğ7=qÔ?<îÊ¿¼äÏE½†ì¼ÚŒŒ<ÍCÀ<ÏŒE=üë¼¤J´=Šq‘»N»=¼¦{=åPŒ¼’¹u½P=7½D½ß=¢In½vü;—ÿ3½á×¼ =eÎ3½ğ(f½¦Én½WQ¼±vD<Êş½ª ¼Sğ•¼¼Î½r.; ×˜:µY½:+1½¾Õ²<ü¯U=×åI»¿Í9½š£½à
+j=&«™¼kw³<9õ=%õ<˜lN½r-Â½Èd</ï¾¼>5æ<j3==†;R“b³p½jÔ¼e½„S2=é•=	Zá<ît¼ÁqP¼;k£=ßÙ½<‡¹ĞaŒ½Ã\½<,=,B”½ƒ5½`ëY¼™Î<šuË<r€Û¼“@½°jç»Æ_>qñ±=Å8Ğ½\ËX½Ÿ"Ò½W„½²
+=•Æ:‡ûS½O0`½ÀÎŞ;D“¼êZåº›Áà<b¡ƒ=|~¯¼Kï<äAW=/ri=ùÁ ½Å<É=—°¼ÂË=z¢ù¼ö1Î»)œ<óB½Î¬½L­œ»¹´=Šr5¼´<”±½*^Á¼
+¨Ã»Ã{=~C÷=Ÿ»Ì:RÖˆ<~o=àO;€Š¸½Oõ»”À@½‚ñº+¼˜½»b=XW6½T}Ë½7=6½“p¼àTÅ;
+µ†=(!¾<bY“<4½4)ş¼¤C½ìÇ1=É³…½Ç	>g*‹=~†½2¡¶½>}=âz‘<§œ<M‡ê¼²r‡<ıˆM=®­€;ço0=èİŠ:+ê¼bVºGW=W.½=L<³^›½ÿ+”½€I+½p ¼Iïl;´V½nMó;{]Ü=y‚°<"[²¼è‰ˆ½+›Ã½J%f=¸H2½pğ<¹Ô;€.~;Eï<s«½ò!µ»jß83(:¼´d	¼Ö‹7½ÍË9½©Oå¼@‰r¼ş(ê<Yã½ÇGÓ¼z½2¥½ö¢L=ÄR½¤NQ½=ŠÏ<p×<DU=)Ço<‘nXºÇô‘½Ú0O=¦›Û<Á÷w=Èæ*¼,¯n½Ev5½…Ï>=…½‚·4¼Êäî:íp®¼q‡ü=ëÍ“=f€½VÃ<Q™^=iy=âŠÂ½Ïw»’¢=á¿Ñ:(
+½­;İEÁ<¼—ú<M‡N½aÄ=nú«<)ÒÊ=òôi=e­$¼°1:0*»|¨(½üç½|!w¼@ä½®ùë=®¹š¼ŸrN=‡¾Ì;6C<R	‡<ò¡Ã<xZ;<) W½Å“¬¼¶Ë`½<	Îıš½zÀ¹;By<°Æ½”ÜG½3¼Ï>Ş9ñwı<[m>ŸL-¼³²[¼ø½½kÂé<Yaê<%\½<€Gf=BèÌ=¼uæ¼@ôM<]~¼«0º<~„¼w¨=”=Ô­ƒ<šm	=rĞ+=®½sXÙ½³Õ¦<ó= $g¼„•—½ÉZ¨<oø«½Bé<=)C¼fÁS=cÑM¼±¬ß=æ0½mı¼]Ï”=SüM=Ê¾‡<\fF½ŒÇi=˜âÊ=ÖBº?½2³§<õ.å<&E<Ş'½ı
+½w2İ=YúÏ<Ü=½Äo§;ØC•½óá§»È-p½‘Âƒ=Îî;½~M=Ør½¥dG½²Ï<…~ï»´İ½Ø «<Ä+½Hª½»‚=²ñ¼ã=¢¼ˆ³½¨îÒ<:º=5½p¼!Ş>Íê½Xç ½îsy¼Ï~=Æİ=í?×»í2=ùZÚ¼KÚ;º¡½ağÄ<u÷š¼°#ˆ<©ì¦‰Éğ<yo=Œø2½l-=1Ì<Rç!¾¸:‚¼^á=Êí½8X½¦jÅ=ûÅ½I£Æ½Qò=y46=P>ñğí½ånk»ñ‡€½2–½o»9UR#½Ÿ%=_ãk=ymH=ä ¼ÚY¼}9Â½QP¢=äü;5Åõ½‚Pa<€`-=äß=ÏP=”ZÎ=Õ"¯;ólo=ÖÎ†=Ï”½Èl¹<¥Z–=K’;=Ó;Ã½R«ù¼ÇL¼èš;FMö<«fš=ÅY<«o=mŠ‰;d%…=Ôìj¼tÂ=¼´Ë¼û‚¼ğ´µº=½õüå;–*½áMÎ¼‹›"<‘L1;Ç—b=ÌH=¼¬äC<r÷'½qŠ‹½Oäa¼›‹½Ì¤=Œ=®¿á¼ÕÎpºsx½2Du¼’â¼§p7½A?=EG<×T„½’2&½:€	=já´¼²6½(h°<», <4‰9½‘WW½fh<Ãë4¼*=õˆ8=Ä&>=½£h³ikƒ;ª‚©¼ÔR?½j$»¥N»õƒİ<Ÿ7m½t°A½Wš=o‹¤½I=Q<sÏ¦½`Ty¼‰^(<Åš›½ '¼®~J<öÀ0¼Èüº<Êá½Lß¼_)½£’™=uH¬=ì0½¿õb½zPÒ½€ººUéÔ<¸Òò;!5½OœÅ<×âØ<q,G=òj<G³§<Î\=rÎ½•¼ğBW=?Et<åi½ Í;»,Y½‚I>å[‚¼–UN=9ÓŠ»w"½˜Üµ¼p?<¯j³<Vı¿;¶*[=Ô¼3âG½Ä÷œº_ûn=İÂ=³ö@½¦[<nıù»…ãk<VåÚ½V=ÿØ×¼¹7p½—xù»_¼”;ì"½—İ1½Ë `=ïƒ6½xx´¼ Öú<,ş˜=„8†="üÑ¼šy½ù×¼Ï+V¼Ø»ê<ı½˜«Î=ô­%=½y<?6œ¼#Kf=ß8(¼iVÛ;x®×:a9<”ş<8‚½'qÊ<d=48<|jL<o!»Ø« ;&¢¼Ö©—½›d½ï‘¼‰&I½NbŒ;¨„y¼Çg¼gÃİ=us¥»ÓI½Ë ›½»[`½(Æà=‘xä½XÒ<{RÈ<Ud»L½<^_È¼P@=èÉ½p–¼<3j:=ãŸß¼W·ñ¼Ÿ¬¼kÛT¼‹q=±h½&uf¼päq½ôYY½Ó7À¼6s½ûF½·Õ9=ş“Ñ»rVµ»3X{=gp:Î›1=®>Ê¼(2<ß ¦<ˆ²¼d ¯;>ƒ½uP¼§ø^= ,½â¯¼•I :>œ=œÀ¶=¸å=×'c½+o<‘w=aOU=ö€o½Ÿûx<€ã=DÁà<Ş:‹½AG§=CQ¼€·b=—{‘½L]¼À½ñ< F=ø˜Š==õğ=ï8‹¼ÅÇ½ĞÁ¢½ Ø(¼[Æ½áó´=	:Ó¼í<ÃHƒ<`.È<5ƒD¼İ	ƒ=Ñ¼-½iB ½mqò½-¥	ÜéL½{VÆ¼Q~¼˜ÿ£:,O¥¼û‘ö¼§2½ú­<ñ½>eõ/;-Ìà;N0.=±†<ÙÆĞ¼ó§3;ùÍ”=‰,>–2‡¼0ò½ÌI?½„a=©g¼²b>\½5f==•<"h<M3¼¿¾k5ô;DuV=tÀ;L¤»½º;t*B¼à³¼ÙWV=y+(=*Á¼Û>š=üİã¼U†å»]yß=<é¿<m‚¶º¯- ½Ö‚[=íO=Y¸[<GÍ»éñ»è<ÉU <˜£Ñ½¨Fx½b4¸=AeA=-ÒA½|t©<í¸?»Z4½(a½ˆ{‹=Ò%» 
+=T÷m¼d‰½Éÿ„=ô¿=?Z½ìÜºÂŞf½8ÔŠ<Æv=ŠÁb½Óè:Óqˆ½ñã–:¿h=ÊıË¼I:5=u¬">+ï^½ŸY*½_úœ¼w<Lc=sœb¼åˆ€=hn„½ÛòÅ»]@<£½½’¸êÒ<Á²‰e’½cæE=îÙ²½½8=ğ„9<ÏSú½ÆÎ½ìr’=´	µ½Y¼ój>,çP½¾Q½„êØ:5¦=pf¶=’k¾tñ ½	Úˆ½Zs‡»ì¨Ì¼ú&¼Ò¿üº„:=jm=-Ø¼ãÎ£½"ô½úR#=ï»%£½u„ç¼•¸Ñ<ëe=ü„’<ÆÎ<H=ÀæB<]V¾=uJ½¤e=D±Ç=[’¼Uj¶½[/˜»q/½n:=Ä<6¼aµ=î,)=ú©ı=ˆºF»¥i<ºHV¼X:=©¼¼Ş”;>ñ;"!W½bº€=²uî¼ù¹ˆ<	0=ıI²<4)=ûô <ŞÃP½±—²¼G’½N1¨;€l¹½p;=qzA=`Y¯¼2ê·»*E²½ó¯W<¾SE½D×¼´r=‚}<=•Í¼Š3½qÜ?=|p"½²Ë»¼üµ=Ú4û¼¾ÿ$½àÁi½Àİ;Ö=ºò	½&‘^=-¹>¼”Oe³=¨Ö½€1@¼%†°¼¼ºg¼'ş=ÔoÌ»øŠ½x¿
+¼ğC;<Â„»½{D=úö1½nt½_A;@+&½ºKà¼{/=$m=±…<ËA¨<xïc<²íÕ¼¶—•=zñ=©ø=İ¾ğ½ù¾Tßºl}¼u†İ<ü~‚½Wè›¼~&L=@0;À»ŠŞª:3s=ô‰–½6*£½;U=hr\<ë<¼Õ½¼$.ë¼V–á=o'p;Nò =Pÿø¼yÔº¼2/-¼Såÿ<œã’<—-=J¶M=#¥ğ<ú¢;²»4P@=ø—=ç•½‹Z ;¿B<¼}x¨¼ËÆø½_O¼7z½,Éµ¼D˜<]Š
+=ÅdV½÷Œä¼ß/g=q¹½İ½¼ˆ¯µ< ¼¹¼å<×Îö<	ªü»„¸½dC‹;s‰q½Ğçv½©@Ö=øğ<»!Îƒ<ß½UÚ<Œ…\½ı1¼Š	½Ym1<z˜=12½nĞÌ<4L=Ï=;n†=H×Ç=È+l½¨ÓÜ»İ ¼
+'¬½ó:&¼\z½ ¬¯½b\=&Pû¼bõ=·><~Ô¨¼	Ï»¢OC½Ğ…=µáo½8
+=ûÍ¼ej@=ò1=¿ìù;w»å<”ÜX½q7¼(=ìL©½'`½ÿàáº±áºn,È=°/¬<Q‡‹½«ø“½ô½»	6<—½?±”<Hà<¢i¼‘û=Ø+=RY2½Ém¼E.¹<›UF;Ö	=:u¬<-GÁ»´nQ½pr)º'
+=äyÂ¼`¼‰˜`½1õE=íı=&>œ´Ç½ş±P=EÜ½›vÕ=d•½ú±¼&mt=ş“g<zm³½,°<ÄåC=Ûı¬=©Fı½±& ½Îã<©L«=ı¢=;÷Æ¼Ü¼ß"<@!L½#ïŠ½Z+;5ö½@=†:`¼¥ñ-»Aƒ<­õ<"c”<ìÛV=ª^w<Ê#.½ƒù½àHŸ½ˆ¯°	Â¨¼øÈ<‘O:vâ ½¬½|Ô£¼§k¼£ì»#\÷=^=­a½Ë¼âÀo½§ñ­¼¥s=œé…=hñ˜=P;¦;6µ0½²ËF½¥ñ=C…0»¤´>é‚¼Xr¥=P›¼¹g½fùm½›ı½Z“(=˜
+<ÔËÉºZµ½Ù#=Ğ l½Méó¼°0½I”‘¼TO,½p¾€=¨Ä¼ek<>©ë=¶¬;P7¬;;Ê½¦›Ç<b<ˆ7=Ô<"÷=±Îı<,&V½“&½é¹¼Ûçr=6=½;÷=µğw½ÉA½Å„ ;vî½u‰I¼%@Ç¼KÏs½Jç"=b‘=³E=•ìß<§ä½õ¦ï<v­œ=åò<b½¬
++½	Å;**—=@¦œ¼Tˆ=>wï=­$½ªk½'!f½mV½<»=Ã5½rÛœ=ãìæ½5C¯¼µ€Ó¼ÂL¨<S‡‚¼& =_Êç‰y›&;f=¦Yç¼—hƒ=gCç<áË¾w·¼²=‚ñ^¼³ÎÉ»˜Ï=±vû¼‰»•Ã<®S=VQª=Î
+ô½ÿ¸K½Bs½M.g¼¥ä€¼ÅÜ(½Å>É<ãß™=î‡š<»´®¼%)½ÓO½õ«=DO=™íš½Šnm=AE<l!é=Y9=º=­½x~à;Ş¦/=Ş¾=ˆ	h½âo­=Ó²=u·¹<k²½²d~½t†Y¼å=ÀvD¼jÇë=˜r›¼´<r=½;èÀ¼ïû»¿3®<'ş1<ñ¸¥Ÿ<é›ß½ßÓq=óÚL:] J=¿eÉ;WİÖºÛÖ®=›r= BN¼~¨D½ğYF¼@²=9´à¼]3;Qh=C·[½0w4»vPÆ½²É¼<›¼(Ô<S.Y=ÓŞe9$Õô;ß|ú¼Ş»g=Ğ$r¼Ä³€½$Ñ‰=œ¨š<(ø.»%½¶ºú¼j·S=}wú<Qw<îÃ <¡Le³vñ‡½©½Üô¼‰x‰;ô¿J<@AÓ;@J½(½b<Ó"¾(B!=š€ø»wóY½®/ù;µA˜½¢]…½j/´»+×<Ş„¸+£i½I¤¼¯R¼š’=‰ˆ=dö†½»ó7½ª=
+¾d9b;j,=yOÇ<¨a±¼B¢½y'=›”8¼¢=›uÕ<¬“=—0†½1®I½?¦Ñ=%ğ<s!ê¼&ï¾<'ø-½Bg£=w8½ÒüÍ<úş;½hEI½óz&¼è<5Äæ¼:½÷»ûz‡=á}=â <æîÄ;Ùö<œvŠ=y—u½0Â*<LK½\²<lÃ´½ûÒÔ»0õ¼5h½v½Ió‰=wø*=9Ô½UñT½Ê"¾°Ò/½ÒP=eá¼üS=‡‚=½B‹½'<X¢E»QŒ½ç3Á;¥&=š§í;SÒµ<`Œ‘½RŒQ=:Öå¼Ñ©=YËA½Ş»†M¼~_/½ÂL“=V_°=k—ÿ<‹.=sò˜=Sæa½Êt;×¤F<úVÇ¼gy=' 	=‹¾Á½Ô‘=’2®¼óP>âƒ=ûts¼ìZ­½“÷y½rT;ââ¾½ƒñ=ê†™ºÙ¤Z=[Ö;½]Z½{=	@›¼MÙ¼`%¨<Ş©»©%½àuê¼­¼¼òYl=|ã¥¼ÖÏ¢½u®½ı‰½¹»ÃGí¼5ú=ïÅT¹ÄÕ
+½Š¥=î!=˜<¯½à,=±”½xN¼Òd<È'`;¾y]½~¹ô¼=p<=‘º½;%«<$Ü½Ó/È<)a>Â<$9Û½‡™Ğ¼tù¯½ş…=é²Ô<kã!=UjŸ=TTğ;fšO½f\º³•â<âRH=Œ5©½0‹š:î‚Ä==r…=+Ç=PUÇ½Z‘8=ªõœ½‚Ï˜½’©u½ÏÛÅ<ë.½4-=ûw½Áú1½(G=ô/í¼0aõ:‚¦J<:Yº= ÚÍ¼p²(½áº¾Ìh
+c@ø¼SµĞ;Ñá¼s«=½<ëã¼°ú»Tns=v½¼¿=É…“=¨÷Ï½úS<³Ã<"Ê¾<'«¼ÅEÅ<şæ\=Ñ¾×º8f ½eL–½ìÙ>«‚=]N=yÙM½Ä	¼æ6ºj4;à>½|;¹½²
+­<?T¼C@=O¼0Æ«=daºÜ½í¾¬=¥aß<fZ‚=ZAó»âÁ\=Úš<K
+Š=Wáì»l]½ğ²P½¼U&=é:a©»åòX<ªÉ»¼Î…<µ¥úºN /¼P=‡•
+<Šˆ¼/®S=ä”=ÿfk½ëï£½˜\»l‘5½ÓÎ¼Ä=/h¸<Ú1¼£Í=Hº´<s½ß\!½÷kÉ<Ó»Â¼½ºœ=E¬œ½3m¼öKh¼ÎW‡»tÎ<‹ß=&>ÿ)¼i¬¼!³¶¼Ş÷'¼Ö =–Y‹½eù<›<l½Õ{‚¼—oö¼GÏi½ˆÆ'½ç»3=»ˆ]Š}><*#ß=­Dg½_yP<½›<ç%h½‚:z»6Ğ¬="ÁÅ:“½©¼X¸=eË,½Xçu½_¸¼s"½¨ï=p¡½H0&¼9^¬;¶ë¼0½Àãı<’CÇ¼³"=€õ¼ WÛ;a†-=*ı;ÛÊ÷=d=ßìÖ½ ½+É2½O>)½4x‹¼KI„;«Qé¼Z3=)jO»r9Æ=C1’=6Â½c{G<e˜¼´Ä<×"=™ÆR<!Â=J½4L@=¹
+½4/½r4»øÿ)<§…<òÖ»äzl=æÉT½iñ»@¹
+½µt= Ú½é …¼
+ÚJ=Ë9;"“Ø¼ĞYN¼¥l/»ÆGë<ŞÌ™½AØºMz<›½ÎÚ€¼g½–÷½¡ş½“³<r€<¤üb:ÚÕt;—î=½?>À"n=ñ=‘=º	´=67<~L?½6è½‚¿=ì\A=OØN¼ñ=‚;­@£³ÜâÕ½†®<½¨ <y¶°¼à=ıÀS;œ`"=§=¿Ù~=v’D½ê¡Ÿ=eæm½Bw½	Å2½æZ½‡ü»4öe½õ‘½‡	½_¹—½¤¥l<İE¸¼ß§~=T½Sî¼Â½£r¾Ò)=¸/=(2U½ÏÒ»;¦Ğ½ r=\mQ;×_¥=X“D=¨Y„=–Ş˜½ïãe<Ûh½±´½ÿõ»‘ì:€ú<½éš=!q3=-0<µâB½{©»Q•H½éÀç<ş@¼1&<0ì.=İ’<lr½şÔ9<'LÓ;™øJ=ğ¢¼æ©?¼02©<vÎ<åv½‹k½¦½ş]<z#¼.O•=CûH=!Ù»I¢=;@½ş
+<ÈÜ;ßC=“ “<Û ½%#—½ÔÈ8¼Ïlx<î*=–Š›½¾_£½(âL=x²=ŒIk½Ÿı‚<vq^=‹¥P½Íå<xi=äş.¼ÿ¾	;®’½ÖÎ¢;®==8#½Õ8U;Ò­ä¼¼äå<;Õo¼@g½?Í= h7½Íà½éle½ÒKq½ÜœÙ=‡E“=xƒ¼º&k½T,<Ücş</¸¼=üÏ<N%z½^xL=˜¶@½æİ½èÎˆ½øJ½¶á…=Nu}=¥X»Y!½J¯½ÿA€=.Ñ«<›&½ØkA<ä=s½od…¼êİt½C+ ½Îï=Ñğ¼û+=õò©¼å#‡½Ç­=Ëxø<gê=Š†¼½°¼ÛlÒ=™ ‘< Èh½”ğt<~=Z¦#½âm`<<¤%=÷t<?»=ƒË½¥Ä¿½ÔPºE©¼ãà¼Ÿíî<EÜ½ô4<¦•=İ½­‡Ö<r­ÿ<Æ´=]ØŞ=<½dnE=oÌ =ıÂF=á<½	­ê¼5\˜½^=×½Z`»»Yç =¨½rÕ'=FÜí;Iu9Lş?=o©<1‘:¼=¢Ó»üĞ<Ï„Â<ï“§½âjå	x07½î†û<ÊYè»ë³½ã½9¸½L,½+ğç»Ç3•<yœ=º²X½4¢½@•¼ø0½§-c=êOE==‚òŠ=…¡¼„õ%½‰Ô³=<E½g›£=öÅ7½ñ¸†½Æ*Ê».åQ=ú‘r½ùˆ»½â\<·ì\¼­¸A<oEº»'Ê¼Ë›zºÜ1¬¼î>ü»¥8½ê,=ß†Ÿ=qº6S<sƒ¡<:’˜½ª~,¼ø&=>=&œ;·c=Q>¾;EºB;Grb¼{³½jî·<½Lª=Àò¦¼ïÂ¼=n=¢Ÿx<ö@Ğ½ ?6½¾†[½¾½ë½Xô}½Ÿx(<¾;a<,Í½k»J¼§Î„½’áë¼Ù&v<G©½ÔÚ!=}yC½2Ù"=ÖÆ¼]I<Ğ}ß<Ø¬&½üÊ=­Œ½–8j½Q|L=ŸÊ/;
+´=ª^Š½ÜOÄ<cüG½ï´±½ı¶‡=h†c¹p%<ïÌ:¢ŸÜ‰g…¼^-=ce6=5Ù=ã[»Æ<k½™$œ¼¤$.=3ù¼Ñ;‘½
+=%U½õ=f¼â ö<vù=@Á®½e§h½Q³ğ¼2=Bö¼oa<nÈ<¦«= "o½[¾‰½]»n<Ë}”=2'=éÁ½¨ÿü»½DÉ¼ñ†—½¼ê<ı•<¼_¼ÕT€¼\Øú»Aİ=Pğ«=7³‘=xò>Ñ½¡½üşK½])…;Ñ1¼
+n=UI<˜A5=:¶N½ü}Û<‡2¦¹p9½[EÀ=»½ˆ¼Ì¾<W”y=|=‹$½vŸ=>:»<ŒBq¼Šèº6Òõ<Ykò=ıÚ=}sm=Ùb*=LÑ¼ê„=†Õ‹½júÏ½z‘=7"Š½„Ò…½w´Æ½:½»8Ç½D½‹¬ë<e=<á»/`=J=,ç«<,”p=Šó>‘Ès<ŞñW¼)¾­½,ŒS:år=dàè<T¡f='e¾¼¯Wk³XI…½™Uº`¸·»ÁW
+½^=ÇP½‰Ë,¼â¶Mºl£½¦–˜¼x^U=¤¨³<2ÆÈ½­ï</<iÉ¼†<À=É»â‰½ªè=0rI;Y´=M½"JN=Y‘½f#½Nº=_m©=9¯Â<-Xw½•o¢=[Ş¼=¿P§¼Ôu=Ù‚¾<ıŞ¥=t¼Í»©¥Š»ó`–=Y’º<úÒB=Ä8l½Êâ!½ô$<Ã¨=sùá=¨±½mw"¼ÆT½å,Ñ=¶Ó¹‚Æ–=be!=iSÉ=R°'=×½íuI½2ck=6Â®¼‡‘½`˜½Ö*‹»éÉ¬¼#²[½ß ½Ş3ÊºŞud»Ğ¹š=M“
+=‹ë½’nG=‘2É½ åF<}
+*¼Ğ?A=ºsf½â=/Î*½–-*={C6=!‚ò¼LN‚½´X(<HÆ=!/«<Zúl¼Å _=Ô”/<*Ç<¥„;ã	™=€29pu‚;-	=r˜\=B_z=——ƒ½b¹;;<¼Î<K=½Jİ©½¥ğü¼¯©¼ˆ\ò½Hõï¼cà<{ìô=¸:½´¼·<Ú›‰<ú>¿<C½Òj±<±\©¼ãp’¼Ûï#<£^‘¼F¡¼(s_¼ş‹b¼£øN=öÑÙ¼õ¶½‘S[½³S¼Ø+"=¡iê=ğA ¼ìë ¼+“D½ Ğ2½Oò}»8ÏH½Š?=BŒJ½2óÉ<Ì’=Ñêª<ûö—=Øú¼ ìf¼$€<JÎo½‚nƒ=8SL=;Ÿ@½¶ùÔ¼¦Î<[V<l—Ã¼jØ4<Üv»8>kİ»4ÜÜ½¯ºş¼A\Ÿ½J†=˜Lé¼¥½ªÃ¼üŠ=vë}½E»zJ=½*=nA=!†~½¸v˜=;xÇ=æïÿ< g½‚4<=õ¹º¼KØŠ¼"¹¦Ü‚<X¤M½´‰=20¼x¶¼ZuX=ÀÃ„¼ƒeh¼¦Ø°<ğò[½4Ó:½=¼17ç½bÌ:
+òç:‘]¶¼K·I½ÈêZ½ëîÒ¼ú{½N?¼)Ç.½îıÀ=L^¤=¼!¥½–·ˆ½ ´;ç(=#=È,=«>=¶I=”¼¢± ½äÈºæ‰ºï²=VÕu½gUÑ<u²®;şxû<ÄîÓ½Ç‚©½Õ‹‚<æ]ò<øî0=Àw½Ê\§<ÀÜ¼í=1;İ¼…³½Î¿>ú¥`=Zş3<	Û<„W=î¾Â<ìjÏ;£‡< vúº>;dÈø»Ö;D¡< ¨‡<î’½ÙVM=h½î¯£=?t
+½¬Ğ‰½õ4=ã¥s»%F½ÁX¼Œ7b£|½çüF<ó½^ü<.ÄM=€È“<™ª¼*^¼Yoù;[ğ0=İX¼ ”Œ=·O¹»…Å=ú½’Gˆ=Œıì»™¼»‡Ï=·Ïƒ½±yÁ½[ì[½<ÿP=_2=Ú³½½m
+=GY{½>.™½«3#=¼è=Gï):íÇ<=; Š;ÒV=Òº£¼¿8­=ØØ<ĞœD=ª¬Å½”H½±ŞU;ä,W½¶ÃÙ½¦lè=º­Y;*Æç¼²&Y¼ÎB‰=úBÛ=–+ò½½4½‚=¹ÇÁ;+ß!½*«¼­Á…»P¸<{œ>½¢½?øh½hW5½WÏ‹=O¼KwQ½
+.}=½Á={=?Ş;ï™í<yw'½Èàº€ë5=HÓ<Esö=mÊ=%g½õ}}½Ğ„ø¼ã³¼íÁ¥=5+=@Ã’=Ì`*½X#=Ÿ¿­;ëåZ¼û‚®=Tg=ˆ#Û<§ 2=@Àb<C±F½êX6=ŸŞ¼¼«†b='»9Œ±‹<M@Ğ=@g\<BÚN=Ái¥;¡¾n½eBä<=½*P‹½ºÚ£=NS½¬]=¼cÁ’½aÃF½ğì{½Î½ Ç<ïeÈ<ËEª<Nø!½Z0¿=À±2<×d=n€=ÂÌ=—è?¼Èú½Èiº¼GÖG=íÍ¿<o¯µ< =S¬’³o’½'Æ]:Àµ=ƒ9	½”;$=]_½xšt;ım=ò<E½{(•¼„#9=ç
+=öÅ½†Ìt;	öX8’˜½<ïØ= ¼¦=çJã¼d¦½s§æ<¥l½ÿ>íğ¼2I[½·½³Ğ~½m==ªoŒ=9ª\= ‡”¼¨Í<ßÖÛ=mÍ¼N°Ù= ÉØ=AŠ<ôñ²½v¼¼A=z™Ÿ¼¡»œ¼ğ.<<š!F½jÇ<¬Qß¼‰·=`¦¼œ5ò¼CeO½l¦†=åû¼®é=8¸i=÷¾=¥
+a=ö½(½şU<zĞ=Ú—¼)ƒ´¼œEÇ½T¨ä<>\½WN©½o›½ba½R¥k;ğê›»âL<ğb…½¤şÏ=†'½×W½nm#½½ïhd½Õb»B>¤¼Š`û¼M½7áK=á\½Ã¸ë»´ÕÆ»şÍ¥¼ùÏb½ı
+=HJ»¼SÅ¿=Kì‚½É%=‡’½üÙ)½³†K»œcA¼ä)ôºU7;ÕÙF=n‰‹<H®=»¿Í¨<SLƒ½îù¼×Ô—;EäO½\Ô>`1¼S^=•Ü¼WJR½6EÔ<-]<<l‡a½Ğ¼©j¿<XE‹½:4½b·c<òéK=[SÅ¼÷bØ½Åïª»!a‚½¦S½c×k½%çF¼ƒ;ç»ÀÈ,=`H®¼ùÇ¼u`½ßÜ›<}F)=+mûºÅwt<ªÜ½BÔ½Us¶=‘¸=ÑŸø¼*K;=·ª=Ëê_<Vd=K_½ªÄ¿¼Y¬·¼È ô<’‹ç» ³…<P ğ;š™<	V¢<w=o³E=4Døº¨î =±ûm¼u=rßé¼Œß½Å/.<v“7=Ñ‚<kAW<\Ay½M¶Ã;N´½¹g¼´!3=‚¦>mÖ2¼O1?½åNÄ<jw†¼ät¼Êæ`;U/d¼Õ(<@Ü§¼v=˜š<Ñc÷=½½p¾¸ËS<‡^º<é½ÜY‡<b¯½¦°.
+åˆ;=\41<·¼;AŠ%½ğú¤¼ v³»ù‰:¼½ØC>½hÿ¿;T%¼j¨=÷1¼¼)Ë»í <#I…½`;¼BQ,=iJ½ Ù½ *<I¢=Ö;™=óŒt½ü"Ğ<rá=aº½6¶Æ¼ùL½O¹<ç=¤‹½7ÂÅ½ì¨L=\™\¼ª2É:··L»%Õ$½Ø2®=+¨ø<´)»»şÏ=!ï=úp½Â"<(WU;Çkø;
+	L=‰p^=ÉÖ“;Ğã»7Û¯;¶ß¼_	¿<Üç¼Ñ
+ó»Ñm?=å¬<gR<Ûˆ¼ºª¨¼À×=GO½—)Ñ½¬J@½¿´=‚«Æ½‹±›¼+Aè¼?™ =ÃT:<úB½FÅş=`k³<Æµİ=ÁÃ
+½<<\ôŒ=S»X½Ø³;±Ú½Ü²·=sï½ÿ]2½&Ğ­½BÁL½h5¼˜™½è¼@´%½ŒN½§Ú¤½Eş=¶êŒ<0\½uŠ*á¯¼=Î9=Vcå=!Y=swß=nù+½gÉ¡=’`½Ó=¹Ü5=Şú«=ï–…=Â3‰=çKÁ¼Š#=H·;_[½`S;}h<Ìì?½_†=wx\=Nä‹<Ki=Xª³<.Êº)©j<9n}½“B›»<×<Ïé|=
+Q<<L½Aş<Xı½½§Ñˆ½Z¢¯¼öh¯<®2!<Õ'=¢ëğ=Ö ½„ì¯<È;‚;I!=Á»÷¼‹ˆİ=Üwy=úr¼< ±Œ=Î£;‹Tÿ<8›Ø½ÆZ¹=ô›ı<-5<E2¨=v~;6ô»½ö<´»wø±<«‹Æ=”;™¼™ã€<Ã2ó<AZ¼ÿ½½›lN<*Ú1=˜QO½Œ³Ë¼Y=÷á¾O=©>3<i!d½E¢b=¦ˆ=ÎxÙ¼À[­½¾W¾<U{z<'>v=ñ@"¼N#=7rİ;¾j¹=%`i=U£p¼oA=Œg6>kÉÉ;Àˆ<t­y³*5•;nÍG=/Ãû¼ÂŸP=B€?½Á§]=ç„†½ì/);ŸÌ½%ÉË¼õsü=!•!½·L™:r«½Ô?Ã¼‹’½<®f½ZÚ¤=xLC½¤yÑ¼ïV½;CÚ;­N±=É@=½d"Ô½OÌm½†	E;+~w½AO»7Ú6=| d¼òõ9½İÎÀ=‹‚|½_û=3Ó:„mS»ìç=H·i¼°e~=Gı¼lfh½˜vS½Ç<»³I=à¼a^F½c¼m¼{?…»¶	ã;÷<ce,½U½‰½òU“¼ğı =ÉNÏ<ùà¸½?íÍ<ÿ(ª½†¯¬½Œ’=U¯²½N1å¼9q6¼Œœ½½,½0åA½$ƒ=¼ó=úÏ¥<UÂ;2ò”=%3<Pat<z%»;-;Ÿ=À½üU;W­ã¼IH½—¼=ÖGË½/ÑÊ½ji²¼Çm=šK¢»`ß\¼Ûj=²ªÒ¼	…›¼Ùâ>»IÊ›¼iL#½ı×‹¼Œ’İ¼¦¾“=¨ğ<ŞÃK<„î¼uÛ|=_ü€=wô;Ğ4Ğ½¶	i<M)½:»½Û4<ØP¨».>¢N™½b-¤;±]â:xXJ<nf½y=ß¸¼¼Ï‘½”•Ã;¤£U¼o¡½0(½c˜½ì°[=ıyÁ<`àÂ<?q½sÒ¼À‰= 5Ù=Ã+<vöQ=cT´½€^–½íç‚=|U4½)—'=A;™½¯†¼¾«¦=‹óû»£&=úr<{ş=MkS=‡g(=½¬<ÊM¼ÄÆz½L}‡»l·¼:±Q½‹B>½á\=rÒu;Æ|=7-.<…_K½ß5=2-L½£ÿÇ9c²m¼¸çÇ½–é<ÍHC=¯œ½yßE=‹)a¼)Éz=¥R¸¼ÀÚ;sW=“à5>ô§¸;¤R==|Ê»ğ¡=©¾½.PÌ;
+Â¡¼Ãùk½uû>=ÈF_<Ó‰(=öˆÚ=0,=Öh6=^‘E=d½»ñ½¹u;L¾Èšş	ppb=O¸=2·}<–¡–½~“<LÙj<ÌŞ:½H*¨<…aF=‹L=ŞØ½Bg-=•vC»ÿÄX=ß=”e3;¨V=‚r =IOJ=8şÆ½5Œ=OBD=ïô=ïÉ¶½ <‚C<÷kı»0½20¸½Ô«<ì-˜¼>æ·¼}]Ó¼9÷æ<^@¨<Çæk»e¼<7E–½¤ Ó=íØ ¼'Vk½òË¬=ï:¿=ZÃw½dƒº~­é;Mü=üÚa<se¹<ÆBK=sqI<é©Í<ºÔ½p–&=<èÙ½W™<^÷[;o€´½&™<Q/½ÙÌ¼oàA<Â“¼¨)í½V)=\@¸<Ğ4…½w°Ô<ã‡¼:¥æ;O„÷<Õğ<ÃX=˜÷-¼(Õ=ÉRç½É½ğ=¥@;½{¶¾<5­’<Œúq½ÿ[=ÎÌI½‹ì½5
+´½A‰-=ªtÂ<'g©½›ú<³Dı½Kµ¼PººÔÂ"=%ZĞ¼”yˆ='kó‰—8¼óyİ<Ä² =5	=Y	k=K>ƒ½ÆLì<æÈb½Y<²<5v½íÌ¢=0O&=_!²<®zU:5=jL<$W“½¶m”½»V<=©÷½²ú…<:‘m;>ÛH¼	E%=£‹½½òZ1¼Ï¯:Ïõ´<€q==ÌZ‚=‰Â½«—¼Îm¼…W‘<Ya½"Á<V´<·&=xÀË=øQ=ƒ—½šâò¼+U‘<n=³îu=…I=Z1=¾Ó=‡!q<;–<¡Š¿½êc÷=÷e*;Ú~p½ÂA#=_*Ã<íŒ­½’àñ;õâ5=»å=¼hØ¼Í"n<K¥=9à”¼wì‰<g=ÿÑ¼+7,=õ±y»e¿®½È9H<-iz½q‚§¼bŸ‰<Ğ\¤¼PğM½¼GÃ¼=õ5<ºé‰<ö<·8è<™›=Ÿ?†»„P€½	ÛÇ=Lúé;¶l¼~w‹;«s½Æ’‰;nY‰=ÉÃ…</UŞ<ã«€³Ø†½ã	8=v–½(…†½ÛT…<_ğ:½>_&½Pš¼í¼¼3ˆ½¡=	]&¼X“½7eR½u¶ÿ¼§<$¼¬„=j¸á¼M6½Kš¼h6Ì¹yâˆ¼±ØÃ½`LÈ¼ôY½0½m_™<{=UÁ×<yÕ½b¿P<øqm=”´‘¼<”<*‘=ú×<d »§M½Éñ=s±¬<¨2<£ººŸüL½yA6<"<¼m=Ğ©½Ín•¼­¹¤< ÊÕ<g[ò¼)Bµ;Ô†=.J,=®9¼¼öÇ½9Ÿ¼ŠÈr=|İÙ¼§5¼‘ÔÛ½Ï#–¼]‹¼DÄ½]’‘½¾×¾¶q=„X=ÇSp=¢°;\7a=ÖÛ<•ï‡=š{°¼1}=Ş/\»Èx-=¹‰3½Zpë¼»iQ»8ÑV<HŸc½ÑØy½çÇ=ïz/=j!í¼é¼Õ<ƒBV<Õâ½Oû“¼Mõ ;„½O+= ƒĞ¼.Æˆ¼ebÍ=°®è¼µ,½ø=<š‚::¢1U<ò—D¼ÓìX=¢6L½ï³½˜|ñ;i‘n¼~Îÿ=8=Ó½K$0½È+=;P;¼EYÚ<”‰ñ½m½QKÃ»8Ña½Ùé+¼ÓÃ–½#™ï¼ŞO=Iı0=¦b€<{æ%½°¤€½ƒiß=Ç¥ñ¼Péõ¼»4I¼ü¼n½´y½»s5½‹´{½*}Ô¼“#•½@>Y=ÚM<OÔºú:è=÷Á‘¼ûäú<> Ğ;²9–<ë¥=\A¼ï ½Às<Ğm=§æ<é>Ã¼ıG=Î=z³=¡Ëğ¼É^Z½¤Áå<2k¯¼°(4=dtÓ<òÜ¼İÓ=¥êI=»"|¼M*=á.³¼ï÷ =Ç7´=lFm¼¸õË=N5d=	¿ğ<i‡=ÿn½	‘=Ó@q½Õ+Ã<Ã¸ƒ=ß@¯<>(=»
+F=Ôû:u¢=êïJ»?)¼rÆê=Í`½¨î0<½XU½PÀh	U$Å¼ƒ¶Ÿ=7³"=W	€½“şŞ¼ëm½)ğ=½óÈ¦¼ç=Mˆ„<ø3í¼Á“c½õ¼_2R<»x=f÷=õ+<i=á[®¼u5½\©=Äq\½««=l½"„½Œ¸k¼T—}=£Ôà¼¸–Š½Å`M;=tu¼H]==9O¼}i/<şGI<£œ½Øº:½áy
+½gb.=rK=Æ.^½á‰<*=ö«Í½) <r…½ŒÌl=¸Ni=!K<N:b<Å+;³‘»RŠ4½Šê¨=8Ö;½ö4é=™”<õí;n:o<Cd½Kou½ĞJÂ½Oô½U*»½‘.i½iÿ.½!(¼€‘t<©’M<Ce´»G›X¼ÚË»X2-½‘p½¼‹=ÈÚÕ¼ÚÙC=ømø<¶½€B²<ñü ¼”‹=8ÇF½²Nl½·=~WÃ<=µÒª½ß^½HE«½QHà½‘ƒB=`ßÇ¼ÄX5½w]İ<Íq‰ÇõT=\uÚ<KŠÓ<Ysm=„‰¾<ó`½™ŠJ¼ÙbŞ<LªÔ½A`À½>Ÿm<DÂ$½’<«ò»¼}=·$³=¶Û¥½8<”¦½÷âK<H¥S»®9¼ñ*#=&µH½.³;#“½ŸĞCºR;£=µ <‘Ãü¼u¢=ĞH±¹Æªa½«Øš=(%æ<,›<x…<µ<¦½:…<º”¾=1šÍ=½u >Ş½H‹½½¶ê½OH‹»òæ=ˆ.<àÂ=‰ìö¼™;=1w?½G½|>®!<{
+$½{á¼+!½=VæŒ<1N.½ÀWC<îÆ=ÁD½˜a2=””M=‰=¦<à3=W¬¼ÿ=¤†h½GKº¼€œ=Ac½%¬¼¡Q”½«¯šº»½Œ½7X„½—„‡»95b<K2»¼Sßs<íc7=‡S¼¤µB=>:¨Ÿ<7´c¼è*u½ñ½(½Bf=Cà<YÊ—=ëß"¼É{X³ôÃ/¼÷—=Ù5½½ç‰¼ŞY/<É?Ä;ßgO½QŞ¼Óv½Øâm½…¡×=W[½¢aØ½‚=e&Ô;ÎÉt<W½¼÷=†I–<Ó¹Š;”xš<l›¼qN:<k+¼ˆ…°<{ı	½pÈf¼*+=´‘ñ<%@½è7½Ò9?=à=‰´Î:ÖEƒ<ù|¾=t0¼”½½»´<Öû> î
+=r«î<Ş¦E½’s¾»4=Öz•¼¾¶=h¼¼ö‡±¼Làá½k{S=® ½H
+˜<ÑÄ¢;Y«=±Š½<ƒ½¼F¦½‰f^=›Fk<±†½"`Ò½.¯‹»#Ş¼=d½™İ½‘_=.-<	‹ª=ÃÒ©½<øû»ÇĞ–=ú
+W¼MÀR=i</å”=0‹<n±2¼+î=½¤²¼R#¼í–<ıÊ½@Nµ<-;W=ƒ¦={®½òÊâ<ú×•=³lT;„)=ó°=G½‚‹R¼3<3½:=çV;¢X½˜=E½ï“»‡‡˜¼càz¼¹cX½ÄYG½Wåq½İã&½_½¥«=üGª={¸=®p’;¤‚³½Ù*=<O–:¦•(¼Á	ş;4‚=d=ûDÈ<ñ¨;½0½åc»€ñ§=:`)=q£|=‚”F½×a<B—<DM~=EX<U4—<Ô¬½ïÁ–½Š	3»ò)·½Uîºƒø/½ºA<ÓÙ<²Š=9ä¼–¤<©¨<p‰v<Ÿ0z=ò	V=(«<•zª½k\	=m¼<Z¦‡<½û‘¹·íò;
+ƒ=Æ¯Ó=;öX=pâ½EÂ¼Ø²X½˜<šH½ñ”	½,=~]|=^-¯½ÌŠw;ÓÓZ¼dõ=	W=uØ¼ì<º?=[ÔÁ=öû<7<YV<½ i½œ|¼‰¼ßbÈ½²¢œ=ôòÕ<Ğu»¼RQ»³;[¼g/,½Yôû;÷jˆ<É±»#İÔ½>s›	6<Õ¡,=x“½>ş¸½¯D„½OÕT¼?³½s0¼\à×=)(=àĞ–½‹Øl¼Qì;O¤\¼sŒ{=Nå±=ùch=!D<¡Z½X2:·€Ì¼¼ÆÚ½±=ü“¼ôz>¼Èá=½º7ƒ<ªT¾¬Ê½Ş´Ã»¹¦Q¼Œ`9=?~r¼"J<@-½yˆ½9D='™°¼Râ¼…<Úı‰½x«õ»Œ˜=SEÛ;á)ÿ<…;/<™	®=˜¯ï<Làí<‹nİ½y×½¼¼
+=Ö÷<!"T½;J½€NŒ=rJ™<®z½®\»_=ì¼¨¬N½¤<|½ d„;Xû¼Õ×È<ÿà;©üC<˜5&¼cæg;­Y™¼! =@›<n¸ª½”›G=Æz=H®i<Å\!¼ÂaW½gc½Pù=Kg¢;÷©;Ëš<ÎV³»¼p:=³
+i½µ¹<eG°½]«½ön`»±&½ôòp=ùœ»âqŸ‰L;="¨g=ş{½ûI=ğ½<Õ¶ï<vø¼„Õ³=$0½œŒÄ½³„¨=o¦¼¼dÏ¼Í™¼¶‡>ævh=Èç!¾&S8¼-XÊ½v =6G0»è;¸<Â›;õ­¹=Z†o¼w|µ¼!ƒæ½™Ê¼HÀ½äz/;Í&€½Àñ;şuA»Ápê<ºr=ñzR=X¦‹¼áa»¢ù÷<ˆ¸f<‰a:=”Qæ={eZ½Î¿†½ÕK²¼•H…½ñ‚>«Jö¼àŒ='åµ<ßÅ=œ'e=«›—¼Ë7…=}<•éÙ;¥÷E¼|.‹¼† C»ùxó<²—½§ã=Jb=7‰ºÕÄ=â2¼o’¾¼‰Š½ãj`½%¤A=`Ì'½•´¼¼ßŸ=ìCc»g¶:Òê¬½Q¤<z¡½è>½ƒ8ª=µvS=Œ,<¸…==n =¥À®;5=v=Gn='›d;cğú<,†½š˜‡:)#¤;]ƒ<ÎÄê»ê¬‚=Šåb³"¡ ½´;=±Ç½Üè²¼’=Õhò¼Gñê; Ì¦=Šm½æğm½ªëş<g¦:½Ë ·½]ÔL½5ğZ½¾%:ºH/£<?>a»×¼»M.å»¸„I½
+zF=”ô¼X„‘=0ú½È6¹½ˆ…<ë¡=g‚»=rê¼EEÅ»nI=Ç{<°qĞ»Õ»i=`Ãù<,ü?½Şhh½¨õª=× †¼"÷=®u:¼t_ë¼½<ˆı$=çL’=ÁŒS½…/ÿ»k{_½IÒ¹=+÷2<ùág= ÉÕ=ZÔØ<;°»qA½<$õ<]í<¬†®»¡T¼!ˆ½€<¼ò¸½¨²Ğ½7àÍ½Â&?<ÖH4;M‚=Zh+½ÊMn¼¾a=“È-½KÎY<È×›<è”¼ßp"<d½¾ˆ¼Z‰§¼z¼5J=ğ}½	„™=~¨=¢¾ =³ô»‘À½Qô=°Md<ƒ–à=õl=±E›<İ½¹3U;’×=áú%¼OrÛ¼Ç·;; ½¼Z§^½\¡Ü<îê¬½ş@&<YŸ<ÃŠ<A¼¡+=Ã,E=ğá=t²=¼~—º½Ğ»İN½w’<0À»=úë½%,=<&<Ôc.½™>n½Å™Ñ¼ÛgO=øµH=°É“="g½ùé	;^äg¼;Vá=åM’¼ Ql»fŸ¨½F×R½â—=‹ßÒ½ºØ<2¸½ó±s½#=u=´„Ã=Ç±»u9”=V¼Û7Á½ø†»=€W=úÖµ<9¸µ½}a½Ó7w=‰™¼ŸŸ9=^:¸¼ÌŒ==ĞLÒ=C|@=VB2¾QÁ¢½î“½T¼Ã ”<DB\=Ö³6=(=Œ³½P9-¼’A=	€=öSÕ<ó¶r½‹M™ºTúç< øç<Ö<g»;	—½¾Õ”½…Ö´º\»Ä*Š½zB=Ï¥î<Ü=Êi™¼–%<?D$½Å‡½"E¼ß®«¼óë<;£½aİç	,¬<ÀÅ«=u¼y=8½»ù½äº ¼=ô˜½Ìq3½oÇƒ=·=şÉÔ½d1=Xó¼OÕ ¼ğTi½Y¢Ë=‹ˆ¼Æld<_Üb½•L<edÕ=ç–»g	%=Ñ¤´¼üP-¼w©¢½ºÍŸ;¥gÅ½Î–½îä¼›³¼ v©<wÔ;Ë¥<‚N¸¼!Ì¼²ï<ô¼Y|—¼)X½6Ãü¼\ÆN:8†Ø=£‡Ø<Øÿ½Ô¶¼¡YQ=y:zºùÀ=ÀóT<4<3½);¯Ê$=ÊC¸;HA<ÕÆÇ=i­=[¥½ÿõÁ»Q'U=àOX½ò¦º(®³;S½şs­<½Oã<r‰o½VU<Ş
+t=* ¾¼r)½Ø¥#=Ñ»…=é§½~Éo½AòÕ¼M½:./<xµ»Úno<	‰Ü½(»@=ízi½d¼fıT½ô›?½ÿZ0½n³„½¶¼øõ0½‡ı¶½Bí`<ÆA<½Ä =¤ºµ»MæÔ‰Hê«=ê±¢<ÿç\½>¹U=XÍâ<)cş<Êê4½ÁÜ>Ùu™<â¥¬½ÛˆÄ=R‰|<Z°<ù‘=À™ú=‹˜·;ƒŒã½Òc-=¦½ğ•=KT;U“š=¹ü<cÉ®=ÀJP=÷]Â¼*É€¼‘Ö»¥Ñ‡½„­<±ù<,ƒË½zÈ]½QQ<Dë©<Y7½‹X„;+ö!<¼%<‚¶?¼]®ô<8Û=L½:Ôg½¹éb<Ìb<8šr=®¬½£ÍŠ=ùáª;ÖvD=o¾1=AŒ½)±=Œ¨¼Êl='‡½Ú=à?=2Ü=UmÙ½lØV½ ’“=²¿<?j6=Ğ*É;ğëå¼Ö®N½¥"‚<é{< Š½â0³¼z¸ƒ=–B=‹;ëò£½ßí‚=şr½»)¼„É;Ø’9=ñÒÙ<m{~<;É=oÂz=’RA:V?2=•ì<èn=‘xÉ½øS—=¢=Ã§¼èÑ´= Yø<Ó=n³¦áÙ¼îÁ½eá½^°¼ñu¤=/1½ŠaA;Â¼›¼ó(<÷A»Õ™=­ç½vÁÒ½¹¦½A½Äó÷<ÆŞ(½£@Ô=0jú¼K­;¦ğ±¼4Í|½<d¹<ë¾S»%µ¡<æ¥½?j-½õ:Ì½cßœ=³¤e=jÇ-½É’:‡†=K
+=JY*<ËTé<ëO0<Ñ#<ÛŠÁ¼P µ=76/¼lQ=ƒ­¼‘æ5½<ed= 7–=Á9¨<±9´;ÛŸ›º0 h=ÂVå¼š!=¤r¼Ğ8ã;€µ<ù¸<ìPu½Œã=6
+C=2ó½å©<ƒz"½©4%<ü­ ¼=ßd½(d¼-XC¼?½„L1=ÿ½™=$Öx½ïğ£=½é1»<Êøy<=.ßÁ;™H½êÉ¼0gˆ½æs'½™·>=Ê¼i½Â–½Er˜=é‘V=TH„½¥.¾»™wN=ó´g<¼ªx=€Ò±=‘O=@ŞIº5÷:ù‹ª¼Ù#>‡Ä¼‘§v½ÙKw½*rğ<Ry½Ò¢½ğÏJ=“w';GÃ½ß6='·ö¼˜„ÿ=3Z	= 8½2Lq½b Ç½h`<²Hô<éIø¼d…½	v¼>˜=ÜÎÖ½VÒï¼ªLq¼‚jM=h‘¼åO¼r#q½0½Iô-=Ãı@=ÄJ³½k¼‹¼ä}	½ªµ<ş‡‘¼õÀc½’<C
+½ÃŒ¼%Lt<Y#<¥½¶ç=Àt>:¬#'¼¤Üà<üÌ=Í·+¼üÎ®½¬K1½Qr-=/`›½‘¦ÿ<ù’%=6ó¸Õ¯> Ô½¹eğ½Œe =»a¼®‘=½·G=^×;Ø©=”70=øÙ=õ×9=İiÎ;w/Ÿ=5d4<á¶¼Ä.Ô=3ƒ<S|¯;Güæ¼İU¾¼§…‹½4¾c$½*=Â-Ï½Şì=X/Àº´xÛ»>½ê^¼Ïê½ì¦Ñ¼&7°=ÁD9¹Fg"½7ÀÈ½+™8
+™Y½ê¼ç<Cæ2¼j¾½(0à½­§½‚¢Ş¼K<½]‘à<€^P=÷:½h?.=_Z½ĞyO½4†Ğ¼SÂY=å½•=x˜İ<³òQ<‰…½5C>ú±2½†¢<ı¹¼CÙ<7_—»ú;9=ŸóP½1>D½éâ;ÌB="Û¢¼MÖ»¼¯¢=ö÷&º{~(¼ê¡ =@D;Û0J=?=	½L=vËi»j=ö2ô;ZZ’<î<=FÉ½}=B8§=y¢ø»Vk€½Î»Ûº½Ä¼¶åğ<$oÙ¼G|Å=–e%=˜8½ÎŒo¼M9;é’Ä½j˜µ»`´¼@ï`¼d°ƒ;çeÊ<ç˜³¼'2½á!;lL€<¿b½cÍ­¼Ë»Ÿ¼DÑ8=N©½¦<¨şÃ={/²<nd±¼{Ãm½òÎ=d ï½{¹“½2ñ<R¾½íá'<ÿÉ^½Ä=‹)#¼é÷z¼è‚Ï<÷Ù¼Ç`=’ÎÔ¼¶=Š×Fš¼¯bÊ=®¬¼ˆ0Ì=–>¼<½^*a½H¼a=Êˆ¶¼‹½div=`Î½WÛ{<¾7;OÅ
+=”=’–x½˜s°<–Gª½ªJ@=+<¼şd<­D=ÁØS½ú_D½Eè£¼„»À¯‰=y\¼n½Y>ß¼°¿½›†ò½‚=÷±¼±ƒÊ½ÊW'½•óÓ»ùŒ=ÿ;Ó<ôgÖ=ç‡={db½ÀP¼êĞh=2S)=(¨=º¡<¿WÅ=i±×½®f<=p‰š<}İF»6éD=À	—¼
+ö~<¦Ä<!Â4=é¹½€‡¼Üİá<¾ÂŸ½P:”¼nÕ=Tî =UuÍ;éh&=y.P=:Î»š¼Ãïİ½•Ğ½L-=a u½Ã ¼êĞğ½•és½	¢À½_¤<³ <=¢¼ÈLU=ƒ=ÏÖ)=µ#¶=d`J=_7">¼=„=Şä:»:’Æ¼É1À»ŒáF=a<é?=`<v³9â­½â°½ª,g¼Ãã<;jWy<.	ø»4»‘½PŒÚ»ò~¼†~);ï#=„½Åò¾±A½ZXi<,ƒ*=9£½åAP=Ÿ:<öƒ½rô9<òò;VZx=iLü¼‹–Y;t—®<)e¼7>‰=Œ(š=^!8»¸„½± Ø<™0Š=6(=¤Ç·;¿ü¼Lé¿=,E=‘6š=yu=¢Å†¼˜*…;¦w!½.£9<¿3<™ƒÄ=mR=6£ˆ<)ËÊ¼£Ã½Rl=ÚÆ¼;v<Nùè¼ä
+=ÿ”:
+`¼¾·»Õ›²:¦å»…÷<”á¼h¿¹ñb£¼½ò†½Õ•F½¦0.¼z®¾=•¹n=a	¼ÜD½Şüé=6²7;:Â<±Ù»½¢—U½H¡<*0»=š];UóD½³â='Û¼ar ½5cx½w—=ë}2;à K:ş´½‹éˆ=I',½;Ÿ½Mæ`<´†¼!(]»Ä`;­ç©;èşP=ğ¼U³¬½p*½Ô@5=˜bQ½ÍÓç<EOF=â€µ¹G›Ñ¼@_ñ=äË·»z)w=?J°¼¡£½Ùò½~+c½¼_K<™5½\`[¼ôØî¼{¼ìßg¼ï-)=¾¢<ı˜L½¸"%=¸ñ½§`=Es½ ©ö¼ÀR»íXc;3"@¼ˆ²%½ú3½ÀÃ%½§Ö4<â«½=h×½²oŠ<É<š(=Üºÿ<2åƒ<ñš&¼}¼y<cø<é.<B4è½HÌû<x¤]=c~ª=ÍÍ¼ `‚< Ä=aá§=?¾»T{½UV=wlà<‘>Šğ<rïb½¹¼ <Q7=€ö<D=n×4<"G[=7½Ún¬=@Õ%½JŠ =3‡ä:H½S=£c½aô6==º=ğ¨e=ç(t½İ|˜=Ê½7ü,=Ûÿƒ¼À Ã»jw~=U:|»_ã8=^\e¼å‚
+¾ßz
+ª²F½`g=üRã;Ä½Fü#½fl½äÔ|½;00=RÚ­=Êw[=2}­½¸Ôv¼@S½¿? ¼V¶g=RØ=¢.½Yğa<¸§q½•Ò×<<`=Y/™½ŞK®»cbo½
+¼fL½Q³¼İ`†<˜du½‚5¼pãs¼¿nõ<¦i½ã{²<O3º€?½§Pb¼³<ğóS<§={€¢<÷ì<2B»ˆİ<ü<&=è¥½¦¯½Í¿7¼_ÿÂ»„Ø¡<û{€½q¶˜<†½ÿ¼¥=™z¶»|?]=X¯=ŒP=µÒ¼ù¦o<Şñ¼PÜ½6 <2Š¿½{Is½'Rü=­«´¼»€	½_£=€}7=í=EZ¼½éxA½ÉBà¼VZÒ=©½½æ=$ ^;£bà<Èïl½ã`½Ú=†a½ĞW•½‹ì4¼´Æv½E¼9C0½	:½ÚE´½›X¼J¶¥=6ğ&<9o{<¸R½äzXŠ;gÌ<÷pW=£,&=»¨>•ª¿»«£½ÁÇí<#Gæ¼üÙ»j½v†¼=Ş®¼­Bü<¸Q†¼ïÏS=#)§<¢•¼†²½	î¢=3M»»^Ò;5QË<mø*¼®`
+;Oß¥½ü£0¼»½¼W²½£¼î3Ã½‡d<+ú|=0eh½qy=|Ê=3»kHa=ËH†½+Ÿ)½+>¼äM=h>13æ¼¼Rq=Ø»©"I»ıüš=Èí¼/˜˜=U#B½VÂ…=·½qD<Ø¦T=‹|#½½ê–<DÆ<½é¦=œÉ<0åğ;¯s[½%‰q=ıµ¼ß8G=Ô,<½UÕÕ;[µ:6à»=³#ª<e¼xMY½^qe½ßœ‹=¸‡¸¼©M½·{¾>BY<ús½è\‡<c¾.¼*“r½x½=j½ñ¼•¾½fc»úæi=ÖºI=Áj½äÛ¢¼$ä ½ŞÛe=¸:´<Ü¾³<fµÎ<¤®³ğ“è;şZ½°4§<‚£…¹Èäc¼›ÉŞ¼}Qi½¢K=<c¥R½¢¶›»Ä`;=¼Ã1ä½ÎÉ¦=áˆ<=ùm#¼Æ<¥pˆ=Ö«q<•[‰<^&¯=Ò"½í=`ª½”Ğ¹<-ü¡¼ƒ&¼¿`=À¼Ûd=fÄV<?h§<íM®=²3<iäŠ<@!Œ=§wJ=‹¼Iø…<6½=S@½¾Q=É¥¦½Æ¥´¼%8=.Iè¼‘•—=bF½„7=Áü¾›ø=+ßo¼E½ójĞ¼q± =Å;˜Ô¼½åÓW=%;„¼¼RÅ¼ùs=Â½ù’½ß5‹½û½Ÿ¼ë F½º¬½ÔæR=’˜=›]=“h<•OÅ=»c<s¬w=}Zœ¼H+”<é\½*µ@=-&½	½‚Q=Æçš¼6¿½¼ö¼	«5=Å'È¼˜Ö¼©UK¹V„;!yŸ½54á¼&@€=§?ƒ½ÿæâ¼dÊc½ÛXR=(8Ä=¾h½x*õ¼R37½°<ü	v¼;½»ŞF=ŒÇY½ü£4½bÅ¥»
+¼§¼×ï=ò1=XûÈ<[üÖ;»4=¹vâ;dé}¼&]½«ö†½v€<…Ì½ÎÜ	=¥	~½w4½µ<fn«<º†'<Xó|½Àœ‹½|7ß=˜İ3=¬‡g½xAİ:şÓ½^«½—I#¼.Â¼–;>½;x);„ù=¢g»ëµÉ=½¹x=º‹™=„î¼È>=î<àé¼fã½ö~;½P$=‡©ê»Ú*ƒ½6¯=Éï“=6$É=KKç»Éo¼|Äğ¼¶Úx½±•·=§ùG=¬:Î€0¼ìZ=°»*½¡¼"=RÂİ<½O™=EuN½úô=Ô8<zš=¾„=á=½·¸€=tÎ½«.¼%õ=„¯P=4Rc=k÷<I<Äƒy<e»a<&p½Ó7š='!8<QÚú»ØÊ‡¼›½#™Õ	‹¼€g=-Û<<%ß½Ÿ ½^Š½lhV½*d½“Hu=1Ú*»šúı½ØßX½Ù$<fúä»ä-¥=ÛK=ÕT°<<ø<aÁ÷º²n4¼*u>Á ó:¶lÕ=üßR½?í;-öŒ<èõ<ÆÈ„½&gı½¯<·Ä´¼÷şƒ=ôc<Â2=²Èw¼%b½|ö‚½’¼Ş<½=Ù?¼ar,=]!±<ÌÍ‘½p^…<<§½êW‹=´l+=P…İ<8K›=-7Ô¼€G5<|4œ½ôsî=$E<Á½= –Y¼_¡Z½â¶Š¼Æ6‡½‹	I½=ó8½‡“‚<‡œä½õ‚H½«„i<¿Å®<W«|=|¢=Ï¶Ò»*N±;"¨;Xæ„<@Â­½y÷¬=Ow¼ÄŒÎ=Ğ”O½t’²»`”n»«T‘½>¶‡=N¤G½ã³=Ñ¸7½(¼º¦=üû½—ïNºâ¼Š½Âmq½Ò³Ò=¢°»1s¼Tf=ƒ±‰şé=Á‚»Z k=á1†=øÆÉ¼‹T¼&O‹¼\g¿<}·Å¼åq½ÓÜF=G	g¼uŞÜ:&Ó¦½N=ß]‘=W½PL½}]`¼¸&¼‚'<eÄÁ¼Øyæ;J&À»ÍÅ<Ü¡½[ã!¼ :‹<:`3º`Öm½ÙÄ<oìh=×Ÿ‡½“ö„=ù¾<ˆYA<1%å:Ä€¡¼Ğ¼ï->
+	é=¯>tÈS½!i†½şŞ,¼ŞŠ3¼øS=¨ğº§ìZ=IØK½–j‡=¢v‹½÷l—½ê÷¸=B#¼lß¾»™'Ó;íİp=×–=îau<†ËË¼Lz><q ª½<ö<ÕĞd=Á®½ò¼âeµ=Ù*=<Æ¹<D¶*½¢ü‹½"m=¼ÊÒ¼Şè¯½şB½z°y·Ç½º<¬Ï{=ÅU±¼Ş>5=üç¼)°K=_tì¼ŸCW<v]= 5„<: ;Vq½xÒ½v¢=wl=Üow=}Î<Oƒy³$×m¼ï.Á¼ëa½,‚ ½à=µl½‹ä…¼{=Ê¿b½ızM¼†ëÓ=N{`=Ø;V½àRQ=ì­¨¼ëñ<¤»¤‘Š=»Ï„;V8½€N<=N*½³‹½ÉN'½ „Q¼¿õj½Šò&½¡fh==L¼Ÿ]ƒ=˜´½›i=±Ë¹=V¢º|¯n<S–·=eì< ]‹½Õ|½’Æ=$<l¼ËÙk½íÒG½Ru¸;m½ üß=å9½§rŒ»G$¸½4x=ô‹<9VF:H8«<í]=§ºR³¼‰r½)´j<™i½€#½Ô-o½IĞ¥¼!½Î9n¼¥«U½Ñ1=Õ³<¿U`=‡AŸ½kƒS½e°=¯/»ª™Õºù±ı¼öCƒ¼æ§»+ø<C ƒ½UÔ½D—½N„×<ş[I½7Î¼fß=s®¼<ŸÌ¢½}ã»ñÌÇ=o©Õ¼!_£¼œ]Ü=±îu<ùd½î!U½6™;2“—¼?=³½øğ½‡”¼ÓH½ìy½Ï¯®½–ÌQº1Ú ½ï¼¯:<àÆ¼¡Â=á¡¶=2‚¼+Ğ½¾êd¼q€Å»ÁI*½½§0»nÛ|<“Šø<Ã¥Ô; †¼{©‰;[Ta¼a=-SÂ<<gµ<êìŞ¼^½‚Í8¼G›=Æ„¼€¨<<ÉÄ½F.^½yÛ¼äIr½˜ë¼>è½CA=@m1¼Ê)=¡=Ÿ49='õ»"Iì»±ö–º‚z1=¼Šé;¬ù¾ñ@Œ¼2 –=¨ô=»ATO½t5F½÷3=*O >…o={4½Hœ‚½úld½‹q“=7Ëê¼É£’;ëûŠ<­°<¹´¦½ã˜V¼şÑ=
+¿Û<
+u ¼…ï£¼‘µ©»`Jÿ<AÃ=Ñ<sp»,æ;©ÿ°½Qt½öË;ô¼¹w!<0m<º.J<ÉQ„='üÁ<)½1SŸ¼O>W=ãœH=kx9¼ñâÔ½"üÍ		Àë¼Á[Û»€½d3Û½;°½:˜±¼Şõ+½Ùôˆ¼CÂê=ï<¢»K¾î3w<iU´¼º§½û¡=_>2=/(ú<|Š:g­ñ¼;óÑ<8 ª=OÂ~½Ä›=ç©½~>œ<¡ú{¼½I=îÂ½Ü™¾[VÄ<cS¼‡uÔ<‰ò½½1¥<Ùrb½ÁÏc½`¤»ÿt7<à"Ó¼Òˆˆ=À» Ú¼N=?V1=çü<ÜV–;<=é¼=š=u4é¼F=°=ä¾<T½&«Æ<üÛ=—˜<ú$<½-“Ø¼¨¼»µ„Ğ¼²h½hµ=ö¦‘½´´“»Ñ+A¼¬¹|<‚†<¯–M»A®^½u–»Ü8½"=fß–<ç?½õb•¼Ùwª<HS=r<õ}½yt–½‹cï=ÙoÜº:æw½XrQ=ï¯|¼{¹í=Ù>½¯.±<Hn‘½×„µ½ÚR–=€5©<.Æ¥=ob<«ñ‰¥5É<é†=Ë™!<ÄÇÄ=ÄY½}N˜<Å`¼Ê=9…½lt½˜ÖÔ=–uŸ¼à^Ò¼š¼­vÌ=2ª=Ú
+¾ïo½—«½ãl¼M:½5}<µvd¼+L=¨ª½1_J½©6½İu½óŸ¸¼¿Í½nëØ½Á•J=ˆö§¼¼N=7åH=úN=óÔÎ:^dƒ<ŸŠ='F¦=òòŠ=/‹
+>Îw£:anš½øY½DşÜ½SoÉ=g7º
+²=ic¼V³=XVc;6|F¼,ş[<+B‘¼¥ØÚ<—k=¤æ1=¢½•óZ=!Ø–½h½<*õx=È¥;ËQo=á†5=-;Û-ò¼)\O¼ÅÄ¡<æIÈ½4å+7Iõã=ÂE!½J…;ÀÆ†½tÑ<ŞÎ¹¼Šk´¼7¡C=Ö¾8<-¥Æ<öXæ»i¹=Ü‚¼…DÒ;ûß#=üµ<ºƒœ<ùh½üúW=Ö$ä;p"=¡›Æ<U¨™=¦?S³=¦ìº¬KÏ:½¤ªÎ¼d¤=ˆöú»ªğ½Åo€=¶#5½,æœ½jp(=âˆ¼qı‹½Ù!=£T™<+Ïq¼XK³<P«= >N;Ñ¼§¾B=˜O÷½x1=‚Õ<”Ï=>
+Ò½¢±Î½_õ¾<©Ë]<o|Ò=‹U\½™¸¯<¯	=»Âœ<ùÍa=½$‚=_
+1=5%á¼å¡½Ÿ&>å¡<É½3X½¯Ÿ!½!«x=¬wÒ<úÌÙ=øâª½JtU¼å¸»Ëgn=©%¼B1=á=M¡O=» <±÷ƒ¼Åõ<˜%Í<ç*à¼é}Ê¼t',½äí¼’@¥½â„½}°?ºız½Œ¹K;ñsF;‚°¼;ü	¼L[=Úm?½wY|<.ñ?½)¹0¼öƒ:Ì•l·N4H½–ZV½£$—<è<ó2½Km›½7ÍJ=Q¨Ì¼tAõ»lJ¾¼Ám#=)¯9Ê3Y¼¾é=–H•¼h§½ØÙI½a6|<RÉ=Š½?QX½BFç¼'¯W½RÚõ<Õ¦’¼2¥Â=Œo ¼ŒÄ…½”¥¡<¡‹/½œŒ„=æ§=ïõh¼4“½ç®¼iHN;øè½&<DA½²3ç<üÒ‡¼·.½gpI½Z¼]‡<]t<x ¼e\X½Àø¼Kj=İl?½QH9¼ùìÁ¼4D ½\:½ø&Ö½È/;z§…=OOÁ½¡n=ûdj½J¼
+S="ç<Z¸w»Ä×?½ø= =Üì`½—°ú½~_^<ªà=,KU=w‰
+½W¼ <,²'="ı= ã©<v6½Æ+–9»"±¼—l =Iß<„q=5í=ftï<92=aæ9=êç»wëŠ=»›<è"'½à¤ =¥–¼ÑH•=““ø¼à¯Œ¼¬ë£<í¾‹§¾¼¯<\=Ú‘ò=+ß½i—P=»îr½0É¾=Ì½ì\U½WŸ´<-›º<ıBÉ¼ú£"½!Ğc½Aö°	aLI¼íRÊ<¢:Xğ½Rì:¥gU½Öp¼Ó»1‡Ñ=Dâ2¼óD‰½¸½³¸½³åh¼DÏ=$à=¡J½»ŸÇ=½Õ ½Hõ"<eÉ>Am½@î;‰Ş<Ûde»'¬P¼ÔR<=ÿ<D±Ÿ½)r˜;?º<HV>¼¨xl;ûû<^Ú»Üûª½vûŞ»÷7¼·˜=†ÜÜ<¤%¼U¤;|&-=|!†½Öps<§3½O<d=–º<õP»Â|=´(;“‡&<rn(<¦f¡=c¬H=šCÌ=V].=¹Š¿»Èè<™«¢=,.ô½¢´¤¼áãg¼rG¼ï“,½~›å<×úa=Qƒ!½§;!=H'¼7b½õ£'½IÙ¼;êJ¼‡p“=Ó©¼°È6=ÇÄ<áRw½_¾;Æ ½‰ö>Hä¼­•å½_Z÷<å€¼(¤¨<óÁ*½Îğ,» :¼¢¬¹½ ÷=ô)œ;1VVº¾*½"°±‰z^‰»„-=Ê¥˜;Şâè=|<½œ&I=+áC=»õI<F+ü»^‰½ÜëÍ<‚º:½ì )=ó¼:=#hO=KJ½TÏ¤=. x½áê<Jê½<iF=-ß ½À}¼t}C=­$ğ¼vÑ$9û=gœ»z½g¼¼YÏ½6êè½„'¼=ı2=ğ¿½œn”<jIa¼çô3=Ïe>N3=< ©=ÚŸ½½;h½u¥½&Úİ½:@ç<kö<Ø¡´=§â‰½¡Í¨;hÃ=óa—½x•=/Í2=™‡)=4<Ş<şín=U0½[Z‹»Fà¼\ìç<‚ù=òı ¹Ø­&=%	<=Ö²Á<Ê‹=;?™»@0=ù-”½=Ü¼“‘>ñ^½1d¾”ñ»½>à<è*N½%Š<)dp=×Z5½1e³<xi<áU=S~ú¼lsÊ=#¨›=±Q’:Å3=ÎuP½ªtv;ùh=J*=ÄÏ‚=áb{¼Bo}³|™<Ğ[U½Í¨Ù»õ—.=œ+¤=Øªö¼x÷V½$±<nö†½»>•½ı9Ó= U½5<¾r=‡NÈ=Ãÿ¼«¸f¼†B#=ÄA’;ÇÔœ¼Uí¶=2%½9¨Ó;Ò_&<_=`ÒZ½Å—Ô¼´Ñ=¸)2¼ı×=²L§¼w{ƒ¼Úú:=°èp¼Æ=(©³¼iJ"=dº,;„«»ñî”=©ší<À±x<ˆx?½ó”;9::·`¼à¶<Ö?¡½"±•¼=Š—½~×<!x<@È¼¤#<u£Á=×âX=Pcç¼]ôë½¿±T½6I±¼bõ)½œ½4*½UÛ <cLÜ¼mÑ¼,‰¼ºß‘=˜Ë}=9ky½¸Ú=½^Ö=¾¯½Ùô_=ˆ‚½öĞ=Š»¯<Òç=¥«À½ı7¼osˆ¼_NP<üfb½Ë¾³¼«¶8=Ç=ís©¼¾ÿÂ<9I`=Ëÿ€9\B½T„=àÔ¼>A	½:Ü½mçl=è5B¼J‡Œ½Œı½=Š»ğr <z2½Ó–ã¼WRk»o„½R ½H<l’Ö¼aÜ=åı;=^Oè<vËà¼F©<Ã<D+½q©m½µ+=Á(Ñ<>gî¼Ğ.Ä¼yü¼ûß#½HîĞ<Ò•4<R%=e³‚½ÔA½È(ß<ºÇ<b™j;÷ú…º°½?¿—½µFy¼q8N½hM»âAC½*ôc=ü=ğ—<´É==»f=Æ=o.»Æ';5÷ø<v¼ÁG¾ğ´Œ»6!=7ğ=Ñ-½µ·è¼ô0{¼Üyú=ºV<ÔÀ_½Ë( ½QÓQ½‘£¤=·Ù€½ªk4<÷òL¼#ãA="Q½¯ÑC=l­3<Ê F=f2\;H­¼5°¼=2Ó´=ÿÀ=¶R²<ò =‘¿‚={1¦½¾„¼k6P=%0$<[É)<d0¥<A…‚<áÎ=è=br°¼´öù<Y6O<ó¦µ<`U©¼Jwš½‚?.
+ÀV[½´Ï1=_Ø"<#Òğ½b«!½ÇZØ¼	î?;[½+=lÚ§=Ôj¥¼ø§Õ½˜H(<š^“¼˜#ò¼,mÏ=_<>=¤ëL=5HQ=\y¼½Ô’Ö=@‚Ÿ½Ü²±=2p½ƒ×Ë<”øÓ<löë=,±Q½â¾D+7•®â¼ír=*V/½×ì€=·5ò¼Ú½Èã¼Y_ˆ¼*»KX¸=ÏúĞ<½ì=´ô=½<¨¼óA”<ê”œ½`B—=—¶‰=òĞ <5É€=W™Q<q°,=Ù$½&r>=tºp<h8•=b¿÷<ñµ½»Ğ<}ëH½X¨U½)±·½p<sÅŒ½IÃ·¼>Q=O$½—å0<IŞ;İ‘Ÿ;|3<À¼Ê>¼<ŒN•<² y=ÕHQ½y=ƒÇ8<=—ëå¼…/½ì©ä=²Í¼y›¼Xê<¢ût¼qÛ=:ÃI½åa3¼v‚æ½»¾½ô<^í»l†¼Âm»b Š„ÏL<‘`=^	N=pì>&}Ô<~o½ˆ>½Å@ˆ=4pR½mD;½læÖ=ò|Ø¼—Ä4<¸ØÍ¼Š[Š=š¥Ë=ÉÃ½2_™½D:˜¼Æì¼>:»İ)=2+Ù;:]-<­¼‚äj½½™/ì¼äâ€¼µM¼TAr½8ëS»¤+C½·¨=¬Ø³<º5 ;W¸¼36‘<Â,<}ÚP=ÒhÉ=ôÁü=!f°½Lß©½¤à.½v¾½âwè;4?g;ÛMñ=A„ƒ»Õ—³=Ñ…=¼İà¶¼?¯˜:®?¤<Î,»Z==é¯¦=®2½»T¼›†2½©2ö<Á¸<õv"=O¶=ÃÊ½< ˜¼~Â=1·#½Ğ===
+Œ½ÑûÓ¼…¬=Ú‰À¼Ñí8»í“(½®wˆ<Â½w½ç’%<†B§=[¹m;á¡€¼ …ù<‰C=h‰¤¼Û$=şí<9ı$=ÃÎù¼ùÑ	¼Q¡B;Ög=#‡=ó¢)¼w`4=¶–³áG¼c@<{
+½-¹8¼~ıõ<§	½¸ †½¼,=§c½Æ¿Š½i6ß= ´ì¼•Ôk½P›F=”á¸¼}$½h³;UÙw=Ã'½÷S¨¼--?<î{™½9Äs=²Øå» tÁ<²*±½üIÙ½Ø€=Rİº¹q9ê<Ü¦x½ï¨ ¼¹ùŸ=ƒBÈ<Ö=‘¼Í%=˜ÃŠ<4 À<{İ“½l©°=åÚe¼¶z(¼¯Zˆ½+ÿ½‚û¥=&¨1½Şu=”³»½…H½²Ö‚½kÊ­=ø[0<—İH¼Ñ¾Ç</Šh=ä<Ÿš>½‚¢¼Š»½ü½´½¼  ¾8Ìş¼ C½ˆ#½Èd½lØ§½z;=İÿ=Ãÿ‹¼cÊÄ¼=[=u¾ ¼v¼h¼Gn¼õ	»†—½L	ü<á
+½d¹½ä‹#=í #<?Úy½
+@¼ğ£Ã<•Ùk»7õºs[7¼WĞ½ŞL½¢t¼¯€<Ğ²‹½÷ *½6ã¼ÂË=×=Ü¢`¼¥Dæ¼/W;¼F¼OÀZ=µı•:Å´(=Šºp½æÓ¼½1\ß<{‰v¼ouÉ=§s‡=rØ<ğ©Q¼Š±2=‹¢˜<«¬è¼ñ3ˆ¼Yø¼C0H=¿eQ½\\’½2¤J½÷ş}½Cış<âšR=Áš!½1b½)Œ½ã$ =»âd<qÃ<0’<‹j×½ĞûP½«3y½ú½üM§=@¥½½
+7=s <"=¨Æt=È1=ã¡=µÇ°<áö÷<«œ=X"½µ±½6‹a=U^á<j¡‰;‚A`½Ğü¼+7(=&>ø=4Îê<T›ô¼rq&=¡>r½$=Æä<V½«·˜;Öì=”N¾¼ye'=ï“û»ØwL=mŞ*=¯ç»#]l=×‹/=£¨=²8:¼¶”<ı¬=a¸½q9¤»HÊ=ÿÉ#=Ì]ÿ¹æ†=ä!Æ»”ËÂ= à»¶m½pó½=^D¼DÊ;“`g;êşó½°!
+¨¼‘¼÷Œ¢=‘%T<ì[½
+&†¼`½Îüñ¼;…'»Ò4=šQ/=¡]¤½R8<SÊ¼hiå¼=ş=r‡Æ=éÚ¹mg=#½¯³19ğo%>oU†½e;>°z½/µÊ<µ;<…—<½Wû91Q¾ïC!;[;½1ª<„-¦<fV0=ï<u»½ÏŠ¼Ó!½~¨¼ïŠü<£-½ÃŸE='<=TÔ½qc<ØI½µßŸ;Ûô;ßŒ<˜}=—­ÿ;O=Ù<dß½ÉÇH=‹y;Aâ»=Õ®á<j±
+½ßÙ<T; <WN£½¬1P¼D~ï<×»n½÷Ö½”9Ñ½¼LT»;Ó<k‚ù<¥xğ<ƒA…<Õçˆ:ğã)½|$)=®UC½XÍŞ<O-¼ş¼c¼@=£“µ<¤šÀ=·¢;(ı ½ùü„¼-ìÖ¼}ô£<‘½ÒÌ¼0sâ½¸{Ò½¾àõ=|P	=–…‘½@ùØ;Qp÷‰ô’09œB=H(=×ã=!½¡Â&½“=ÀĞ•<Ó…\½Å#9»nè‚=Íü/»†’=	]É¼Dw=Åj=¯v½«³$½4İ6;íA•<—ß·¼®~ <ûòŸ¼–:,º­Ù<'~~½ô½Fš=7Íºå½¬ ,=ı =-„½*Vf=w¯Œ=agl½„Ğ¼·Xµ¼¦v³=Ñp>í†=<ı=òÜ½¢¹—½>pV½g ½+"Ä<W¸=ıæÇ=:àç¼µ€Ÿ<î6×;GWà½w˜=µ<e.¤»åd =¼¦=ÛH\¼cRŸ<6(½ãi<íÛ~:ëé6=¯–,=2Nß<e¸;&å‡=³X»;Yí”=Â}½üz½W•°=Í›Î¼’½1FY½ºp<ÁI›¼Ã«Ä<¥¾[=’@Õ¼ìQ(»z‚<\U¢=È ’¼—„=ä.»=¶ÅÎ¼¯p <9Hû¼Ê=Ù¼K—c=Uh‡=ârÆ<+?;"H„³="-½ í¼•+ô¼`
+£»¢8 <^'Q½pˆl½ûõ·¼ÉE³½éŒ¹½›ªê=é´<HLÙ½¬Ÿë<nñè<f²)½%,Ú»÷ÒÇ=ç¤‡<2à‡;=ßï€¼};<í}¼@F=s6½\½¹(•=1
+ºe=RQ½0¼Aæu='­¼¨fš<Ÿ:=ŸnÆ;ş1¼üj½¹Pè=ê‰×<Cû<Š…‡½pC1½¼TÇ¼DÒ“¼Ê¨n=NÒÃ½-Š$¼§Í¼Øxˆ=½Àş<¤ip¼ã'ğ<‰ÛÈ=ê”<
+p)½ç†½š"½ÒÑ½ü“½îÙÂ½`gP½¸§1½-«½k÷¿¼¨üt<“lÍ<BHÂ»öÊ½‹l¢½g3[=•á
+=¦ü»Hjs¼©=Äºç<O=Z1n½§•i½}àS¼˜bˆ;å]â½ÄÀo=i,;9õz¼¼üÒ½b‚4=Àµ=?œ:·“Ë½ÊD†<÷2=`>½3!×»b-Á<®V»‰{ä¼Şc[=DCï:ˆ®Ç¼’ô¼©É…½É§ğ¼Úà½Q¬P¼hQ=§½Q®=ğı¼êu<<s(½»k½E(Ù<‚·Ÿ½ùG½=®©=·f;ƒ|<ëÔ<Ôÿ"½ÙŸ½×-<Ä_M<ƒÑ›<M¥½Ï€½É´»AÜI<w/<*ğ±¼ ‚à½MA¤½èß3=™g€½'^‰¼”
+Ä¼5­p= ÒQ=ß*l=—Î¹îœ<¶d¼–÷<Éû]=Î*­<ùÂE¼AªÚ½ÜğM½Q)ş<Ô!‚<—ƒ†½Æ¯OºPé%;jğğ=z´º=£d6<´ò=•,ë<Øü=ÃÑ½¿.=Pš=É==T¸Š½;ê<dù¼™ÔB=S8½¯«½Ò37=Ø¥¢=&æm=Zy=Öî =“Yj=Ê½S½’ê<¾©á½É<èˆ<2ùÔ¼í$s=î“¼»v©¼A»?o<(,½C¤¼p7µ½@ 
+
+ªš<qKœ<‹Å;Òğ@½_»+º2. ½á7M½Às©¼Ñ'ø=8a½×>½®m=~F½LL¼¼eH=Xƒ¾=TÈ˜=Oû<„àÕ¼âµ£9~ä§=VW…½Ûâ =£	¬<Ë4†=´P9=C=€‰½
+$¾ÅÙ=krj=5æ<il«½e<„½ÌBÏ¼q >¼ÅU»‚¿½Í£=D©½ Ñà<‚ha=ºä¡=Û¯à<íØ½f#é=+]³=´½<&Jü;üF=#OŒ=¾Ú¼ªÂ»nHµº@bğ=Ş"†=¾§¾½x»ÿo½q‘+½)!½Qè6=ş´¾½J=ÔÙ=y+½Yx=†<²ó¼Ïşj</és½¨†÷<ö?='&	=ÎŞí¼â
+½¼¾…<¦ç{=õ½í;†7‚½Êƒí=7½tS½†Ôà¼hƒ½Ğ ı=xHÆ;EªQ=±%½ö¼&M½*’<{Jı<Ÿ¼~¢
+Šöe·;|=âúO½§#¹=@Tç<ù=Ø½_½8„Î=±TÇ¼Š÷–½wø=R)o¼ÁÜ¾¼ÿŒ=ntl=½F7=Æ½jé­¼Ëdä½­“½ÅP¿º1=½³ĞÜ:å¢=øp=ts…<Ìã›½½BÊ½<'½ïŒJ<ZY©½eQ•=Ã¾Ì;gïr=ìï<3Oç< Äà¼†ô<Ye:=#â½¨rÃ=æ=\š>»êíı½$ßE½Ÿ…ˆ½^#Í=C ¾»2õ=  ò»Ùğ’=¶Ö˜<Qğ;]ß<J@‡=Ù|:yA<»•=÷ï–½Ş=B‘½²3=<
+:ï;qQ=-Y.=%Ã¬<Û¼’¦5½ÔÔÌ<Bò‚».;›½3ğÊ:ÿÔ=7—¼éıS»Âìk½Èòvº?r|½­UU<vXa=§Ö¼D&¼âß¼’Ú>=šÖt<âxî¼èo/={yõ<ŒVCºŒİ;‰ä=–ù;(˜K<ş¼N=× “³¾è¼ª€=­@v½y´–º´Ãı<ü<Á:`½_K¼ØÎÿ»éú½Z…¢=•¸½mT>½ƒ˜Á¼Ôås½Š’½ÌÎ¼~ş2<%Q¼Å£F½Bş;{ƒ½Æ0‚=3;K=r¾ö¼N¬½ğ.‹½›©=R¿ˆ¼Å[=ğ½ª¼ï»A=Ú ¿<ËŞ¹*Z-<Ã=õCù¼ïí½„¯…=	ì:ÿ(½›*½¨íŠ¼§l¢=>=âÚò<	Ó½ï‡½†½J¹=éº¼^»»8Á=¶“½»'Z»Qò.¼B(<¥¾B;î¾I½”‚º«ù£½£ ¼6Ê³½Âğ½õ}_¼£?£<å­ú<D®½ÖÜÁ½ˆî!½æk=ã’½Òêš<ÆW½ô0=.‰='Í<vª½+V2=˜\á<{ú¡:ÏşÄ½îf=Ïm#¼wéİ¼”}½ã³a=t¢õ<ä\==ƒ³ ¼Ìœä<ù k=Ÿ½@ –<æœ>=Ì}Y<tYC¼Ë=îÔ=‰hW½a)¼`½°]Ê¼+P,½ Ìf½£V=Pˆ/½Ëğ=’Q»"¼»ãPü½l­p½s6U==ZF¾çØ‰½ö0$=®Jà¼@;Ò]==ïÌ‡=ÿ*"¼¨f¡¼"½ïÔ;Ïë<_`…½qöß;ËÅ=ÉÚ£;->wº©Ÿ‹=Ğ\‰½
+&=>œ&<3X¼ÌØƒ¼Ô+©=eıP=>ÒZ<43€<{<;Ñ<,Z½ş-ï;hŸ2=îkÁ¼®&½;š ½²NÏ<»+<™=Â3¼ÀÊ½Ùlø=’ò½<l±ğ¼"›¤<R
+ƒ=µç/=ˆpa½ÍáZ;=]Î<¼½=ä}Æ¼i„0=Gì<Êä‚¼—MC½ÿ›½7ø#=°È<Ì€=„I¼Pé»Ìhg½‚h—½§Y\½F¬¼¼X
+÷½sh{=ïã¼ŞO»¹µ—g=ûï&=â<jX=ºLS½=_½ õˆ½Šr½…Á	—f@½õ™¼©¼·å‘=)à<å¼Sè`¼Gh,¼\ÛX=ú<¢¼`Ú;ü7=VB½KPL=XƒG=e	=pï‹=çF²<İó½õ\…½He¼ÓC½3w†=<@?½Qc-=DV>="2Ë=A{	½˜İ½Æx =ü9]y%=pcì¼ÔaÍ;Ø©¦¼©÷=ÚpP½®½ÅĞh»×”¥=Û^ ¼mßì¼o
+>d5¼½Aş»¾eó;ğT¾;4Œ%=7Ö¢¼§¹r¼#³F:âEz<¢M=ºq¢¼ó„Œ¼45V=è‰w<±(Å¼fí™¼”p¼¼Ö·½?"½üH½Sr¼Ìgé¼Xk;C5½İ‰´=„İn=íë½<½\-½r’½ùƒ ½9âĞ¼¸®½7Ò’½}¸ˆ;<Ó<Ç¾$:y.›½¡Gâ=€;z9½«€½Ùj“¼g{È=’†y=¤±œ»^3"½ÚyÉ½Y„¼ =yÅ¿<”6 =“cí‰ëC½ıÙy=/š½:&Ø=¦\U=›Ô½3G½´O¼D
+Ñ¼f(F¼NC„=}ï«½DŠ×¼¶o:=¿K‰<\¦=(#¾v¯Ê½}1½ x,;*èí<³4<»?~)=$´<—¢ºıEÇ»Å‡Ï½ş}2»M·	=MM”½edŒ½`¼Ë¼S=˜0½ó¶	=;I=^Ş¼ª¡.=^D:½32³=®)‚=6ü<=:{¾µ8"½îWi½¾Û;[V½¬åp=T°;ò%=L½V=¦\ =ŒAY;*U;a2½îñ=b4=ˆ6E<|A=³¼Û?=0ë†=ss<£~Š=Şî=»´¼öQ@½‹/–½ètQ½XQ'<¨@4=é}P=í³<V8¼ô¨½ş]<¹xz»ºH«¼á=ÒµŒ=#•½•ˆÕ<n¾,=/ E½ÇÏª¼«×<Ş–Ô<[_;Ÿ½ÕT½MÌ=¼Îy<¿UN=bµ½µ§³è>Æ½îÍ¼q[¼Á€ò;|–S< ç¹<Wz½â„)<ÿœ<2İ‡¼Ã¢=ğÜˆ½¡ß„½†2=ëÁ¼Ó½€)G½(òŒ<¢-‡½Ë“´½å='ôí»€Õ£=gÀŠ=8Ô8¼êX‚½êåã½vÜŒ=ƒ<f)¼¼ Ñ2½é2=N3g=şè,»:Y=ÊĞ²=‡q=~¼ô?<»]¶=ïŸ¼–¼<¨;m »¢<>€2 ¼7é›<¦[Â½
+¢½Wyı<í»‚»«±¼ğ–‡=X°›=‚–=ë”"=öƒ»<=uÏ<¾ÅS¼´ŞH=¯~‡½ÚÆ¼¡=Û<vD—½«ú‹½k™<øxj=»as=)T<h9f½Š6;=øH½ºñ¦<j¡½„d¼l;X½§mQ=9Ç@½àÿA½O½¸¼{¼j½ƒ€.=Æv=5‹<8¹é¼×2°<M¯s=ƒ+Ò<×¨«;'
+@=X8~¼å«¼6{Í<Ğ•è¼Ğ^^½ë˜=|É‡; %=˜z˜¼À½Ü©<–ËÇ¼Ò÷¼ISë¼£S=a×M<¨³2>†›<×H¤=Ïü•½¯) ¼9ƒ<Y½Òà¼—¶<îè°=Õõ-;ì~<Â®=¨[½\	=,Y=–U&=Q×½r½µˆ¼â=É«j=ŠË=„›a<ãQã½½	<Â<<Ë=ûq»ÕÖ‹=äX=ŸÑŠ==È=Ôo=SO½q3=ÔÍ¼ÇD=“’=ær½S)½á“í<óX\½8õ½;5äˆ½Ç”<
+lg=Ó1Ğ=Ç¹½¢Wc½wƒ”¼İ=	Y½k­½Y‚<6×ù<xÊÇ¼SØ;ÅÔ€<ÄAµ<†n¼+îs½Úo=r-z=5²¾=h6¬;mk<¼²=p:Ó¼*I½L`Ğ;OCI½ös1=Û\¡¼ÿ±»Í—€=• ½ƒ6<­å:<Ë	= ¯L½™£½Ç¿ì½áÔÙˆq¶Í<sçeºo×°<HñX½ƒ<”xW½}³·½åÙA¼rãØ¼4·„½ \×½V#=µz>½_W´<BX½.1¯<¸-L=• Y¼¦l»ïÊ|½ÎÃP½€‡½p‰=5oÓ=şL<Xãç»JÜ<é|í¼ò˜½`œ¼>M®¼ÚÿW<áÆ­;#7;=çaÈ<$°²½y­ƒ½]%"=¾Ãƒ¼È¿›</±<aèa=dİ=ì÷=ÓÒ½ŸM¹¼vf=X^¤»î`—»H½'†z=¿·ô<VÇ½;áª¼àxp=ô¯ƒ=ú
+‡=á.½Ùşä<ä¤½s<	>½Õ¡^<b©<8è½„®À=Ê»²½	¬ò=„ßA=o¤Å<’?<~Q<A¡­¼jÔ'¼{J\=ŠK=ÛÜJ¼tE¼¸Ñ<İ|:âz2½âN=cà¼Ï{½—¾YÉ<µ1´=ƒ!±½~±Ú;Y$”½ß¿‡½‘º²¼iØ…=RT#½½.q‰¨Õ¼`ò«<2¼x¦P=¢ƒ*=H3?½LÄ½ê“€<ûËS½º$¼Æ¡)>¥/1½ÜG=°´=<ÖRK=¸â«=|Ù½¥½¸/=sm¼¸ÓU;öœ³<VØÚ;mbá»Ú/›¼B}^½
+wS½Í!½ÿ€¤;W`3<Ä4½G"D½mº½CŒ==²ìºÿ¨=½ï‘;ƒ¨ü<£wª<i¼Û6=ÕX€=RD¾n^½ƒî¸½›½a<W.F¼(Êk¼±*<B‰â=Ê¦=Št=Â»<¸½nş¼i˜–<Ú|}½q)‘=fğ—;S)I=l–Ú½DÍi½ <²ÃY½ v!<“Ó™<(¯½ÇÒİ»Àëß¼'×»<µ_Ó<Àí=nÛ<!Ä©;îÅ;ÓÎ½'rj¼ü¢½tE¼½UÏ =k+Š=Á\d=¤'»j'Ê=¸?=pªå<€8=lµ<äÔ:­j“<Ä9ì­=Rú*<FhŠ;£ë»rfd³Ã}½^JÃ<ÙªÃ<¡ü½Ÿ§:=ËL ;)ô¹ÁKÙ<å–c¼Ã1¦¼Ôñá=ÓŸ
+½©Ş?½¼Õå¼»½”Î¼ì(½ĞS•½÷GÊ<²vÔ<ñÀ=\Yİ¼›+=£=•$=]¾€ë½ßù=¤ï!½ƒŞ?=yf(½a=÷³k;?²´<
+Ï£¼ç¬_=ä=£<È¸å¼=½H
+‰=Í’ä<-üM<YŞ;¼è‹Ô»İ!¼C›æ¼·ÑU»fŠo¼Â–B<j%=ªˆé<ôö“;b=°<ÁŸÚ=§î•= ‚%½3¯…½ÛVí;sè»º‘º;E§<¢µ½l
+½5UŒ½R7‹½ih@½Êñ;pB;%o=Œái¼ƒ$½{@h;V)½[Û2=Ç.“½(½–<”eú;/nö<öÔ@½ù¿â<R´´<#Xœ=±qD½ÂK‘=AÆ¤¼@…
+½h¶“<‰ÄA¼—
+z»‰#&=g*ô;ü€=ßõ<â5½f=BÁ·¼ü*H½õH=5<”9‰=¡’*½ºøn½æœâ»SŸ©¼ÂÖD<Šiÿ;n–=¡vz¼±˜>"C=Ã‡l;‚Vo½#|¼‚#¸º?y¸½¦ø½k±Ò»×`İ¼3Nä<OÁé=4£©<Æ¦½ĞaŸ<ÆL¢;öÀ~=(„`½•ñ|<î(½±¬="Q=º›å¼¾í·=³Tt½tœá¼‹=T=”=±_ö<¬X=Z§=¤v™=e€G=”†=îß¢¼ 6û;Ó~„½‰±=ÅPœ:Â¡¼00¼JTÅ<·2Z½äW=ùé½zõ™¼“3æ=ÿÖ›<AF½$Í"½³¯‹¼šÈ<™”¼–ƒ;šgs:èñ×<§™%½”=ëqm=±Sv½ê?½¢L–¼`=—¾Æ<gÂ3>ÇŸu½;­¼wø=ƒ€½ªVæ»åÄ½Jzõ½F˜a=*y›½ZíN<ıäh=ıÕ¼©éı;ì;R!"=z¼1½ïµË½úú+½]_¢‰T/M=Ø]¼~#=é‡•½—sÜ=ÆN”½à²<è¢—¼:•»Â¨K=êí¸½'=ß\½<´×=GĞ¼À	Q»U+:<¯™½û£¼&¥É½ã ş;b¢1½ =4=’_=¿O<Z£=R.Š<Y¬½÷+S<‘<ò7ã<É ½àó>ƒşF¼*¼¼ÃWä»±Á;İ+;‹EK=ª÷<ù<O¯=ì+u=ÕÓL½Ov ½@=‹ƒ:©A½7Ê¼Cc"=S_<Uâ+»ÿÄa½9«<é¯=‰<Uû<=®eŒ<´`Ø¼Hc¼’Ø¼äê»S=a83½_•©=«½‰=#¦‡=¯Û<`áš=>=9ƒ½Û„ó»ä¹6=Ob==ë<–Xñ<d9<ÑğÍ<µÿ‡º§-<>ñÓÛ¼¡¦X½©ñ›½ãì
+=›(=Ù/½Iª:K½ó^v½Š»˜½6¥=^e¼/#=<‡l 	m&Ì¼¤¾<Õ)<Gƒ=&{Ë<Ø½¸¬©½ú£;²¿¦½u?F<-Z!>ƒ¸;¬;Á§<åá=Vå	>îJ£½í?[¼ü¹”<%2°½øM¼íÓv<V™&;£C{< ;Ñ¼pì
+½HC½1Õ¼_É=¢Ku»{Ô¼‹Q½&é&½h=›D»˜²=®Ì¼şÂº¼d®7=*ñ¼ãİ{=ğÜ/;À¢½¸“½Èµ„½ Ö‚ºùG†½"@½Õß=Õ&x=Ş¡M=ğàà»€=÷†¤½ë‡)½«­¼NÏ³ºnæ=æòÆ¼¼ó­=w‡½Ñ)Ñ»r+¼şô>»¿.<ú³<vŠ;½,mä¼æB]½W‰½*V»#œÏ<9Šf=Tç=×ü½Êg¾½)½ ±=vã¼îœ<Úó›=bÜø¼»L.½çö=ÀÈ=ÒB<Õ0z¼ãû¹;æÉ<Sj±½…™<Ü{=úƒË8>.:=CÕ*½ÉØd³ïÏ½10U<„¹…=¾¬-½e¬=JİH<,v3½v(¼Uû=½ƒº¥½ä~t=lTh½qr€½PV½¼¤~½™É¼Q4ë¼Û,f½®•/<ŸB½I,Š=>Å<·/¡=<C®=Š{Ö»…Zã½M	ò½1i6½®B=ú½=Œ´¼·S=ÒÙi;|NÓ<ŠÎ;;Î´=yİ=ª½·€¸½vX'<€å§ºãş½ T:&+½©
+ì<ı´½…o»±÷X½!?I<A“ä;óD=¸Ú®¼áˆ­<£OÜ<–°Ô<e&$½++=üõ\½÷Œ¼;“ +¼DŠ[;mE™½U.£¼o½an€¼{­·½®°
+>Î‡­=-î
+>]P…¹Á¼½–`=qÒW¼]cS=üá¾IÅ^¼ÒÎ›¼v,=×"Æ½h,Ù<”¹à½K¨»êÃÅ<vï><šöN»‰Yá=Wá½â™=àWº;ŒG‚»|ÖC=W¬,<„4f½Êè<ñ¶Æ¼%¼İî=¡î–½ø!º½Df;…à;oH2½èÉ>½ !É<¸ì%<ÿ£‹½yO|º„¯à¼Rcû=>bÈ<È==ˆ½‚k†<¨‹=IàºÁÃ®;Ÿû1½€²=&¡¼c²H½óSb½ S˜½¸ç¸Ø¢ò¼ÍF%;İÎ¼¼üLa½$,ˆ»Á8c=o
+²¼Xª„½Kiò=Œ¤<r˜c½œD³;€şK=}ş³½?ß‚=L¡<ğ~:9Ä«=£`e=@Ø1=ëmE=R!½ª®=³·†=Ã§½&Q|<iÑ=So½3İN=¨&7½;Ø¼È¤ø=ŠFÌ<Vq=£Âà<“sR¼v{æ<±$Ë<ßbÓ½k4=Cœ=½3È½^Ì(=µã½ò#/;Šv-=ƒ~½ac'=Şƒ¢¼J»<“-¼ˆö¼ºM»ÈïK<ä-=/>ï< Ô´:z;“½~Û>=Ğ:H=åíÇ=óË½ãO½}İ<H8=õE¯=‰=G½o¼€~Òˆ{/<>x½¿=Ï<”È¼Â³‘=CÃØ½=è©½­.Ş½²£=`UŞ»ïiÂ½ó
+E»f±k¼E 
+=+²¼Úáu=DÖ¼\v=;†4½7C½ì–=3º‹<GK@½İ«~½K¤í¼]°<{jQ=®€¼ñ<,¾=9½•…<Ü1;pF
+=ÎĞ´»~¹¼'"©¼æÛq¼`	=Û‚¼ÆÙ‹½– ½jÍL½ùbp½
+£k<í˜¼äØ6=”¦…;ë˜<<§î<TÉº0¡E½´R`:oPë; „½¥şY=N4¼Œì”<İ§Æ<q4<"4½Ë7»¼]P=.*½Ò²¾<÷€»XBº÷ÿ¦=bñ¿;TS¤<tÖ;=4= (i¼Óµµ¼‰ai=ŸK´½ĞL$==,=@ û¼3)à=‹·¼0àŒ=¤—<E—½Ö{”<û@Á<8.Œ=¹î%½ b¼ÍOT½aÆ¼à‡å;œıb=Æe¢=…’<jlˆ@*¯;Éò<şên=[	)½WšP½Œ;_+=K÷P¼AÙ<6’G½Ê)—<ZAø9½<Ù<*Á>.k­¼Â¼º½ŸA¼3ş<<	îÂ½ÏÆW½í(3¼†±Ù¼Çä„½ëÖ’½%Ï	º´>vfÖ½8”½¯è9M¼×½´¼KÛ;z$½=Pì\¼ğZƒ½øÊ<]ˆÇ<ÖÓz=rŒ¼U';¡Ë›½Ûâ´<÷»Ò¾4=Ùëü<[Š©=Ğÿe¼äb=µÁã<gÎë½•É=ÊÈ=IN»¸>®=ónÉ¼‚hˆ½úC1½Si¼È»{–Ş;˜
+<•ï‘<Ä.½<x“=,š»n¸N=h
+=ØkÁ¼|¾'½+Æ4=$¨“<<üê;†Üj½%+<ª­Î<½è½65¸§ö;™xÌ;)İ<`„;'m=|qä<{=‚{Ÿ<Íª’»É€°<`¿=€BÕ<`€™<‚ü<dÿÅ½Fz³Dğ<jˆD<n•½ù§˜½¸º€<öí¨<²Un½èÊo=J¸£½ÅÛ{=[>‚Û9‘G»½¦	*¼h’Œ=sğ¼ö5İ»´W=&~E½J¶z½¹H­ºî{º/Ñ ¼§4”¼r¯”=Ñ7½õ¢¼ï!æ¹¹š=æ<¤Ó]½#=_íŠ¼„Š;~R	;wÂ=øEî=²£=uŒ½È«=u8À<÷*$½»/·½]îf½êI<=+¾<£<Î¼¹>o=şÉ6½ñ`ó<Œgå¼4>„=í°=9ÊÀ=à:;²é½)›…½Ø6æ»´;¼§:&=Ç¿½«Â‘½½¸÷¼½’U½™úœ½ı‡;0ƒ6½ç†*<© ½£ê”½À0®=Fu¼Ìí=ª¥–½ÿ =¦¼æ=ş½u=èÃc<Ü ½ŞW]<4r-¼¿J>–³U¼OUä¼€›½ñ§(=µ©¼é<p~3½QŒ=vÓd=;Ş¼ûÚ‚¼»)_<, S½Š^=w½¯=ÆÚ!½–o½ÚkO»9dx½zP½¨Ì¼C1=öeà¼¬J<=ü>y3½Rü7<©¶§<¦r½›¨=‘†½Õ=zú=³Ÿë;İ|§»<Q¼b ²<Tv¼»r¼…Ks»ñx†¼ş	½1÷<<Qæë¼Q v=1Kª<œ]Õ¼Õ#×ºÛå½NX²=7ı½PL¼lÅ¤<—`Ú¼3²<p8y<{9½äÎ>¼iP½!ŒA=é‰<PÍÇ<ÍC»^Ù­½ælk:&®¼ué!½Ü[á<eèî<h¡=­ªÏ=‡=er¢½n31=rù<9¡=Ï½ş½E¡)<*/å<0¸!½Ìì$½2Ş»;1ñ•<Ï
+=oğÓ½…•J»«f=¹>‘Y›=3ÆŠ»T<À€=0(ê»r½/<]½ÑçÒ½N¶%=‡¢8¼Jú=öÏĞ¼	‹
+=Êc×ºÖr=…ĞM;œJD½´:½˜±¼‡5‰B~	½ Ş=ÔyJ;Tš¼YMŠ¼]¼±Ş¼%ş»$ò¸:¦÷lº+Ó¸¼Õù<½Z/=ğÚ¼sŞ.;Èá=·o=®EE½Ïƒ½ÊT½¸Âˆ¶ ò9¼‚­c=Ûê=@z=î¹¸»{ò’¼ö”½:¨¼½‘Õ(<m½Î<çÙ<Ì½¯‹=î†½c$æ<İ¢Ú¼W¼§é¨¼é8=¡x½i¨ü¼LF¥=¶æ=ªp<åeÓ½Áñ½DJÕ=OB˜¼£BC½Ö¹»–(~=À¥½SX<Ôa½UK¶=¡=5ˆr½±r‡:ó¯±<?‰Ã¼Ç•£½wh3½‹ä¼<_”¼X‹;HhJ½Æî=w«L=@S¼l»	<ÛÆ"½« ¼oB"=øÇò¼|üF<œvB¼––=5/p=™˜Õ<ÎÃŸ=L=ı˜¤»ì¸Ú¼ó|½bÍ#=GÛÑ<ëF$½—@\=\©²¼F†Ğ= š½LŒ=‹1$½êÖJºªÌˆ_	»<‰½ĞiŒ½?=Ì(l=+¾Ô˜3½!-2=ó;*½õ¾Pú=9•G<FÈ½½O6Ô<¼Ç+=K’¡=…q»½Ÿ«<gŠ)½àAü½ŞŒ#=	ğ¡½
+e»=eä[=×_= ®„¼÷Jí<Ÿÿ½@†=r+¼=qD”½Ëú=àÍ5»miø=¯+‚=ßCe=¶.$¼y”=xÙW=wH—½öĞá=õ£m=yX»¶È)½1`"½Òâ¼aæ½ÖyÅ<Œ¼F=·Ë<Ÿ4=ÌŞ¼÷6M=u0ô¼ÛÁ=×d!½¤š–;!A†<nóJ½Bì=r¿©½Vm¾=9¿‹½À½¸¼G›µ=Á u½È·“½’I‘¼V•¼ÇŞ³¼Pñ)½å‡"=|õ9½]º–½:m/½ÊğºÔW½´Á®¼¾d;.k›;ØÁµ;è¦¸¼¦ŠN½Œ{=‚Ä)ºy¯,¼!;ù(=&½½sA¾è3¾<Û½Å<É“=:+<:•;°do³àãk½—;{=çïQ½ÊŒA=S¯E=R.=~…ÿ<Ú ü<…óŞ<A]½µ2¼|ô¼…³t<ù=½ ¾×Ûz½5AL½a²ù¼'ö¾:
++¥½¼CN½ˆåº~:è=Ï4±=Õ¾wE½¥”½Uv	½øS=ı½•Ùo½u,y½ ‘=ØÜ<¤Œ¶<Š=©K»RÏ»¼»¨?;8ÁL=Ïz¹¼š1M½Q›ü=jÚ”¼Óòw=~ƒ&½}²O½N‡u=oÈ¼2û½`%Â<Ù¤*=‚‰<{•ƒ=óë½3›¼»wVô¼a…=á	> ½P:ø\'»¶Jó¼be¼e8ô»t›`½3°’½òÜ<¢e'½$¯v=»}*» #Š½Š=ã<y½‰¯<*RÄ½¹˜»îñ=,=I=F©=$z¼KÙ½éğ<½é+½f?Ş=Íkq=¯ &½Ke¼i©‡¼I®À¹yè=L¥Š¼¦;=¢M=¯"b<}Š»êø’<Ÿh²¼ZÒ=	'‚=Hó‡½ß‡Ô9¡J2½¥È½äI@½bù¸¼Œ ==Io»­°=é=Ìk½í»3=~ÀQ==ÙY½aW<©v¼{¾=OU$½Ñkm=åÖú;›Ã›=õ°<İ»YšF<àA%½iK»sYç¼°=ñé.¼¤•N=_–=ô)Ô»rAL»Ç†£½+=¬Å¤½$,ÿ:ms=§Á:b‡=‡5;TDÔ¼nâ³<GŸ½â:=™ge½¿@‰½ƒ{<Ÿ¾O4¿;Şá¼öz<¦Z\¼'½~=Y=œì‘=½¬v=ˆoš½X$m¼?y=ú’¤=BÃÊ½~w<±+÷<Æi½^«½u»½)pî<‰Â#=ú½$½dá/<HWŠ=Ob´=7
+=gŸ<U¿©<gÁä<¶Z½§>H½ÑÙ¾ ‹¼Í½JÉ(=—|_¼vcñ;8ïÒ<Óª†<ŒÒ=¥Û ½ãÍ¼‰Hz½¨I2‰_¬%½¾|^=eõï<gü"½Ÿ¾Ç¼8Rä¼ÊF¨¼’c÷<67Ù<à½ ¼
+]»† Ğ<¯è¼N}†;hœ¨=ˆ%=m÷¹^ä»jÂ¢¼Ü¢š»D4æ<îbĞ=•—÷<¢¶©<¿½Œil<”Z½½¤—½ší2;h<®Bö<Œ:·»<†==€Ê¼,Uf<[Ã{½Sìš¼¦Úw9kÓ'='¬¼¬v“»âF>™vl=+:ó<õ7½hH;Æ‰=ïn:½B¯Š¼Su½Ú/—==G½ü5ë;V‡h½É‰.=ÆG==Yc½89>½™½õ C½Fd½o¼L=uU)½lÙ­<ÏÏ<aQÕ½kkì=ï˜¯=Cıã»	Su=NM¿»R}õ¼NnN=Ş«;ò€=`÷~¼l'Å<³õ=OİT»¤š?=ÍÅÑ=ñ‡½¶8½=~s½z<ƒ‹p=åGëºÏ†=¶¼§!2=3‰–½ÇãR=¡i3»Ÿóà;‡s¤ˆ–«=;>½	‹#½•Ü=•³Ê=ºué½’Ï‡½´æ=ØjĞ¼ÿ¾¾ƒræ=7§½5›V¼Œ©B=±¿Ë<0á=1‰å½ôŠU¼ì–Á:ŸÙ±¼WuÅ<€Â¹½³a=v³ï=ËFQ=†¢½8~æ<•\ô½%‚$=ƒ€|=*U½Õ‹G=›¨n½œÒŞ=ì~.=Î/;sc´;Ö>v=šNN=`»úxï=hşi=G½‘CºâòÂ¼d¤Ó¼î€+<^I¾;Zá9=ìŠ˜<I<(ò1½£â»¼ùß½|íi<ÔÉ„<uÎ½]9=/œ_¼PË®;wà½†<gü¼$ =á;~=§l…9Ø(½:†Ä½ƒzQ½}a>¼;Ö¯<ÖS¡¼Öxw¼]H¶½|Ìa<€'}¼VEğ¼ ì$½³„Ò»³ò<$Æ”¼Y$=¼$Èg½<®~=lş,½“J@½sğ'=P˜º=@ñA¼“½åmº¼´=9Ÿ=-ğ½BG<-°b³ =”¼u£Í:÷§‘½‹=|=Ëº<7Ê½®Ú;½]FU=4>¼yÔş<fPî;@X½¼Hô<>>Å½
+¥â¼İ„¶¼Œşd¼WlW<Xs½f?Š½sYÃ¼¤ƒ>:që=&%½‚%½Ø½qw„½­Yv=Ays=ıf½0BU½U«„=÷S¹¼ñy».3`='ñª<x¯»î<¸à<k=úƒß¼‡¢Ä=x#¹¼wÃ=Šî½±ë½&b=^ß£¼ª¹E½ñ†<½I=.½r6=’ŠF¼'½tÂè»°Ä2=Ó™ú=²]‰<òì»¬ø½<VQ¼éÔ½O             OŸ                     )d
+(3) 
+RBF kernel: 
+K
+(
+xi, xj
+)
+= exp
+(
+âˆ’Î³
+âƒ¦âƒ¦xi âˆ’xj
+wY     ¶Y     xij refers to the value of the j-th feature of the i-th sample.!ÆY     Z                     oY            ¶Y            Z            w   
+chunk ÿÿÿÿÿÿÿÿÿ*string08
+4vector ÿÿÿÿÿÿÿÿÿ*fixed_size_list:float:38408j
+lance0.16.0z
+lance0.1   Ö´ Ï²*q
+0 ÿÿÿÿÿÿÿÿÿ*struct
+
+null_count*int648
+	min_value*string08
+	max_value*string08 –´ÑZ        LANC

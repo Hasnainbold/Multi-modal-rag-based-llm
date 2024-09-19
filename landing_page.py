@@ -153,20 +153,22 @@ def vector_database_prep(file):
                 page = doc.Pages[page_num]
                 for image_num in range(len(page.ImagesInfo)):
                     imageFileName = os.path.join(image_folder, f'figure-{page_num}-{image_num}.png')
-                    image = page.ImagesInfo[image_num]
-                    image.Image.Save(imageFileName)
+                    image = page.ImagesInfo[image_num]   #This retrieve the image from the current pdf 
+                    image.Image.Save(imageFileName)      #This line save the image at spcified location for the further use in hadr disk 
+                    os.chmod(imageFileName, 0o777)
+                    print("os.chmod(imageFileName, 0o777)") #This provide permission for the current image to edit in the another process 
                     images.append({
                         "image_file_name": imageFileName,
                         "image": image
-                    })
+                    }) #Image object and name of the iamge save in the lsit 
         print('2. image extraction done')
         image_info = []
         for image_file in os.listdir(image_folder):
-            if image_file.endswith('.png'):
+            if image_file.endswith('.png'):   #This confirm all the images are are in png  form 
                 image_info.append({
-                    "image_file_name": image_file[:-4],
-                    "image": Image.open(os.path.join(image_folder, image_file)),
-                    "pg_no": int(image_file.split('-')[1])
+                    "image_file_name": image_file[:-4],   #image name without .png 
+                    "image": Image.open(os.path.join(image_folder, image_file)), #This is location where that image is stored 
+                    "pg_no": int(image_file.split('-')[1])  #Image page number where it is present 
                 })
         print('3. temporary')
         figures = []
@@ -180,7 +182,7 @@ def vector_database_prep(file):
             data = data.replace('{', '-')
             print('4. Data extraction done')
             hs = []
-            for i in image_info:
+            for i in image_info:       #here three things are stored 
                 src = i['image_file_name'] + '.png'
                 headers = {'_': []}
                 header = '_'
@@ -210,7 +212,7 @@ def vector_database_prep(file):
                 if not i['image_file_name'].endswith('.png'):
                     s = i['image_file_name'] + '.png'
                     i['image_file_name'] = s
-                    os.rename(os.path.join(image_folder, src), os.path.join(image_folder, i['image_file_name']))
+                    # os.rename(os.path.join(image_folder, src), os.path.join(image_folder, i['image_file_name']))
                 hs.append({"image": i, "header": headers})
             print('5. header and figures done')
             figure_contexts = {}
@@ -304,10 +306,42 @@ if uploaded_file is not None:
     with open(uploaded_file.name, mode='wb') as w:
         w.write(uploaded_file.getvalue())
     if not os.path.exists(os.path.join(os.getcwd(), 'pdfs')):
+        print("i ma here")
         os.makedirs(os.path.join(os.getcwd(), 'pdfs'))
     shutil.move(uploaded_file.name, os.path.join(os.getcwd(), 'pdfs'))
     st.session_state['pdf_file'] = uploaded_file.name
-    with st.spinner('Extracting'):
-        vb_list = vector_database_prep(uploaded_file)
-    st.session_state['vb_list'] = vb_list
-    st.switch_page('pages/rag.py')
+    def data_prep(file):
+        def findWholeWord(w):
+            return re.compile(r'\b{0}\b'.format(re.escape(w)), flags=re.IGNORECASE).search
+
+        file_name = uploaded_file.name
+        pdf_file_path = os.path.join(os.getcwd(), 'pdfs', file_name)
+        image_folder = os.path.join(os.getcwd(), f'figures_{file_name}') #name the image folder
+        if not os.path.exists(image_folder):
+            os.makedirs(image_folder)  #make the image folder if folder is not presnt
+
+        print('1. folder made')
+        with spire.pdf.PdfDocument() as doc:
+            doc.LoadFromFile(pdf_file_path)
+            images = []
+            for page_num in range(doc.Pages.Count):
+                page = doc.Pages[page_num]
+                for image_num in range(len(page.ImagesInfo)):
+                    imageFileName = os.path.join(image_folder, f'figure-{page_num}-{image_num}.png')   #name the fir page number and image numer on that image
+                    # print(imageFileName)
+                    image = page.ImagesInfo[image_num]
+                    image.Image.Save(imageFileName)
+                    os.chmod(imageFileName, 0o777)
+                    images.append({
+                        "image_file_name": imageFileName,
+                        "image": image
+                    })
+        return images
+    img=data_prep(uploaded_file)
+    if len(img)>0:
+        with st.spinner('Extracting'):
+            vb_list = vector_database_prep(uploaded_file)
+        st.session_state['vb_list'] = vb_list
+        st.switch_page('pages/rag.py')
+    else:
+        st.text("i am ready to code ")
