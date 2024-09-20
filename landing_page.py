@@ -59,7 +59,7 @@ from langchain.vectorstores import Pinecone
 import pandas as pd
 import numpy as np
 import json
-from pdfminer.high_level import extract_text
+# from pdfminer.high_level import extract_text
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables import RunnableLambda
