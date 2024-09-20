@@ -63,7 +63,7 @@ from pdfminer.high_level import extract_text
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables import RunnableLambda
-from pinecone_notebooks.colab import Authenticate
+# from pinecone_notebooks.colab import Authenticate
 from langchain_weaviate.vectorstores import WeaviateVectorStore
 from langchain.text_splitter import *
 from langchain.smith import RunEvalConfig
