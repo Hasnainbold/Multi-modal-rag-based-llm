@@ -5,6 +5,7 @@ langchain
 langchain_community
 datasets
 openai
+pdfminer.six
 numpy
 transformers
 torch
