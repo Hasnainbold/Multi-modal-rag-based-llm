@@ -64,7 +64,6 @@ langchain_openai
 pinecone-client
 pypdf
 transformers 
-torch
 langchain_community
 langchain_pinecone
 pinecone-notebooks
