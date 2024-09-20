@@ -896,17 +896,17 @@ WEAVIATE_API_KEY=st.secrets["WEAVIATE_API_KEY"]
 pinecone_api_key = os.environ.get("PINECONE_API_KEY")
 os.environ["HUGGINGFACE_API_TOKEN"] =st.secrets["HUGGINGFACE_API_TOKEN"]
 
-st.title('Multi-modal RAG based LLM for Information Retrieval')
-st.subheader('Converse with our Chatbot')
-st.markdown('Enter a pdf file as a source.')
-uploaded_file = st.file_uploader("Choose an pdf document...", type=["pdf"], accept_multiple_files=False)
-if uploaded_file is not None:
-    with open(uploaded_file.name, mode='wb') as w:
-        w.write(uploaded_file.getvalue())
-    if not os.path.exists(os.path.join(os.getcwd(), 'pdfs')):
-        os.makedirs(os.path.join(os.getcwd(), 'pdfs'))
-    shutil.move(uploaded_file.name, os.path.join(os.getcwd(), 'pdfs'))
-    st.session_state['pdf_file'] = uploaded_file.name
+# st.title('Multi-modal RAG based LLM for Information Retrieval')
+# st.subheader('Converse with our Chatbot')
+# st.markdown('Enter a pdf file as a source.')
+# uploaded_file = st.file_uploader("Choose an pdf document...", type=["pdf"], accept_multiple_files=False)
+# if uploaded_file is not None:
+    # with open(uploaded_file.name, mode='wb') as w:
+        # w.write(uploaded_file.getvalue())
+    # if not os.path.exists(os.path.join(os.getcwd(), 'pdfs')):
+        # os.makedirs(os.path.join(os.getcwd(), 'pdfs'))
+    # shutil.move(uploaded_file.name, os.path.join(os.getcwd(), 'pdfs'))
+    # st.session_state['pdf_file'] = uploaded_file.name
     with st.spinner('Extracting'):
         vb_list = read_pdf(pdf_file)    #this is the another change i have done here
     st.session_state['vb_list'] = vb_list
