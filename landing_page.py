@@ -344,4 +344,4 @@ if uploaded_file is not None:
         st.session_state['vb_list'] = vb_list
         st.switch_page('pages/rag.py')
     else:
-        st.switch_page('b.py')
+        st.switch_page('pages/b.py')
