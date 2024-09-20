@@ -949,17 +949,17 @@ st.session_state['chat_model'] = chat_model
 st.session_state['cross_model'] =cross_model
 st.session_state['q_model'] = q_model
 
-st.title('Multi-modal RAG based LLM for Information Retrieval')
-st.subheader('Converse with our Chatbot')
-st.markdown('Enter a pdf file as a source.')
+# st.title('Multi-modal RAG based LLM for Information Retrieval')
+# st.subheader('Converse with our Chatbot')
+# st.markdown('Enter a pdf file as a source.')
 
-uploaded_file = st.file_uploader("Choose a PDF document...", type=["pdf"], accept_multiple_files=False)
+# uploaded_file = st.file_uploader("Choose a PDF document...", type=["pdf"], accept_multiple_files=False)
 
-if uploaded_file is not None:
-    # Create a directory for storing PDF files if it doesn't exist
-    pdf_directory = os.path.join(os.getcwd(), 'pdfs')
-    if not os.path.exists(pdf_directory):
-        os.makedirs(pdf_directory)
+# if uploaded_file is not None:
+    Create a directory for storing PDF files if it doesn't exist
+    # pdf_directory = os.path.join(os.getcwd(), 'pdfs')
+    # if not os.path.exists(pdf_directory):
+        # os.makedirs(pdf_directory)
 
     # Define the file path where the PDF will be saved
     file_path = os.path.join(pdf_directory, uploaded_file.name)
