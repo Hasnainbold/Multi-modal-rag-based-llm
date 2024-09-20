@@ -76,7 +76,7 @@ from langchain_core.tools import tool
 from langgraph.prebuilt import ToolNode
 from openai import OpenAI
 from transformers import pipeline
-import torch
+# import torch
 from langchain.retrievers import ContextualCompressionRetriever, MergerRetriever
 from langchain_community.document_compressors import LLMLinguaCompressor
 from typing_extensions import TypedDict
