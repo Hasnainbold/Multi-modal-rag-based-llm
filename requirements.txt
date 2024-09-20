@@ -1,4 +1,5 @@
 streamlit
+torch
 langchain_openai
 requests
 langchain
