@@ -21,9 +21,9 @@ from langchain_openai import ChatOpenAI
 import requests
 import openai
 import multiprocessing
-# from langchain.document_loaders import TextLoader, JSONLoader
-# from langchain.docstore.document import Document
-# from langchain.embeddings import OpenAIEmbeddings
+from langchain.document_loaders import TextLoader, JSONLoader
+from langchain.docstore.document import Document
+from langchain.embeddings import OpenAIEmbeddings
 from langchain_openai.embeddings import OpenAIEmbeddings
 import weaviate
 # from langchain.vectorstores import Weaviate
@@ -59,7 +59,7 @@ from langchain.vectorstores import Pinecone
 import pandas as pd
 import numpy as np
 import json
-# from pdfminer.high_level import extract_text
+from pdfminer.high_level import extract_text
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables import RunnableLambda
