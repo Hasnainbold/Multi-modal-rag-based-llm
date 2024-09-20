@@ -7,7 +7,6 @@ datasets
 openai
 numpy
 transformers
-torch
 sentence_transformers
 langchain_huggingface
 ragas
