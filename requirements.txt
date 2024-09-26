@@ -78,4 +78,6 @@ scikit-learn
 numpy==1.23.5
 PyPDF2
 dspy-ai
+spire
+
 
