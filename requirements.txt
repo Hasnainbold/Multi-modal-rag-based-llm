@@ -1,3 +1,6 @@
+numpy==1.26.2
+torch==2.0.1
+transformers==4.32.1
 setuptools
 streamlit
 langchain_openai
@@ -7,8 +10,6 @@ langchain_community
 datasets
 openai
 numpy
-transformers
-torch
 sentence_transformers
 langchain_huggingface
 ragas
