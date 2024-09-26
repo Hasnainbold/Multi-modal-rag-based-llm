@@ -76,7 +76,7 @@ llmlingua
 accelerate
 langgraph
 scikit-learn
-numpy==1.23.5
+numpy==1.26.2
 PyPDF2
 dspy-ai
 spire
