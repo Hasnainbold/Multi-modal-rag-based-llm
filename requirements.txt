@@ -49,7 +49,7 @@ llama-index-embeddings-clip
 scikit-image
 scikit-learn
 matplotlib
-Spire.Pdf
+Spire
 python-pptx
 dspy-ai
 langchain
