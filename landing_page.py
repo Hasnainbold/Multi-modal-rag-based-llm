@@ -9,7 +9,7 @@ st.set_page_config(
 import re
 import os
 # import pdfplumber
-# import spire.pdf
+import spire.pdf
 import fitz
 from src.Databases import *
 from langchain.text_splitter import *
