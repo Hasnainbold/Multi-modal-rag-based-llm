@@ -1,3 +1,4 @@
+setuptools
 streamlit
 langchain_openai
 requests
