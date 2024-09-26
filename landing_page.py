@@ -8,7 +8,8 @@ st.set_page_config(
 )
 import re
 import os
-import spire.pdf
+#import spire.pdf
+from Spire.Pdf import PdfDocument
 import fitz
 from src.Databases import *
 from langchain.text_splitter import *
