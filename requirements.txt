@@ -1,6 +1,6 @@
 numpy==1.26.2
-torch==2.0.1
-transformers==4.32.1
+torch
+transformers
 setuptools
 streamlit
 langchain_openai
