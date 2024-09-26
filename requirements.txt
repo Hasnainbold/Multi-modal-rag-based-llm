@@ -9,7 +9,8 @@ langchain
 langchain_community
 datasets
 openai
-numpy
+xformers
+mistral_inference
 sentence_transformers
 langchain_huggingface
 ragas
