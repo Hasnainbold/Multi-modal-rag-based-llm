@@ -17,15 +17,20 @@ st.set_page_config(
    initial_sidebar_state="collapsed"
 )
 from langchain_openai import ChatOpenAI
+from uuid import uuid4
+from streamlit_feedback import streamlit_feedback
+
+
 import requests
 import openai
 import multiprocessing
-# from langchain.document_loaders import TextLoader, JSONLoader
-# from langchain.docstore.document import Document
-# from langchain.embeddings import OpenAIEmbeddings
+from langchain.document_loaders import TextLoader, JSONLoader
+from langchain.docstore.document import Document
+from langchain.embeddings import OpenAIEmbeddings
 from langchain_openai.embeddings import OpenAIEmbeddings
 import weaviate
 # from langchain.vectorstores import Weaviate
+from src.Databases import *
 
 import weaviate
 import asyncio
@@ -62,13 +67,15 @@ from pdfminer.high_level import extract_text
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables import RunnableLambda
-from pinecone_notebooks.colab import Authenticate
+# from pinecone_notebooks.colab import Authenticate
 from langchain_weaviate.vectorstores import WeaviateVectorStore
 from langchain.text_splitter import *
 from langchain.smith import RunEvalConfig
 from langchain_core.runnables import chain
 from langsmith import Client
 import re
+from langsmith.run_trees import RunTree
+
 from langchain_core.messages import HumanMessage
 from langgraph.graph import END, MessageGraph, Graph, StateGraph
 from langchain_core.tools import tool
@@ -86,7 +93,29 @@ from dspy.evaluate import Evaluate
 from dspy.retrieve.weaviate_rm import WeaviateRM
 from dspy.retrieve.pinecone_rm import PineconeRM
 
+os.environ["url"] = st.secrets["url"]
+url =st.secrets["url"]
+url="https://nmcbryzotwmdzaala0qvcq.c0.us-west3.gcp.weaviate.cloud"
+WEAVIATE_API_KEY=st.secrets["WEAVIATE_API_KEY"]
+pinecone_api_key =st.secrets["PINECONE_API_KEY"]
+# st.session_state['bi_encoder'] =bi_encoder()
+# st.session_state['chat_model'] = chat_model()
+# st.session_state['cross_model'] =load_cross()
+# st.session_state['q_model'] = q_model()
+api_key=st.secrets['GPT_KEY']
+# st.session_state['extractor'], st.session_state['image_model'] = load_image_model("google/vit-base-patch16-224-in21k")
+if 'weaviate_embed' not in st.session_state:
+    st.session_state['weaviate_embed'] = None  # You can assign None or a default value
 
+# Safely access 'weaviate_embed' after initializing it
+weaviate_embed = st.session_state['weaviate_embed']
+
+# Initialize 'pinecone_embed' in session state if it does not exist
+if 'pinecone_embed' not in st.session_state:
+    st.session_state['pinecone_embed'] = None  # You can assign None or a default value
+
+# Safely access 'pinecone_embed' after initializing it
+pinecone_embed = st.session_state['pinecone_embed']
 client = weaviate.connect_to_wcs(
     cluster_url=url,
     auth_credentials=weaviate.classes.init.Auth.api_key(WEAVIATE_API_KEY),
@@ -117,6 +146,7 @@ class Decider(dspy.Signature):
     decision = dspy.OutputField(desc="Yes or No")
 
 decider = dspy.Predict(Decider)
+fd = False
 
 
 def rag_chain(question):
@@ -239,7 +269,7 @@ vb_list = [
 eval_config = RunEvalConfig(evaluators=["qa"])
 client = Client()
 
-openAIClient = OpenAI(api_key="sk-proj-PMJ67akceG4mbeOTbBJVT3BlbkFJvLd9KWYTh4NKefAWfvl8")
+openAIClient =OpenAI(api_key=api_key)
 
 class chatGPT:
   def __init__(self,model,api_key, template):
@@ -252,7 +282,7 @@ class chatGPT:
     return openAIClient.chat.completions.create(messages=message, model=self.model).choices[0].message.content
 
 
-gpt_4o = chatGPT('gpt-4o', os.environ.get("OPENAI_API_KEY"), template)
+gpt_4o = chatGPT('gpt-4o', os.environ.get("OPENAI_"), template)
 gpt_model = RunnableLambda(gpt_4o.chat)
 
 gq_model = RunnableLambda(chatGPT('gpt-3.5-turbo', os.environ.get("OPENAI_API_KEY"), template).chat)
@@ -451,6 +481,7 @@ class SubQueryAgent:
     print(f"Sub question: {sub_q}\n")
 
     contexts = []
+      
     prompt = f"""You are given a main Question {question} and a pair of its subquestion and related sub context.
     You must generate a question based on the main question, and all of the sub-question and sub-contexts pairs.
     Output should in the format: sub-question : <sub_question>"""
@@ -466,10 +497,13 @@ class SubQueryAgent:
     for c in contexts:
       if c not in uni:
         uni.append(c)
+        print(uni)
     return "@@".join(uni)
+
 sq_agent = RunnableLambda(SubQueryAgent(vb_list, gq_model, cross_encoder).query)
 
 class AlternateQuestionAgent:
+    
   best = 2
 
   def __init__(self,vb_list,agent, cross_model=cross_encoder, parser=StrOutputParser()):
@@ -499,6 +533,7 @@ class AlternateQuestionAgent:
 
   def fetch(self,questions):
     def retrieve(question):
+      print("i am in the retriver")
       prior_context = [vb.query(question) for vb,_ in self.vb_list]
       cont = []
       for i in prior_context:
@@ -630,7 +665,7 @@ class FeedbackSystem:
     self.db.add_documents([Document(feedback)])
     self.feedback_retriever(self.top_k)
 
-fs = FeedbackSystem('feedback_loop.txt', embeddings, 'https://jevp6yz2q4uet57pzfbfvw.c0.us-west3.gcp.weaviate.cloud', 'mr8JZynXMHa7qAQ2aXE1JNSfky8X9pjeaW0Z')
+fs = FeedbackSystem('feedback_loop.txt', embeddings, 'https://nmcbryzotwmdzaala0qvcq.c0.us-west3.gcp.weaviate.cloud', '7Bee40vRk0Itrl4WZve2fty2NwU1TMucldyL')
 
 
 def heatmap_gen(question, num=5):
@@ -853,7 +888,15 @@ class RAGEval:
         )
         df=result.to_pandas()
         return df
+print("this first step  2.........")
+feedback_db = TextDatabase('feedback', './lancedb/rag')
+feedback_db.model_prep(weaviate_embed, RecursiveCharacterTextSplitter(chunk_size=1330, chunk_overlap=35))
+with open('./feedback_loop.txt', 'r') as f:
+  st.write("this is the feedback nnnn")
+  feedback = f.read()
+feedback_db.upsert(feedback)
 req = RAGEval(vb_list, cross_encoder)
+print("this first step 1............ ")
 req.model_prep(gpt_model) #, mistral_parser) # model details
 q_parser = RunnableLambda(lambda ans: ans.split('\n')[-1].strip()[len('Output: '):])
 alt_parser = RunnableLambda(lambda x: x[x.find('1. '):])
@@ -861,61 +904,245 @@ aug_parser = RunnableLambda(lambda ans: ("".join(ans.split('\n')[1:])).strip())
 
 req.query_agent_prep(gq_model) #, parser=alt_parser)
 
-req.feedback_prep('feedback_loop.txt', OpenAIEmbeddings(model='text-embedding-3-large'), 'https://jevp6yz2q4uet57pzfbfvw.c0.us-west3.gcp.weaviate.cloud', 'mr8JZynXMHa7qAQ2aXE1JNSfky8X9pjeaW0Z') # file, embedding, url, api):
+req.feedback_prep('feedback_loop.txt', OpenAIEmbeddings(model='text-embedding-3-large'), 'https://nmcbryzotwmdzaala0qvcq.c0.us-west3.gcp.weaviate.cloud', '7Bee40vRk0Itrl4WZve2fty2NwU1TMucldyL') # file, embedding, url, api):
 
 req.query_agent_prep(q_model, parser=RunnableLambda(lambda ans: ("".join(ans.split('\n')[1:])).strip()))
 
 req.query_agent_prep(q_model, parser=RunnableLambda(lambda x: x[x.find('1. '):]))
 
-pinecone_embed = st.session_state['pinecone_embed']
+# pinecone_embed = st.session_state['pinecone_embed']
+# weaviate_embed = st.session_state['weaviate_embed']
+if 'weaviate_embed' not in st.session_state:
+    st.session_state['weaviate_embed'] = None  # You can assign None or a default value
+
+# Safely access 'weaviate_embed' after initializing it
 weaviate_embed = st.session_state['weaviate_embed']
+
+# Initialize 'pinecone_embed' in session state if it does not exist
+if 'pinecone_embed' not in st.session_state:
+    st.session_state['pinecone_embed'] = None  # You can assign None or a default value
+
+# Safely access 'pinecone_embed' after initializing it
+pinecone_embed = st.session_state['pinecone_embed']
 
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
-os.environ["OPENAI_API_KEY"] = st.secrets["GPT_KEY"]
+OPENAI_API_KEY = st.secrets["GPT_KEY"]
+api_key=st.secrets["GPT_KEY"]
 
 st.session_state['pdf_file'] = []
 st.session_state['vb_list'] = []
-st.session_state['Settings.embed_model'] = settings()
+# st.session_state['Settings.embed_model'] = settings()
 # st.session_state['processor'], st.session_state['vision_model'] = load_nomic_model()
-st.session_state['bi_encoder'] = load_bi_encoder()
-st.session_state['chat_model'] = load_chat_model()
-st.session_state['cross_model'] = load_cross()
-st.session_state['q_model'] = load_q_model()
-st.session_state['extractor'], st.session_state['image_model'] = load_image_model("google/vit-base-patch16-224-in21k")
-st.session_state['pinecone_embed'] = pine_embedding_model()
-st.session_state['weaviate_embed'] = weaviate_embedding_model()
+st.session_state['bi_encoder'] = bi_encoder
+st.session_state['chat_model'] = chat_model
+st.session_state['cross_model'] = cross_model
+st.session_state['cross_encoder']=cross_encoder
+st.session_state['q_model'] = q_model
+# st.session_state['extractor'], st.session_state['image_model'] = load_image_model("google/vit-base-patch16-224-in21k")
+# st.session_state['pinecone_embed'] = pine_embedding_model()
+# st.session_state['weaviate_embed'] = weaviate_embedding_model()
 os.environ["LANGCHAIN_ENDPOINT"] =st.secrets["LANGCHAIN_ENDPOINT"]
 os.environ["LANGCHAIN_API_KEY"] =st.secrets["LANGCHAIN_API_KEY"]  # Update with your API key
-os.environ["OPENAI_API_KEY"] =st.secrets["OPENAI_API_KEY"]
+OPENAI_API_KEY =st.secrets['OPENAI_API_KEY']
+api_key=st.secrets['OPENAI_API_KEY']
 #os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
-os.environ["HUGGINGFACEHUB_API_TOKEN"] =st.secrets["HUGGINGFACEHUB_API_TOKEN"]
-os.environ["HF_TOKEN"] =st.secrets["HF_TOKEN"]
-os.environ["PINECONE_API_KEY"] =st.secrets["PINECONE_API_KEY"]
+HUGGINGFACEHUB_API_TOKEN =st.secrets["HUGGINGFACEHUB_API_TOKEN"]
+HF_TOKEN =st.secrets["HF_TOKEN"]
+PINECONE_API_KEY =st.secrets["PINECONE_API_KEY"]
+url =st.secrets["url"]
 WEAVIATE_API_KEY=st.secrets["WEAVIATE_API_KEY"]
 pinecone_api_key = os.environ.get("PINECONE_API_KEY")
+# st.session_state[pinecone_embed'] = pine_embedding_model()
+# st.session_state['weaviate_embed'] = weaviate_embedding_model()
+# pinecone_embed = st.session_state['pinecone_embed']
+# weaviate_embed = st.session_state['weaviate_embed']
 os.environ["HUGGINGFACE_API_TOKEN"] =st.secrets["HUGGINGFACE_API_TOKEN"]
+st.session_state['bi_encoder'] =bi_encoder
+st.session_state['chat_model'] = chat_model
+st.session_state['cross_model'] =cross_model
+st.session_state['q_model'] = q_model
+if "run_id" not in st.session_state:
+    st.session_state.run_id = uuid4()
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
+if 'image' not in st.session_state:
+    st.session_state['image'] = []
+if 'conv_id' not in st.session_state:
+    st.session_state['conv_id'] = {}
 
-# st.title('Multi-modal RAG based LLM for Information Retrieval')
-# st.subheader('Converse with our Chatbot')
-# st.markdown('Enter a pdf file as a source.')
-# uploaded_file = st.file_uploader("Choose an pdf document...", type=["pdf"], accept_multiple_files=False)
+client = Client(api_url=st.secrets["LANGSMITH_URL"], api_key=st.secrets["LANGSMITH_API_KEY"])
+mes = []
+for message in st.session_state.messages:
+    if type(message['content']) is dict:
+        mes.append(message['role']+": "+message["content"]["text"])
+    else:
+        mes.append(message['role'] + ": " + message["content"])
+print(f"Run_ID -> {st.session_state.run_id}, {mes}")
+
+st.title('Multi-modal RAG based LLM for Information Retrieval')
+st.subheader('Converse with our Chatbot')
+st.markdown('Enter a pdf file as a source.')
+open('./feedback.txt', 'w').close()
+
+rt = RunTree(
+    name="RAG RunTree",
+    run_type="chain",
+    inputs={"messages": mes},
+    id=st.session_state.run_id
+)
+
+
+def fbcb():
+    if st.session_state.fb_k is None:
+        st.session_state.fb_k = {'type': 'thumbs', 'score': '👎', 'text': ''}
+    message_id = len(st.session_state.messages) - 1
+    if message_id >= 0:
+        st.session_state.messages[message_id]["feedback"] = st.session_state.fb_k
+
+    s = f"The feedback for {prompt} "
+    fb = "NEGATIVE " if st.session_state.fb_k["score"] == '👎' else "POSITIVE "
+    for _ in st.session_state.messages:
+        if st.session_state.fb_k['text'] is None:
+            st.session_state.fb_k['text'] = ""
+        s += f'is {fb} and the response is '
+        if fb == "NEGATIVE ":
+            s += st.session_state.fb_k['text']
+        else:
+            fsa = [d['content'] for d in st.session_state.messages if d["role"] == 'assistant']
+            if isinstance(fsa[-1], str):
+                s += fsa[-1]
+            else:
+                s += fsa[-1]['text']
+        s += '\n'
+    with open('./feedback.txt', 'r+') as fd:  # feedback records all feedback for this run
+        fd.write(s)
+    with open('./feedback_loop.txt', 'r+') as fd:  # feedback loop records feedback for all runs
+        fd.write(s)
+    feedback_db.upsert(s)
+    with open('./feedback.txt', 'r') as fd:
+        feed = fd.read()
+    client.create_feedback(
+        run_id=st.session_state.run_id,
+        key="fb_k",
+        score=1 if fb == "Positive" else -1,
+        feedback_source_type="model",
+        comment=feed
+    )
+
+import os
+import glob
+
+current_directory = os.getcwd()
+# Define the directory where your PDFs are located (subdirectory 'pdfs')
+pdf_directory = os.path.join(current_directory, "pdfs")
+
+# Search for all PDF files in the 'pdfs' directory
+pdf_files = glob.glob(os.path.join(pdf_directory, "*.pdf"))
+
+# Check if there are any PDF files in the directory
+if pdf_files:
+    # Sort files by modification time and get the latest one
+    latest_pdf_file = max(pdf_files, key=os.path.getmtime)
+    
+    # Construct the full file path to the latest PDF
+    file_path = os.path.join(pdf_directory, os.path.basename(latest_pdf_file))
+    
+    print(f"Final path to the latest PDF: {file_path}")
+else:
+    print("No PDF files found in the directory.")
+
+
+# file_path = r"C:/Users/HASNAIN/Downloads/RAG_06_09/RAG/pdfs/IIT_bombay_Resume_template_2021 (66).pdf"
+
+# Write the file to the specified path
+# with open(file_path, mode='wb') as f:
+    # f.write(uploaded_file.getbuffer())
+# 
+    # Store the file path in session state
+st.session_state['pdf_file'] = file_path
+print("i am come to pdf_path ")
+
+# Extracting the PDF content
+with st.spinner('Extracting...'):
+    # Assuming read_pdf function takes the file path as input
+    vb_list = read_pdf(st.session_state['pdf_file'])  # Corrected to use session state
+    # st.session_state['vb_list'] = vb_list
+    st.write("yes i am in the vblist ")
+
+
+question = st.text_input("Enter your question:", "How are names present in the context?")
+
+if st.button("Submit Question"):
+    fd = True
+    # Display the answer to the question
+    with st.spinner('Fetching the answer...'):
+        # Assuming query is a function that takes the question as input
+        answer = req.query(question)
+        print(answer)
+        st.success(f"Answer: {answer}")
+
+    
+
+
+
+
+
+
+
+# uploaded_file = st.file_uploader("Choose a PDF document...", type=["pdf"], accept_multiple_files=False)
+
 # if uploaded_file is not None:
-    # with open(uploaded_file.name, mode='wb') as w:
-        # w.write(uploaded_file.getvalue())
-    # if not os.path.exists(os.path.join(os.getcwd(), 'pdfs')):
-        # os.makedirs(os.path.join(os.getcwd(), 'pdfs'))
-    # shutil.move(uploaded_file.name, os.path.join(os.getcwd(), 'pdfs'))
-    # st.session_state['pdf_file'] = uploaded_file.name
-    with st.spinner('Extracting'):
-        vb_list = read_pdf(pdf_file)    #this is the another change i have done here
-    st.session_state['vb_list'] = vb_list
-    question = st.text_input("Enter your question:", "how names are present in the context?")
+#     # Create a directory for storing PDF files if it doesn't exist
+#     pdf_directory = os.path.join(os.getcwd(), 'pdfs')
+#     if not os.path.exists(pdf_directory):
+#         os.makedirs(pdf_directory)
 
-    if st.button("Submit Question"):
-        # Step 3: Display the answer to the question
-        with st.spinner('Fetching the answer...'):
-            # Fetch the answer using the query function
-            answer = query(question)
-            st.success(f"Answer: {answer}")
-    # st.switch_page('pages/rag.py')
+#     # Define the file path where the PDF will be saved
+#     file_path = os.path.join(pdf_directory, uploaded_file.name)
+
+#     # Write the file to the specified path
+#     with open(file_path, mode='wb') as f:
+#         f.write(uploaded_file.getbuffer())
+
+#     # Store the file path in session state
+#     st.session_state['pdf_file'] = file_path
+
+#     # Extracting the PDF content
+#     with st.spinner('Extracting...'):
+#         # Assuming read_pdf function takes the file path as input
+#         vb_list = read_pdf(st.session_state['pdf_file'])  # Corrected to use session state
+#         st.session_state['vb_list'] = vb_list
+
+#     # Ask the user for a question
+#     question = st.text_input("Enter your question:", "How are names present in the context?")
+
+#     if st.button("Submit Question"):
+#         fd = True
+#         # Display the answer to the question
+#         with st.spinner('Fetching the answer...'):
+#             # Assuming query is a function that takes the question as input
+#             answer = req.query(question)
+#             print(answer)
+#             st.success(f"Answer: {answer}")
+
+if fd:
+    with st.form('form'):
+      streamlit_feedback(feedback_type="thumbs", align="flex-start",
+                        key='fb_k', optional_text_label="[Optional] Please provide an explanation")
+      submit_button = st.form_submit_button('Save feedback', on_click=fbcb)
+      if not submit_button:
+          print('Click the Submit button')
+
+with open('./feedback.txt', 'r')as f:
+  rt.end(outputs={'outputs': f.read()})
+rt.post()
+
+
+def reset_conversation():
+  st.session_state.messages = []
+  st.session_state['image'] = []
+  st.session_state['conv_id'] = {}
+
+
+st.button('Reset Chat', on_click=reset_conversation)
