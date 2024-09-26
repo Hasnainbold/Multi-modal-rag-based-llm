@@ -17,75 +17,7 @@ from langchain_community.llms import HuggingFaceHub
 from langchain_huggingface import HuggingFaceEmbeddings
 from transformers import (AutoFeatureExtractor, AutoModel, AutoImageProcessor)
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from langchain_openai import ChatOpenAI
-import requests
-import openai
-import multiprocessing
-from langchain.document_loaders import TextLoader, JSONLoader
-from langchain.docstore.document import Document
-from langchain.embeddings import OpenAIEmbeddings
-from langchain_openai.embeddings import OpenAIEmbeddings
-import weaviate
-# from langchain.vectorstores import Weaviate
-
-import weaviate
-import asyncio
-from langchain.prompts import PromptTemplate, ChatPromptTemplate
-from weaviate.embedded import EmbeddedOptions
-import os
-from pathlib import Path
-from pprint import pprint
-from sklearn.cluster import DBSCAN
-from langchain_community.llms import HuggingFaceHub
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.chat_models import ChatHuggingFace
-from langchain.schema.runnable import RunnablePassthrough
-from langchain.schema.output_parser import StrOutputParser
-from datasets import Dataset
-from scipy.spatial.distance import euclidean
-from sentence_transformers import CrossEncoder, SentenceTransformer
-from ragas.metrics import (
-    faithfulness,
-    answer_relevancy,
-    context_recall,
-    context_precision,
-    # context_relevancy,
-    answer_correctness,
-    answer_similarity
-)
-from ragas import evaluate
-from typing import Sequence, List
-from langchain.vectorstores import Pinecone
-import pandas as pd
-import numpy as np
-import json
-from pdfminer.high_level import extract_text
-from pinecone import Pinecone, ServerlessSpec
-from langchain_pinecone import PineconeVectorStore
-from langchain_core.runnables import RunnableLambda
-# from pinecone_notebooks.colab import Authenticate
-from langchain_weaviate.vectorstores import WeaviateVectorStore
-from langchain.text_splitter import *
-from langchain.smith import RunEvalConfig
-from langchain_core.runnables import chain
-from langsmith import Client
-import re
-from langchain_core.messages import HumanMessage
-from langgraph.graph import END, MessageGraph, Graph, StateGraph
-from langchain_core.tools import tool
-from langgraph.prebuilt import ToolNode
-from openai import OpenAI
-from transformers import pipeline
-# import torch
-from langchain.retrievers import ContextualCompressionRetriever, MergerRetriever
-from langchain_community.document_compressors import LLMLinguaCompressor
-from typing_extensions import TypedDict
-import dspy
 import PyPDF2
-# %load_ext autoreload
-from dspy.evaluate import Evaluate
-from dspy.retrieve.weaviate_rm import WeaviateRM
-from dspy.retrieve.pinecone_rm import PineconeRM
 
 
 
@@ -352,12 +284,36 @@ def vector_database_prep(file):
         vb.upsert(image_content)  # image_cont = dict[image_file_path, context, PIL]
     return vb_list
 
+# Function to extract text from PDF
+# def read_pdf(pdf_file):                  #this is the one change i have done here
+#     try:
+#         # Open the PDF file
+#         with open(pdf_file, 'rb') as file:
+#             reader = PyPDF2.PdfReader(file)
+#             pdf_text = ""
+
+#             # Extract text from each page
+#             for page in reader.pages:
+#                 pdf_text += page.extract_text()
+
+#         # Assuming vb_list contains tuples of (vb, sp)
+#         for vb, sp in vb_list:
+#             # Ensure `data` is defined properly (in this case, it could be the extracted text)
+#             data = pdf_text
+#             vb.upsert(data, sp)
+
+#         return vb_list
+#     except Exception as e:
+#         print(f"Error reading or processing the PDF: {e}")
+#         return None
+
 
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
 os.environ["OPENAI_API_KEY"] = st.secrets["GPT_KEY"]
 st.session_state['pdf_file'] = []
 st.session_state['vb_list'] = []
+
 st.session_state['Settings.embed_model'] = settings()
 st.session_state['processor'], st.session_state['vision_model'] = load_nomic_model()
 st.session_state['bi_encoder'] = load_bi_encoder()
@@ -407,11 +363,34 @@ if uploaded_file is not None:
                         "image": image
                     })
         return images
+    file_path = os.path.join('pdfs', uploaded_file.name)  # Define the full file path
+    with open(file_path, mode='wb') as f:
+        f.write(uploaded_file.getvalue())  # Save the uploaded file to disk
     img=data_prep(uploaded_file)
+    st.session_state['file_path'] = file_path
+    
+    st.success(f"File uploaded and saved as: {file_path}")
     if len(img)>0:
         with st.spinner('Extracting'):
             vb_list = vector_database_prep(uploaded_file)
         st.session_state['vb_list'] = vb_list
         st.switch_page('pages/rag.py')
+        st.experimental_rerun()
     else:
         st.switch_page('pages/b.py')
+    #     vb_list = read_pdf(uploaded_file)  # Corrected to use session state
+    #     st.session_state['vb_list'] = vb_list
+    #     st.write("vb list is implemtnted")
+
+    # # Ask the user for a question
+    #     question = st.text_input("Enter your question:", "How are names present in the context?")
+
+    #     if st.button("Submit Question"):
+    #         # Display the answer to the question
+    #         with st.spinner('Fetching the answer...'):
+    #             # Assuming query is a function that takes the question as input
+    #             answer = req.query(question)
+    #             print(answer)
+    #             st.success(f"Answer: {answer}")
+
+                
