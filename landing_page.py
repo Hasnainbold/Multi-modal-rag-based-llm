@@ -377,7 +377,7 @@ if uploaded_file is not None:
         st.switch_page('pages/rag.py')
         st.experimental_rerun()
     else:
-        st.switch_page('pages/b(2).py')
+        st.switch_page('pages/b.py')
     #     vb_list = read_pdf(uploaded_file)  # Corrected to use session state
     #     st.session_state['vb_list'] = vb_list
     #     st.write("vb list is implemtnted")
