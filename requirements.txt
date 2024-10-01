@@ -53,3 +53,4 @@ pypdf
 pinecone-notebooks
 PyPDF2
 dspy-ai
+numpy
