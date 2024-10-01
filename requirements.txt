@@ -1,3 +1,4 @@
+einops
 pymupdf
 dspy-ai
 langchain 
