@@ -29,3 +29,4 @@ streamlit_feedback
 Spire.Pdf
 torchvision
 pytesseract
+llama_index
