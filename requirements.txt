@@ -1,3 +1,4 @@
+torch
 streamlit
 langchain_openai
 requests
@@ -5,7 +6,6 @@ langchain
 langchain_community
 openai
 transformers
-torch
 sentence-transformers
 langchain_huggingface
 ragas
