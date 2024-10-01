@@ -28,3 +28,4 @@ PyPDF2
 streamlit_feedback
 Spire.Pdf
 torchvision
+pytesseract
