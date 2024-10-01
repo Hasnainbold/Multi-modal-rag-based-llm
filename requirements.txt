@@ -27,3 +27,4 @@ numpy==1.26.2
 PyPDF2
 streamlit_feedback
 Spire.Pdf
+torchvision
